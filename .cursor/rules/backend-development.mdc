@@ -1,0 +1,36 @@
+# Backend Development Guidelines
+
+## Express.js Best Practices
+- Use middleware for common functionality (CORS, body parsing, authentication)
+- Implement proper error handling with try-catch blocks
+- Use environment variables for configuration (see [env.example](mdc:backend/env.example))
+- Structure routes in separate files for better organization
+
+## API Design
+- Use RESTful conventions for endpoint naming
+- Implement proper HTTP status codes
+- Use JSON for request/response bodies
+- Implement input validation for all endpoints
+
+## Database Integration
+- Use environment variables for database connections
+- Implement connection pooling for production
+- Use prepared statements to prevent SQL injection
+- Implement proper error handling for database operations
+
+## Security
+- Validate and sanitize all user inputs
+- Implement rate limiting for API endpoints
+- Use HTTPS in production
+- Implement proper authentication and authorization
+
+## File Structure
+- Place routes in `routes/` directory
+- Place controllers in `controllers/` directory
+- Place models in `models/` directory
+- Place middleware in `middleware/` directory
+- Place utilities in `utils/` directory
+description:
+globs:
+alwaysApply: false
+---

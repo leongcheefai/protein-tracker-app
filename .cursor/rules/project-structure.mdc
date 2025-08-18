@@ -1,0 +1,26 @@
+# Protein Tracker Project Structure
+
+This is a full-stack protein tracking application with a Flutter frontend and Node.js backend.
+
+## Project Architecture
+- **Frontend**: Flutter app located in [frontend/](mdc:frontend/) directory
+- **Backend**: Node.js/Express API located in [backend/](mdc:backend/) directory
+
+## Key Frontend Files
+- [main.dart](mdc:frontend/lib/main.dart) - Main Flutter application entry point
+- [pubspec.yaml](mdc:frontend/pubspec.yaml) - Flutter dependencies and configuration
+- [analysis_options.yaml](mdc:frontend/analysis_options.yaml) - Dart/Flutter linting rules
+
+## Key Backend Files
+- [index.js](mdc:backend/index.js) - Express server entry point
+- [package.json](mdc:backend/package.json) - Node.js dependencies and scripts
+- [env.example](mdc:backend/env.example) - Environment variables template
+
+## Development Workflow
+- Frontend: Use `flutter run` in the frontend directory
+- Backend: Use `npm start` or `node index.js` in the backend directory
+- Both should run simultaneously for full-stack development
+description:
+globs:
+alwaysApply: false
+---

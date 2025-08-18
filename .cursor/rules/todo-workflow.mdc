@@ -1,0 +1,39 @@
+# To-Do List Workflow
+
+## Always Create To-Do Lists
+When a new task is added, immediately create a comprehensive to-do list breaking down the requirements into actionable steps.
+
+## Step-by-Step Execution
+- Work through each task systematically
+- Check off completed tasks as you go
+- Don't move to the next task until the current one is fully completed
+- Update the to-do list if new requirements or dependencies are discovered
+
+## To-Do List Format
+Use this structure for organizing tasks:
+```markdown
+## Task: [Task Name]
+
+### To-Do:
+- [ ] Step 1: [Description]
+- [ ] Step 2: [Description]
+- [ ] Step 3: [Description]
+- [ ] Step 4: [Description]
+
+### Completed:
+- [x] Step 1: [Description] ✅
+- [x] Step 2: [Description] ✅
+
+### Notes:
+- Additional information or decisions made
+```
+
+## Progress Tracking
+- Mark tasks with ✅ when completed
+- Add notes about decisions or changes made
+- Keep the list updated throughout the development process
+- Reference the list when explaining progress to users
+description:
+globs:
+alwaysApply: false
+---

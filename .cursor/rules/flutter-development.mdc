@@ -1,0 +1,33 @@
+# Flutter Development Guidelines
+
+## Code Organization
+- Keep widgets in separate files when they exceed 50 lines
+- Use meaningful names for widget classes and variables
+- Follow Flutter naming conventions (snake_case for variables, PascalCase for classes)
+
+## State Management
+- Use `StatefulWidget` for components that need to maintain state
+- Prefer `StatelessWidget` for components that don't need state
+- Use `setState()` for local state changes
+- Consider using Provider, Riverpod, or Bloc for complex state management
+
+## UI/UX Best Practices
+- Use Material Design components from Flutter
+- Implement responsive design for different screen sizes
+- Use semantic labels for accessibility
+- Follow Flutter's hot reload workflow for rapid development
+
+## File Structure
+- Place screens in `lib/screens/` directory
+- Place widgets in `lib/widgets/` directory
+- Place models in `lib/models/` directory
+- Place services in `lib/services/` directory
+
+## Dependencies
+- Add new dependencies to [pubspec.yaml](mdc:frontend/pubspec.yaml)
+- Run `flutter pub get` after adding dependencies
+- Use specific version constraints for production stability
+description:
+globs:
+alwaysApply: false
+---

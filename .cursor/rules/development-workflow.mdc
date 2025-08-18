@@ -1,0 +1,37 @@
+# Development Workflow
+
+## Getting Started
+1. Clone the repository
+2. Install Flutter SDK and Node.js
+3. Run `flutter doctor` to verify Flutter installation
+4. Install backend dependencies: `cd backend && npm install`
+5. Install frontend dependencies: `cd frontend && flutter pub get`
+
+## Development Commands
+- **Backend**: `cd backend && npm start` or `node index.js`
+- **Frontend**: `cd frontend && flutter run`
+- **Hot Reload**: Use Flutter's hot reload feature for rapid development
+- **Testing**: `cd frontend && flutter test`
+
+## Project Structure
+- Keep frontend and backend in separate directories
+- Use consistent naming conventions across both platforms
+- Implement proper error handling and logging
+- Use version control with meaningful commit messages
+
+## Code Quality
+- Follow language-specific linting rules
+- Use meaningful variable and function names
+- Write clear comments for complex logic
+- Implement proper error handling
+- Test functionality before committing
+
+## Deployment
+- Use environment variables for configuration
+- Implement proper logging for production
+- Use HTTPS in production environments
+- Implement proper security measures
+description:
+globs:
+alwaysApply: false
+---
