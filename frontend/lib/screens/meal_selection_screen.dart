@@ -54,33 +54,40 @@ class _MealSelectionScreenState extends State<MealSelectionScreen> {
         ),
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header
-              Text(
-                "Which meals do you want to track?",
-                style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                  color: AppColors.textPrimary,
-                  fontWeight: FontWeight.bold,
-                ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header Section
+            Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header
+                  Text(
+                    "Which meals do you want to track?",
+                    style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 8),
+                  
+                  Text(
+                    "Configure your meal tracking preferences and protein distribution",
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
               ),
-              
-              const SizedBox(height: 8),
-              
-              Text(
-                "Configure your meal tracking preferences and protein distribution",
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
-              
-              const SizedBox(height: 32),
-              
-              // Meal Selection
-              Expanded(
+            ),
+            
+            // Meal Selection - Takes remaining space with scrolling
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
                 child: ListView(
                   children: [
                     _buildMealToggle('Breakfast'),
@@ -90,81 +97,87 @@ class _MealSelectionScreenState extends State<MealSelectionScreen> {
                     _buildMealToggle('Dinner'),
                     const SizedBox(height: 16),
                     _buildMealToggle('Snack'),
-                  ],
-                ),
-              ),
-              
-              // Daily Target Summary
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.primary.withOpacity(0.3)),
-                ),
-                child: Column(
-                  children: [
-                    Text(
-                      'Daily Protein Target',
-                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w600,
+                    
+                    const SizedBox(height: 24),
+                    
+                    // Daily Target Summary
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+                      ),
+                      child: Column(
+                        children: [
+                          Text(
+                            'Daily Protein Target',
+                            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          
+                          const SizedBox(height: 8),
+                          
+                          Text(
+                            '${widget.dailyProteinTarget.toStringAsFixed(0)}g total',
+                            style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          
+                          const SizedBox(height: 16),
+                          
+                          // Meal Breakdown
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: _meals.entries.map((entry) {
+                              if (entry.value) {
+                                return Column(
+                                  children: [
+                                    Icon(
+                                      _mealIcons[entry.key],
+                                      color: AppColors.primary,
+                                      size: 24,
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      entry.key,
+                                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                        color: AppColors.textSecondary,
+                                      ),
+                                    ),
+                                    Text(
+                                      '${_mealProteinTarget.toStringAsFixed(0)}g',
+                                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                        color: AppColors.primary,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              }
+                              return const SizedBox.shrink();
+                            }).toList(),
+                          ),
+                        ],
                       ),
                     ),
                     
-                    const SizedBox(height: 8),
-                    
-                    Text(
-                      '${widget.dailyProteinTarget.toStringAsFixed(0)}g total',
-                      style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    
-                    const SizedBox(height: 16),
-                    
-                    // Meal Breakdown
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: _meals.entries.map((entry) {
-                        if (entry.value) {
-                          return Column(
-                            children: [
-                              Icon(
-                                _mealIcons[entry.key],
-                                color: AppColors.primary,
-                                size: 24,
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                entry.key,
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
-                              Text(
-                                '${_mealProteinTarget.toStringAsFixed(0)}g',
-                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: AppColors.primary,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          );
-                        }
-                        return const SizedBox.shrink();
-                      }).toList(),
-                    ),
+                    // Add some bottom padding to ensure last element is fully visible
+                    const SizedBox(height: 24),
                   ],
                 ),
               ),
-              
-              const SizedBox(height: 24),
-              
-              // Start Tracking Button
-              ElevatedButton(
+            ),
+            
+            // Start Tracking Button - Fixed at bottom
+            Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: ElevatedButton(
                 onPressed: () {
                   _showCompletionDialog(context);
                 },
@@ -175,10 +188,8 @@ class _MealSelectionScreenState extends State<MealSelectionScreen> {
                 ),
                 child: const Text('Start Tracking'),
               ),
-              
-              const SizedBox(height: 24),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -188,6 +199,7 @@ class _MealSelectionScreenState extends State<MealSelectionScreen> {
     final isEnabled = _meals[mealName] ?? false;
     
     return Container(
+      margin: const EdgeInsets.only(bottom: 4),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: isEnabled ? AppColors.primary.withOpacity(0.1) : AppColors.secondaryBackground,
@@ -241,7 +253,7 @@ class _MealSelectionScreenState extends State<MealSelectionScreen> {
                       ? '${_mealProteinTarget.toStringAsFixed(0)}g protein target'
                       : 'Not tracking this meal',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: isEnabled ? AppColors.primary : AppColors.textSecondary,
+                    color: isEnabled ? AppColors.primary.withOpacity(0.8) : AppColors.textSecondary,
                   ),
                 ),
               ],
@@ -256,6 +268,7 @@ class _MealSelectionScreenState extends State<MealSelectionScreen> {
               });
             },
             activeColor: AppColors.primary,
+            activeTrackColor: AppColors.primary.withOpacity(0.3),
           ),
         ],
       ),

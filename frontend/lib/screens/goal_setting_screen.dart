@@ -55,33 +55,40 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> {
         ),
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header
-              Text(
-                "What's your goal?",
-                style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                  color: AppColors.textPrimary,
-                  fontWeight: FontWeight.bold,
-                ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header Section
+            Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header
+                  Text(
+                    "What's your goal?",
+                    style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 8),
+                  
+                  Text(
+                    "Choose your fitness objective to optimize protein intake",
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
               ),
-              
-              const SizedBox(height: 8),
-              
-              Text(
-                "Choose your fitness objective to optimize protein intake",
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
-              
-              const SizedBox(height: 32),
-              
-              // Goal Options
-              Expanded(
+            ),
+            
+            // Goal Options - Takes remaining space with scrolling
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
                 child: ListView(
                   children: [
                     _buildGoalCard(
@@ -108,114 +115,120 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> {
                       Icons.trending_down,
                       'Cut',
                     ),
-                  ],
-                ),
-              ),
-              
-              // Daily Target Display
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: AppColors.success.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.success.withOpacity(0.3)),
-                ),
-                child: Column(
-                  children: [
-                    Text(
-                      'Your daily target',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textSecondary,
+                    
+                    const SizedBox(height: 24),
+                    
+                    // Daily Target Display
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: AppColors.success.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: AppColors.success.withOpacity(0.3)),
                       ),
-                    ),
-                    
-                    const SizedBox(height: 8),
-                    
-                    Text(
-                      '${_goalProtein.toStringAsFixed(0)}g protein',
-                      style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                        color: AppColors.success,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    
-                    const SizedBox(height: 8),
-                    
-                    Text(
-                      'Based on ${_selectedGoal.toLowerCase()} goal',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              
-              const SizedBox(height: 24),
-              
-              // Custom Protein Input (Optional)
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppColors.secondaryBackground,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.neutral.withOpacity(0.2)),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Checkbox(
-                          value: _useCustomProtein,
-                          onChanged: (value) {
-                            setState(() {
-                              _useCustomProtein = value ?? false;
-                              if (!_useCustomProtein) {
-                                _customProtein = 0.0;
-                              }
-                            });
-                          },
-                          activeColor: AppColors.primary,
-                        ),
-                        Text(
-                          'Custom protein target',
-                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                            color: AppColors.textPrimary,
-                            fontWeight: FontWeight.w600,
+                      child: Column(
+                        children: [
+                          Text(
+                            'Your daily target',
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
                           ),
-                        ),
-                      ],
+                          
+                          const SizedBox(height: 8),
+                          
+                          Text(
+                            '${_goalProtein.toStringAsFixed(0)}g protein',
+                            style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                              color: AppColors.success,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          
+                          const SizedBox(height: 8),
+                          
+                          Text(
+                            'Based on ${_selectedGoal.toLowerCase()} goal',
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                     
-                    if (_useCustomProtein) ...[
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        initialValue: _customProtein > 0 ? _customProtein.toStringAsFixed(0) : '',
-                        keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(
-                          labelText: 'Enter custom protein target (g)',
-                          border: OutlineInputBorder(),
-                        ),
-                        onChanged: (value) {
-                          final number = double.tryParse(value);
-                          if (number != null && number > 0) {
-                            setState(() {
-                              _customProtein = number;
-                            });
-                          }
-                        },
+                    const SizedBox(height: 24),
+                    
+                    // Custom Protein Input (Optional)
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: AppColors.secondaryBackground,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppColors.neutral.withOpacity(0.2)),
                       ),
-                    ],
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Checkbox(
+                                value: _useCustomProtein,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _useCustomProtein = value ?? false;
+                                    if (!_useCustomProtein) {
+                                      _customProtein = 0.0;
+                                    }
+                                  });
+                                },
+                                activeColor: AppColors.primary,
+                              ),
+                              Text(
+                                'Custom protein target',
+                                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                  color: AppColors.textPrimary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                          
+                          if (_useCustomProtein) ...[
+                            const SizedBox(height: 16),
+                            TextFormField(
+                              initialValue: _customProtein > 0 ? _customProtein.toStringAsFixed(0) : '',
+                              keyboardType: TextInputType.number,
+                              decoration: const InputDecoration(
+                                labelText: 'Enter custom protein target (g)',
+                                border: OutlineInputBorder(),
+                              ),
+                              onChanged: (value) {
+                                final number = double.tryParse(value);
+                                if (number != null && number > 0) {
+                                  setState(() {
+                                    _customProtein = number;
+                                  });
+                                }
+                              },
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    
+                    // Add some bottom padding to ensure last element is fully visible
+                    const SizedBox(height: 24),
                   ],
                 ),
               ),
-              
-              const SizedBox(height: 24),
-              
-              // Next Button
-              ElevatedButton(
+            ),
+            
+            // Next Button - Fixed at bottom
+            Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).push(
                     PageRouteBuilder(
@@ -247,10 +260,8 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> {
                 ),
                 child: const Text('Next'),
               ),
-              
-              const SizedBox(height: 24),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -266,6 +277,7 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> {
         });
       },
       child: Container(
+        margin: const EdgeInsets.only(bottom: 4),
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: isSelected ? AppColors.primary.withOpacity(0.1) : AppColors.secondaryBackground,
@@ -317,7 +329,7 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> {
                   Text(
                     description,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textSecondary,
+                      color: isSelected ? AppColors.primary.withOpacity(0.8) : AppColors.textSecondary,
                     ),
                   ),
                   
@@ -335,10 +347,17 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> {
             ),
             
             if (isSelected)
-              Icon(
-                Icons.check_circle,
-                color: AppColors.primary,
-                size: 24,
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Icon(
+                  Icons.check,
+                  color: Colors.white,
+                  size: 20,
+                ),
               ),
           ],
         ),
