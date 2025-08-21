@@ -33,5 +33,5 @@
 - Implement proper security measures
 description:
 globs:
-alwaysApply: false
+alwaysApply: true
 ---

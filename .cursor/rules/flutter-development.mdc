@@ -29,5 +29,5 @@
 - Use specific version constraints for production stability
 description:
 globs:
-alwaysApply: false
+alwaysApply: true
 ---

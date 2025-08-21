@@ -22,5 +22,5 @@ This is a full-stack protein tracking application with a Flutter frontend and No
 - Both should run simultaneously for full-stack development
 description:
 globs:
-alwaysApply: false
+alwaysApply: true
 ---
