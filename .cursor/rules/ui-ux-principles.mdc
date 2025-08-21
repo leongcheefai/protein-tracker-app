@@ -1,11 +1,6 @@
 ---
-# UI/UX Principles & Development Rules
-
-## Overview
-This document defines the UI/UX principles, design standards, and development rules for the Protein Pace app. Follow these guidelines to ensure consistency, accessibility, and user experience quality.
-
+alwaysApply: true
 ---
-
 ## 1. Design System & Visual Hierarchy
 
 ### **Color Palette**
@@ -390,8 +385,4 @@ class StandardCard extends StatelessWidget {
 
 *This document should be updated as design standards evolve and new requirements are identified. All team members should follow these guidelines to maintain consistency and quality across the app.*
 
----
-description:
-globs:
-alwaysApply: false
 ---
