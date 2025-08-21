@@ -1,0 +1,397 @@
+---
+# UI/UX Principles & Development Rules
+
+## Overview
+This document defines the UI/UX principles, design standards, and development rules for the Protein Pace app. Follow these guidelines to ensure consistency, accessibility, and user experience quality.
+
+---
+
+## 1. Design System & Visual Hierarchy
+
+### **Color Palette**
+- **Primary Colors:**
+  - Primary Blue: `#2563EB` (protein rings, buttons)
+  - Success Green: `#10B981` (goal met, completed states)
+  - Warning Amber: `#F59E0B` (close to goal, attention needed)
+  - Error Red: `#EF4444` (behind goal, errors)
+  - Neutral Gray: `#6B7280` (text, borders)
+
+- **Background Colors:**
+  - Primary Background: `#FFFFFF` (light mode)
+  - Secondary Background: `#F9FAFB` (cards, sections)
+  - Dark Background: `#111827` (dark mode support)
+
+### **Typography Scale**
+- **Headings:**
+  - H1: `32sp` - App titles, major sections
+  - H2: `24sp` - Screen headers, section titles
+  - H3: `20sp` - Subsection headers
+  - H4: `18sp` - Card titles, important text
+
+- **Body Text:**
+  - Body Large: `16sp` - Primary content
+  - Body Medium: `14sp` - Secondary content
+  - Body Small: `12sp` - Captions, metadata
+  - Button Text: `16sp` - Action buttons
+
+### **Spacing System**
+- **Base Unit:** `8dp`
+- **Spacing Scale:**
+  - XS: `4dp` (tight spacing)
+  - S: `8dp` (standard spacing)
+  - M: `16dp` (section spacing)
+  - L: `24dp` (large spacing)
+  - XL: `32dp` (extra large spacing)
+  - XXL: `48dp` (screen margins)
+
+---
+
+## 2. Component Standards
+
+### **Buttons**
+- **Primary Button:**
+  - Height: `48dp` minimum
+  - Background: Primary Blue
+  - Text: White, 16sp, medium weight
+  - Border radius: `8dp`
+  - Padding: `16dp` horizontal
+
+- **Secondary Button:**
+  - Height: `48dp` minimum
+  - Background: Transparent
+  - Border: 1dp, Primary Blue
+  - Text: Primary Blue, 16sp, medium weight
+  - Border radius: `8dp`
+
+- **Icon Button:**
+  - Size: `48dp × 48dp`
+  - Icon size: `24dp`
+  - Touch target: `44dp × 44dp` minimum
+
+### **Cards & Containers**
+- **Standard Card:**
+  - Background: White
+  - Border radius: `12dp`
+  - Shadow: `0 2px 8px rgba(0,0,0,0.1)`
+  - Padding: `16dp`
+  - Margin: `8dp` between cards
+
+- **Input Fields:**
+  - Height: `48dp`
+  - Border: 1dp, `#D1D5DB`
+  - Border radius: `8dp`
+  - Padding: `12dp` horizontal
+  - Focus state: 2dp border, Primary Blue
+
+### **Progress Indicators**
+- **Protein Rings:**
+  - Stroke width: `8dp`
+  - Size: Large ring `200dp`, mini rings `80dp`
+  - Colors: Green (complete), Amber (close), Red (behind)
+  - Animation: Smooth circular progress
+
+- **Progress Bars:**
+  - Height: `8dp`
+  - Border radius: `4dp`
+  - Background: Light gray
+  - Progress: Primary Blue
+
+---
+
+## 3. Layout & Grid System
+
+### **Screen Layout**
+- **Safe Area:** Respect device safe areas
+- **Margins:** `16dp` on all sides
+- **Content Width:** Max `400dp` for optimal readability
+- **Spacing:** Consistent `16dp` between sections
+
+### **Grid System**
+- **Columns:** 4-column grid for mobile
+- **Gutters:** `16dp` between columns
+- **Breakpoints:** Single column layout (mobile-first)
+
+### **Responsive Design**
+- **Small Screens:** `320dp - 480dp`
+- **Medium Screens:** `481dp - 768dp`
+- **Large Screens:** `769dp+` (tablet support)
+
+---
+
+## 4. Accessibility Standards
+
+### **Touch Targets**
+- **Minimum Size:** `44dp × 44dp` for all interactive elements
+- **Button Height:** `48dp` minimum
+- **Spacing:** `8dp` minimum between touch targets
+
+### **Color & Contrast**
+- **Contrast Ratio:** 4.5:1 minimum for normal text
+- **Large Text:** 3:1 minimum for 18pt+ text
+- **Color Independence:** Don't rely solely on color for information
+
+### **Typography**
+- **Readable Fonts:** System fonts (SF Pro, Roboto)
+- **Line Height:** 1.4 minimum for body text
+- **Font Scaling:** Support system font size preferences
+
+### **Screen Reader Support**
+- **Semantic Labels:** Proper `Semantics` widgets
+- **Content Description:** Meaningful labels for images
+- **Navigation:** Logical tab order and focus management
+
+---
+
+## 5. Animation & Motion
+
+### **Duration Standards**
+- **Fast:** `150ms` - Micro-interactions, button presses
+- **Normal:** `300ms` - Page transitions, card animations
+- **Slow:** `500ms` - Complex animations, loading states
+
+### **Easing Curves**
+- **Standard:** `Curves.easeInOut`
+- **Bounce:** `Curves.elasticOut` for success states
+- **Smooth:** `Curves.fastOutSlowIn` for natural motion
+
+### **Animation Types**
+- **Fade:** Opacity transitions for content changes
+- **Slide:** Horizontal/vertical movements for navigation
+- **Scale:** Subtle scaling for button interactions
+- **Rotation:** Smooth rotation for loading indicators
+
+---
+
+## 6. User Experience Rules
+
+### **Loading States**
+- **Always show loading indicators** for async operations
+- **Use skeleton screens** for content loading
+- **Provide progress feedback** for long operations
+- **Never show blank screens** during loading
+
+### **Error Handling**
+- **Clear error messages** with actionable solutions
+- **Graceful degradation** when features fail
+- **Retry mechanisms** for network operations
+- **User-friendly language** (avoid technical jargon)
+
+### **Empty States**
+- **Helpful guidance** for first-time users
+- **Clear call-to-action** buttons
+- **Illustrative content** to explain features
+- **Progressive disclosure** of complex features
+
+### **Navigation**
+- **Consistent back behavior** across the app
+- **Clear current location** indicators
+- **Logical flow** between related screens
+- **Breadcrumb navigation** for complex flows
+
+---
+
+## 7. Performance Guidelines
+
+### **Image Optimization**
+- **Compress images** before adding to assets
+- **Use appropriate formats** (PNG for icons, JPEG for photos)
+- **Implement lazy loading** for lists and galleries
+- **Cache images** appropriately
+
+### **Animation Performance**
+- **Use `AnimatedBuilder`** for complex animations
+- **Avoid rebuilding** entire widgets during animations
+- **Use `RepaintBoundary`** for complex custom painters
+- **Monitor frame rates** during development
+
+### **Memory Management**
+- **Dispose controllers** properly
+- **Use `const` constructors** where possible
+- **Implement pagination** for large lists
+- **Clean up resources** in `dispose()` methods
+
+---
+
+## 8. Development Rules
+
+### **Code Organization**
+- **Separate UI logic** from business logic
+- **Use consistent naming** conventions for UI elements
+- **Group related widgets** in separate files
+- **Follow Flutter best practices** for widget structure
+
+### **State Management**
+- **Use appropriate state management** (Provider, Riverpod, Bloc)
+- **Keep UI state** separate from business state
+- **Implement proper error boundaries** for UI failures
+- **Handle loading states** consistently
+
+### **Testing Requirements**
+- **Unit test** business logic
+- **Widget test** UI components
+- **Integration test** user flows
+- **Accessibility testing** for all screens
+
+### **Documentation**
+- **Document complex UI logic** with clear comments
+- **Include usage examples** for custom widgets
+- **Document accessibility features** and requirements
+- **Keep design decisions** documented
+
+---
+
+## 9. Quality Assurance
+
+### **Design Review Checklist**
+- [ ] Follows established color palette
+- [ ] Uses correct typography scale
+- [ ] Implements proper spacing
+- [ ] Meets accessibility standards
+- [ ] Includes proper loading states
+- [ ] Handles error cases gracefully
+- [ ] Provides clear user feedback
+- [ ] Maintains consistent navigation
+
+### **Performance Checklist**
+- [ ] 60fps animations
+- [ ] Fast screen transitions
+- [ ] Efficient image loading
+- [ ] Proper memory management
+- [ ] Optimized widget rebuilds
+
+### **Accessibility Checklist**
+- [ ] Proper contrast ratios
+- [ ] Adequate touch targets
+- [ ] Screen reader support
+- [ ] Keyboard navigation
+- [ ] Font scaling support
+
+---
+
+## 10. Implementation Examples
+
+### **Button Implementation**
+```dart
+class PrimaryButton extends StatelessWidget {
+  final String text;
+  final VoidCallback onPressed;
+  final bool isLoading;
+
+  const PrimaryButton({
+    required this.text,
+    required this.onPressed,
+    this.isLoading = false,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 48,
+      child: ElevatedButton(
+        onPressed: isLoading ? null : onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+        child: isLoading
+            ? const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              )
+            : Text(
+                text,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+      ),
+    );
+  }
+}
+```
+
+### **Card Implementation**
+```dart
+class StandardCard extends StatelessWidget {
+  final Widget child;
+  final EdgeInsetsGeometry? padding;
+  final VoidCallback? onTap;
+
+  const StandardCard({
+    required this.child,
+    this.padding,
+    this.onTap,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: padding ?? const EdgeInsets.all(16),
+            child: child,
+          ),
+        ),
+      ),
+    );
+  }
+}
+```
+
+---
+
+## 11. Resources & References
+
+### **Design Tools**
+- **Figma/Sketch** for design mockups
+- **Material Design** guidelines for Android patterns
+- **Human Interface Guidelines** for iOS patterns
+- **Flutter Gallery** for component examples
+
+### **Accessibility Resources**
+- **Flutter Accessibility** documentation
+- **WCAG 2.1** guidelines
+- **Material Design Accessibility** guidelines
+- **iOS Accessibility** guidelines
+
+### **Performance Tools**
+- **Flutter Inspector** for widget analysis
+- **Performance Overlay** for frame rate monitoring
+- **DevTools** for debugging and profiling
+- **Flutter Driver** for integration testing
+
+---
+
+*This document should be updated as design standards evolve and new requirements are identified. All team members should follow these guidelines to maintain consistency and quality across the app.*
+
+---
+description:
+globs:
+alwaysApply: false
+---
