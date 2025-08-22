@@ -123,9 +123,9 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> {
                       width: double.infinity,
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: AppColors.success.withOpacity(0.1),
+                        color: AppColors.success.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: AppColors.success.withOpacity(0.3)),
+                        border: Border.all(color: AppColors.success.withValues(alpha: 0.3)),
                       ),
                       child: Column(
                         children: [
@@ -166,7 +166,7 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> {
                       decoration: BoxDecoration(
                         color: AppColors.secondaryBackground,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: AppColors.neutral.withOpacity(0.2)),
+                        border: Border.all(color: AppColors.neutral.withValues(alpha: 0.2)),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -280,15 +280,15 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> {
         margin: const EdgeInsets.only(bottom: 4),
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary.withOpacity(0.1) : AppColors.secondaryBackground,
+          color: isSelected ? AppColors.primary.withValues(alpha: 0.1) : AppColors.secondaryBackground,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.neutral.withOpacity(0.2),
+            color: isSelected ? AppColors.primary : AppColors.neutral.withValues(alpha: 0.2),
             width: isSelected ? 2 : 1,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 10,
               offset: const Offset(0, 2),
             ),
@@ -300,7 +300,7 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> {
               width: 56,
               height: 56,
               decoration: BoxDecoration(
-                color: isSelected ? AppColors.primary : AppColors.primary.withOpacity(0.1),
+                color: isSelected ? AppColors.primary : AppColors.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Icon(
@@ -329,7 +329,7 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> {
                   Text(
                     description,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: isSelected ? AppColors.primary.withOpacity(0.8) : AppColors.textSecondary,
+                      color: isSelected ? AppColors.primary.withValues(alpha: 0.8) : AppColors.textSecondary,
                     ),
                   ),
                   

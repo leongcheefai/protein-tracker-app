@@ -146,7 +146,7 @@ class _HeightWeightScreenState extends State<HeightWeightScreen> {
                     }
                   } : null,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _canProceed() ? AppColors.primary : AppColors.neutral.withOpacity(0.3),
+                    backgroundColor: _canProceed() ? AppColors.primary : AppColors.neutral.withValues(alpha: 0.3),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
@@ -198,7 +198,7 @@ class _HeightWeightScreenState extends State<HeightWeightScreen> {
           decoration: BoxDecoration(
             color: AppColors.secondaryBackground,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.neutral.withOpacity(0.2)),
+            border: Border.all(color: AppColors.neutral.withValues(alpha: 0.2)),
           ),
           child: Column(
             children: [
@@ -225,9 +225,9 @@ class _HeightWeightScreenState extends State<HeightWeightScreen> {
               SliderTheme(
                 data: SliderTheme.of(context).copyWith(
                   activeTrackColor: AppColors.primary,
-                  inactiveTrackColor: AppColors.neutral.withOpacity(0.3),
+                  inactiveTrackColor: AppColors.neutral.withValues(alpha: 0.3),
                   thumbColor: AppColors.primary,
-                  overlayColor: AppColors.primary.withOpacity(0.2),
+                  overlayColor: AppColors.primary.withValues(alpha: 0.2),
                   trackHeight: 6,
                   thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 12),
                 ),
@@ -308,7 +308,7 @@ class _HeightWeightScreenState extends State<HeightWeightScreen> {
       decoration: BoxDecoration(
         color: AppColors.secondaryBackground,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: bmiColor.withOpacity(0.3)),
+        border: Border.all(color: bmiColor.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [

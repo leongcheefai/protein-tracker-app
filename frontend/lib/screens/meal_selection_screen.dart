@@ -105,9 +105,9 @@ class _MealSelectionScreenState extends State<MealSelectionScreen> {
                       width: double.infinity,
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: AppColors.primary.withOpacity(0.1),
+                        color: AppColors.primary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+                        border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
                       ),
                       child: Column(
                         children: [
@@ -202,15 +202,15 @@ class _MealSelectionScreenState extends State<MealSelectionScreen> {
       margin: const EdgeInsets.only(bottom: 4),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: isEnabled ? AppColors.primary.withOpacity(0.1) : AppColors.secondaryBackground,
+        color: isEnabled ? AppColors.primary.withValues(alpha: 0.1) : AppColors.secondaryBackground,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isEnabled ? AppColors.primary : AppColors.neutral.withOpacity(0.2),
+          color: isEnabled ? AppColors.primary : AppColors.neutral.withValues(alpha: 0.2),
           width: isEnabled ? 2 : 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -222,7 +222,7 @@ class _MealSelectionScreenState extends State<MealSelectionScreen> {
             width: 56,
             height: 56,
             decoration: BoxDecoration(
-              color: isEnabled ? AppColors.primary : AppColors.primary.withOpacity(0.1),
+              color: isEnabled ? AppColors.primary : AppColors.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Icon(
@@ -253,7 +253,7 @@ class _MealSelectionScreenState extends State<MealSelectionScreen> {
                       ? '${_mealProteinTarget.toStringAsFixed(0)}g protein target'
                       : 'Not tracking this meal',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: isEnabled ? AppColors.primary.withOpacity(0.8) : AppColors.textSecondary,
+                    color: isEnabled ? AppColors.primary.withValues(alpha: 0.8) : AppColors.textSecondary,
                   ),
                 ),
               ],
@@ -267,8 +267,8 @@ class _MealSelectionScreenState extends State<MealSelectionScreen> {
                 _meals[mealName] = value;
               });
             },
-            activeColor: AppColors.primary,
-            activeTrackColor: AppColors.primary.withOpacity(0.3),
+            activeThumbColor: AppColors.primary,
+            activeTrackColor: AppColors.primary.withValues(alpha: 0.3),
           ),
         ],
       ),
@@ -333,21 +333,14 @@ class _MealSelectionScreenState extends State<MealSelectionScreen> {
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                // Here you would typically navigate to the main app
-                // For now, we'll just show a success message
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Welcome to Protein Pace! 🎉'),
-                    backgroundColor: AppColors.success,
-                    duration: const Duration(seconds: 3),
-                  ),
-                );
+                // Navigate to camera launch screen to start tracking
+                Navigator.pushReplacementNamed(context, '/camera-launch');
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.success,
                 foregroundColor: Colors.white,
               ),
-              child: const Text('Get Started'),
+              child: const Text('Start Tracking'),
             ),
           ],
         );
