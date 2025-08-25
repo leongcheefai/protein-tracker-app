@@ -7,6 +7,7 @@ import 'screens/food_detection_results_screen.dart';
 import 'screens/portion_selection_screen.dart';
 import 'screens/meal_assignment_screen.dart';
 import 'screens/confirmation_screen.dart';
+import 'screens/user_home_screen.dart';
 
 void main() {
   runApp(const ProteinPaceApp());
@@ -108,6 +109,17 @@ class ProteinPaceApp extends StatelessWidget {
             meal: args['meal'] as String,
             mealProgress: args['mealProgress'] as Map<String, double>,
             mealTargets: args['mealTargets'] as Map<String, double>,
+          );
+        },
+        '/user-home': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+          return UserHomeScreen(
+            height: args['height'] as double,
+            weight: args['weight'] as double,
+            trainingMultiplier: args['trainingMultiplier'] as double,
+            goal: args['goal'] as String,
+            dailyProteinTarget: args['dailyProteinTarget'] as double,
+            meals: args['meals'] as Map<String, bool>,
           );
         },
       },

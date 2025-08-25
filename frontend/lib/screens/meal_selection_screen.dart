@@ -333,8 +333,19 @@ class _MealSelectionScreenState extends State<MealSelectionScreen> {
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                // Navigate to camera launch screen to start tracking
-                Navigator.pushReplacementNamed(context, '/camera-launch');
+                              // Navigate to user home screen to start tracking
+              Navigator.pushReplacementNamed(
+                context,
+                '/user-home',
+                arguments: {
+                  'height': widget.height,
+                  'weight': widget.weight,
+                  'trainingMultiplier': widget.trainingMultiplier,
+                  'goal': widget.goal,
+                  'dailyProteinTarget': widget.dailyProteinTarget,
+                  'meals': _meals,
+                },
+              );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.success,
