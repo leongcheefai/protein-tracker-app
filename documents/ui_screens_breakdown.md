@@ -80,21 +80,44 @@ This document breaks down the UI development phases and individual screens for t
 
 ---
 
-### **Phase 2: Core Camera Flow (Week 2-4)**
-*Milestone: M2 – Camera Flow*
+### **Phase 2: User Home & Camera Modal Flow (Week 2-4)**
+*Milestone: M2 – User Home Dashboard*
 
-#### 2.1 Camera Launch Screen
-- **Purpose:** Primary app entry point, direct camera access
+#### 2.1 User Home Screen
+- **Purpose:** Main app dashboard after user setup, central hub for all functionality
 - **Elements:**
-  - Full-screen camera preview
-  - Capture button (large, centered bottom)
-  - Flash toggle (top right)
-  - Camera flip button (top right)
-  - Permission request overlay (if needed)
-- **States:** Camera active, permission denied, camera error
-- **Navigation:** → Photo Capture
+  - **Header:** App title "Protein Pace" with settings icon
+  - **Welcome Section:** Personalized greeting with user avatar and motivational message
+  - **Daily Progress Card:** 
+    - Current vs. target protein (e.g., "89g / 144g")
+    - Visual progress bar with percentage
+    - Goal and training level display
+  - **Quick Actions Grid (2x2):**
+    - Upload Photo (primary action, triggers camera modal)
+    - View History
+    - Edit Goals
+    - Analytics
+  - **Meal Progress Breakdown:** Individual progress for each enabled meal
+    - Breakfast, Lunch, Dinner, Snack (if enabled)
+    - Progress percentage per meal
+    - Color-coded status (green=complete, amber=close, red=behind)
+  - **Recent Activity:** Placeholder for tracking user actions
+- **States:** First time (empty progress), partial progress, goal met
+- **Navigation:** → Camera Modal, History, Goals, Analytics, Settings
 
-#### 2.2 Photo Capture
+#### 2.2 Camera Settings Modal
+- **Purpose:** Modal overlay for choosing photo upload method
+- **Elements:**
+  - **Modal Header:** "Upload Photo" title with handle bar
+  - **Description:** "Choose how you want to add your meal"
+  - **Two Options:**
+    - **Take Photo:** Camera icon with "Use your camera to take a new photo"
+    - **Choose from Gallery:** Gallery icon with "Select an existing photo from your gallery"
+  - **Cancel Button:** Dismisses modal
+- **Design:** Bottom sheet modal (60% screen height)
+- **Navigation:** → Photo Capture (camera) or Gallery Picker
+
+#### 2.3 Photo Capture Screen
 - **Purpose:** Take photo of meal for AI analysis
 - **Elements:**
   - Live camera preview
@@ -105,7 +128,7 @@ This document breaks down the UI development phases and individual screens for t
   - "Use Photo" button (after capture)
 - **Navigation:** → Processing Screen
 
-#### 2.3 Processing Screen
+#### 2.4 Processing Screen
 - **Purpose:** Show AI analysis progress
 - **Elements:**
   - Captured photo thumbnail
@@ -116,7 +139,7 @@ This document breaks down the UI development phases and individual screens for t
 - **States:** Uploading, processing, analyzing
 - **Navigation:** → Food Detection Results
 
-#### 2.4 Food Detection Results
+#### 2.5 Food Detection Results
 - **Purpose:** Display AI-detected foods and confidence scores
 - **Elements:**
   - Photo thumbnail (top)
@@ -130,7 +153,7 @@ This document breaks down the UI development phases and individual screens for t
 - **States:** Multiple foods, single food, no detection
 - **Navigation:** → Portion Selection
 
-#### 2.5 Portion Selection
+#### 2.6 Portion Selection
 - **Purpose:** Confirm food portions and calculate protein
 - **Elements:**
   - Food name and confidence
@@ -141,7 +164,7 @@ This document breaks down the UI development phases and individual screens for t
 - **States:** Standard portions, custom input, validation errors
 - **Navigation:** → Meal Assignment
 
-#### 2.6 Meal Assignment
+#### 2.7 Meal Assignment
 - **Purpose:** Assign logged food to specific meal
 - **Elements:**
   - Food summary (name, portion, protein)
@@ -154,7 +177,7 @@ This document breaks down the UI development phases and individual screens for t
   - "Save" button
 - **Navigation:** → Confirmation Screen
 
-#### 2.7 Confirmation Screen
+#### 2.8 Confirmation Screen
 - **Purpose:** Final confirmation before saving
 - **Elements:**
   - Success checkmark
@@ -162,29 +185,30 @@ This document breaks down the UI development phases and individual screens for t
   - Updated meal progress
   - "Log Another Food" button
   - "Done" button
-- **Navigation:** → Today Dashboard or Camera Launch
+- **Navigation:** → User Home Screen (updated dashboard)
 
 ---
 
-### **Phase 3: Dashboard & Management (Week 4-5)**
-*Milestone: M3 – Today Dashboard*
+### **Phase 3: Enhanced Dashboard & Management (Week 4-5)**
+*Milestone: M3 – Enhanced User Home Features*
 
-#### 3.1 Today Dashboard
-- **Purpose:** Main app screen showing daily progress
+#### 3.1 User Home Screen (Enhanced)
+- **Purpose:** Enhanced main app screen with advanced progress tracking and analytics
 - **Elements:**
-  - Header with date and profile icon
-  - Large daily protein ring (center)
-    - Current vs. target (e.g., "89g / 144g")
-    - Percentage completion
-  - Per-meal mini-rings (horizontal scroll):
-    - Breakfast progress
-    - Lunch progress
-    - Dinner progress
-    - Snack progress (if enabled)
-  - Recent items list (last 3-5 logged foods)
-  - Floating action button (camera icon)
-- **States:** Empty (first time), partial progress, goal met
-- **Navigation:** → Camera Launch, Item Edit, Profile
+  - **Enhanced Header:** Date display, profile icon, quick stats
+  - **Advanced Progress Visualization:** 
+    - Large daily protein ring (center) with animations
+    - Current vs. target with trend indicators
+    - Weekly progress comparison
+  - **Per-meal Mini-rings (horizontal scroll):**
+    - Breakfast, Lunch, Dinner, Snack progress
+    - Color-coded status indicators
+    - Tap to expand meal details
+  - **Recent Items List:** Last 3-5 logged foods with quick actions
+  - **Floating Action Button:** Camera icon for quick photo upload
+  - **Quick Stats Panel:** Weekly average, streak counter, goal hit rate
+- **States:** Empty (first time), partial progress, goal met, streak milestones
+- **Navigation:** → Camera Modal, Item Edit, Profile, Detailed Analytics
 
 #### 3.2 Recent Items List
 - **Purpose:** Show recently logged foods with quick actions
@@ -369,10 +393,36 @@ This document breaks down the UI development phases and individual screens for t
 4. **Profile** - Settings and account
 
 ### **Modal Overlays**
-- Camera launch (full screen)
+- **Camera Settings Modal:** Photo upload method selection (bottom sheet)
 - Food detection results
 - Portion selection
 - Meal assignment
 - Item editing
 
 ### **Navigation Flow**
+```
+Setup Flow: Splash → Welcome → Height/Weight → Training → Goals → Meals → User Home
+Main App: User Home (with camera modal) → Photo Flow → Back to User Home
+```
+
+---
+
+## Phase 2 Implementation Summary
+
+### **Key Changes from Original Plan**
+- **User Home Screen:** Replaced direct camera launch with comprehensive dashboard
+- **Camera Modal:** Camera access now triggered through modal overlay instead of full-screen launch
+- **Progressive Disclosure:** Camera functionality only shown when user explicitly chooses to upload photos
+
+### **Benefits of Current Implementation**
+1. **Better UX:** Users land on informative dashboard instead of immediate camera request
+2. **Permission Management:** Camera permissions requested only when needed
+3. **Centralized Hub:** All app functionality accessible from one main screen
+4. **Scalable Architecture:** Easy to add new features and analytics
+5. **User Control:** Users choose when to access camera functionality
+
+### **Technical Implementation**
+- **UserHomeScreen:** New main screen with progress tracking and quick actions
+- **Camera Modal:** Bottom sheet modal with photo upload options
+- **Navigation Flow:** Updated routing to support new screen structure
+- **State Management:** Proper parameter passing between screens
