@@ -500,7 +500,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
       backgroundColor: Colors.transparent,
       builder: (BuildContext context) {
         return Container(
-          height: MediaQuery.of(context).size.height * 0.6,
+          height: MediaQuery.of(context).size.height * 0.65, // Reduced from 0.7 to 0.65 since content is now scrollable
           decoration: const BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.only(
@@ -532,7 +532,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                 ),
               ),
               
-              const SizedBox(height: 8),
+              const SizedBox(height: 8), // Reduced from 12 to 8
               
               Text(
                 'Choose how you want to add your meal',
@@ -541,54 +541,64 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                 ),
               ),
               
-              const SizedBox(height: 32),
+              const SizedBox(height: 32), // Reduced from 40 to 32
               
-              // Camera option
-              _buildCameraOption(
-                context,
-                'Take Photo',
-                Icons.camera_alt,
-                'Use your camera to take a new photo',
-                () {
-                  Navigator.pop(context);
-                  // TODO: Navigate to camera screen
-                },
-              ),
-              
-              const SizedBox(height: 16),
-              
-              // Gallery option
-              _buildCameraOption(
-                context,
-                'Choose from Gallery',
-                Icons.photo_library,
-                'Select an existing photo from your gallery',
-                () {
-                  Navigator.pop(context);
-                  // TODO: Navigate to gallery picker
-                },
-              ),
-              
-              const SizedBox(height: 32),
-              
-              // Cancel button
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton(
-                  onPressed: () => Navigator.pop(context),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.textSecondary,
-                    side: BorderSide(color: AppColors.neutral.withValues(alpha: 0.3)),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+              // Scrollable content area
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    children: [
+                      // Camera option
+                      _buildCameraOption(
+                        context,
+                        'Take Photo',
+                        Icons.camera_alt,
+                        'Use your camera to take a new photo',
+                        () {
+                          Navigator.pop(context);
+                          // TODO: Navigate to camera screen
+                        },
+                      ),
+                      
+                      const SizedBox(height: 20), // Reduced from 24 to 20
+                      
+                      // Gallery option
+                      _buildCameraOption(
+                        context,
+                        'Choose from Gallery',
+                        Icons.photo_library,
+                        'Select an existing photo from your gallery',
+                        () {
+                          Navigator.pop(context);
+                          // TODO: Navigate to gallery picker
+                        },
+                      ),
+                      
+                      const SizedBox(height: 32), // Reduced from 48 to 32
+                      
+                      // Cancel button
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.pop(context),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppColors.textSecondary,
+                            side: BorderSide(color: AppColors.neutral.withValues(alpha: 0.3)),
+                            padding: const EdgeInsets.symmetric(vertical: 18), // Reduced from 20 to 18
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: const Text('Cancel'),
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 24), // Reduced from 32 to 24
+                    ],
                   ),
-                  child: const Text('Cancel'),
                 ),
               ),
-              
-              const SizedBox(height: 24),
             ],
           ),
         );
@@ -606,7 +616,8 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(20),
+        margin: const EdgeInsets.only(bottom: 8), // Changed to only bottom margin
+        padding: const EdgeInsets.all(20), // Reduced from 24 to 20 to save space
         decoration: BoxDecoration(
           color: AppColors.secondaryBackground,
           borderRadius: BorderRadius.circular(16),
@@ -628,7 +639,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
               ),
             ),
             
-            const SizedBox(width: 16),
+            const SizedBox(width: 20), // Increased from 16 to 20
             
             Expanded(
               child: Column(
@@ -642,7 +653,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                     ),
                   ),
                   
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 4), // Reduced from 6 to 4 to save space
                   
                   Text(
                     description,
@@ -653,6 +664,8 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                 ],
               ),
             ),
+            
+            const SizedBox(width: 16), // Added spacing before arrow
             
             Icon(
               Icons.arrow_forward_ios,
