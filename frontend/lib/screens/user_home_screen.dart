@@ -23,14 +23,48 @@ class UserHomeScreen extends StatefulWidget {
   State<UserHomeScreen> createState() => _UserHomeScreenState();
 }
 
-class _UserHomeScreenState extends State<UserHomeScreen> {
+class _UserHomeScreenState extends State<UserHomeScreen>
+    with TickerProviderStateMixin {
+  late AnimationController _ringController;
+  late AnimationController _pulseController;
+  late Animation<double> _ringAnimation;
+  late Animation<double> _pulseAnimation;
+
   // Mock data for demonstration - in real app this would come from a database
-  Map<String, double> _mealProgress = {
-    'Breakfast': 0.0,
-    'Lunch': 0.0,
-    'Dinner': 0.0,
-    'Snack': 0.0,
+  final Map<String, double> _mealProgress = {
+    'Breakfast': 25.0,
+    'Lunch': 45.0,
+    'Dinner': 30.0,
+    'Snack': 15.0,
   };
+
+  // Mock recent items data
+  final List<Map<String, dynamic>> _recentItems = [
+    {
+      'name': 'Grilled Chicken Breast',
+      'portion': 150.0,
+      'protein': 46.5,
+      'meal': 'Lunch',
+      'time': '12:30 PM',
+      'image': 'assets/images/chicken.jpg',
+    },
+    {
+      'name': 'Greek Yogurt',
+      'portion': 200.0,
+      'protein': 20.0,
+      'meal': 'Breakfast',
+      'time': '8:15 AM',
+      'image': 'assets/images/yogurt.jpg',
+    },
+    {
+      'name': 'Salmon Fillet',
+      'portion': 120.0,
+      'protein': 28.8,
+      'meal': 'Dinner',
+      'time': '7:45 PM',
+      'image': 'assets/images/salmon.jpg',
+    },
+  ];
 
   double get _totalProgress {
     return _mealProgress.values.fold(0.0, (sum, value) => sum + value);
@@ -44,308 +78,273 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   @override
   void initState() {
     super.initState();
-    // Initialize meal progress based on enabled meals
-    for (String meal in widget.meals.keys) {
-      if (widget.meals[meal] == true) {
-        _mealProgress[meal] = 0.0;
-      }
-    }
+    _initializeAnimations();
+    _startAnimations();
+  }
+
+  void _initializeAnimations() {
+    _ringController = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    );
+    _pulseController = AnimationController(
+      duration: const Duration(milliseconds: 2000),
+      vsync: this,
+    );
+
+    _ringAnimation = Tween<double>(
+      begin: 0.0,
+      end: _progressPercentage / 100,
+    ).animate(CurvedAnimation(
+      parent: _ringController,
+      curve: Curves.easeOutCubic,
+    ));
+
+    _pulseAnimation = Tween<double>(
+      begin: 0.95,
+      end: 1.05,
+    ).animate(CurvedAnimation(
+      parent: _pulseController,
+      curve: Curves.easeInOut,
+    ));
+  }
+
+  void _startAnimations() async {
+    await Future.delayed(const Duration(milliseconds: 300));
+    _ringController.forward();
+    _pulseController.repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _ringController.dispose();
+    _pulseController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Text(
-          'Protein Pace',
-          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-            color: AppColors.textPrimary,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.settings, color: AppColors.textPrimary),
-            onPressed: () {
-              // TODO: Navigate to settings screen
-            },
-          ),
-        ],
-      ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
+        child: CustomScrollView(
+          slivers: [
+            // Enhanced Header
+            _buildEnhancedHeader(),
+            
+            // Main Content
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 24),
+                    
+                    // Advanced Progress Visualization
+                    _buildAdvancedProgressVisualization(),
+                    
+                    const SizedBox(height: 32),
+                    
+                    // Per-meal Mini-rings
+                    _buildPerMealMiniRings(),
+                    
+                    const SizedBox(height: 32),
+                    
+                    // Quick Stats Panel
+                    _buildQuickStatsPanel(),
+                    
+                    const SizedBox(height: 32),
+                    
+                    // Recent Items List
+                    _buildRecentItemsList(),
+                    
+                    const SizedBox(height: 100), // Space for FAB
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      floatingActionButton: _buildFloatingActionButton(),
+    );
+  }
+
+  Widget _buildEnhancedHeader() {
+    final now = DateTime.now();
+    final dateString = '${_getMonthName(now.month)} ${now.day}, ${now.year}';
+    
+    return SliverAppBar(
+      expandedHeight: 120,
+      floating: false,
+      pinned: true,
+      backgroundColor: AppColors.background,
+      elevation: 0,
+      flexibleSpace: FlexibleSpaceBar(
+        background: Container(
+          padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.end,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Welcome Section
-              _buildWelcomeSection(),
-              
-              const SizedBox(height: 24),
-              
-              // Daily Progress Card
-              _buildDailyProgressCard(),
-              
-              const SizedBox(height: 24),
-              
-              // Quick Actions
-              _buildQuickActions(),
-              
-              const SizedBox(height: 24),
-              
-              // Meal Progress Breakdown
-              _buildMealProgressBreakdown(),
-              
-              const SizedBox(height: 24),
-              
-              // Recent Activity
-              _buildRecentActivity(),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildWelcomeSection() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              color: AppColors.primary,
-              borderRadius: BorderRadius.circular(30),
-            ),
-            child: const Icon(
-              Icons.person,
-              color: Colors.white,
-              size: 30,
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Welcome back!',
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    color: AppColors.textPrimary,
-                    fontWeight: FontWeight.w600,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Protein Pace',
+                    style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Ready to track your protein intake?',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textSecondary,
+                  IconButton(
+                    icon: Icon(Icons.settings, color: AppColors.textPrimary),
+                    onPressed: () {
+                      // TODO: Navigate to settings screen
+                    },
                   ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDailyProgressCard() {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Today\'s Progress',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: AppColors.textPrimary,
-                  fontWeight: FontWeight.w600,
-                ),
+                ],
               ),
+              const SizedBox(height: 8),
               Text(
-                '${_progressPercentage.toStringAsFixed(1)}%',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          
-          const SizedBox(height: 16),
-          
-          // Progress Bar
-          LinearProgressIndicator(
-            value: _progressPercentage / 100,
-            backgroundColor: AppColors.neutral.withValues(alpha: 0.2),
-            valueColor: AlwaysStoppedAnimation<Color>(
-              _progressPercentage >= 100 ? AppColors.success : AppColors.primary,
-            ),
-            minHeight: 8,
-            borderRadius: BorderRadius.circular(4),
-          ),
-          
-          const SizedBox(height: 16),
-          
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                '${_totalProgress.toStringAsFixed(1)}g',
-                style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                  color: AppColors.textPrimary,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                '${widget.dailyProteinTarget.toStringAsFixed(1)}g',
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                dateString,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: AppColors.textSecondary,
                 ),
               ),
             ],
           ),
-          
-          const SizedBox(height: 8),
-          
-          Text(
-            'Goal: ${widget.goal} • ${widget.trainingMultiplier.toStringAsFixed(1)}x training',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.textSecondary,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAdvancedProgressVisualization() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Progress Ring
+          SizedBox(
+            height: 200,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                // Background Ring
+                SizedBox(
+                  width: 180,
+                  height: 180,
+                  child: CircularProgressIndicator(
+                    value: 1.0,
+                    strokeWidth: 12,
+                    backgroundColor: AppColors.neutral.withValues(alpha: 0.1),
+                    valueColor: const AlwaysStoppedAnimation<Color>(Colors.transparent),
+                  ),
+                ),
+                
+                // Progress Ring
+                AnimatedBuilder(
+                  animation: _ringAnimation,
+                  builder: (context, child) {
+                    return SizedBox(
+                      width: 180,
+                      height: 180,
+                      child: CircularProgressIndicator(
+                        value: _ringAnimation.value,
+                        strokeWidth: 12,
+                        backgroundColor: Colors.transparent,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          _getProgressColor(_progressPercentage),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                
+                // Center Content
+                AnimatedBuilder(
+                  animation: _pulseAnimation,
+                  builder: (context, child) {
+                    return Transform.scale(
+                      scale: _pulseAnimation.value,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            '${_totalProgress.toStringAsFixed(1)}g',
+                            style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                              color: AppColors.textPrimary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            'of ${widget.dailyProteinTarget.toStringAsFixed(1)}g',
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: _getProgressColor(_progressPercentage).withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              '${_progressPercentage.toStringAsFixed(1)}%',
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: _getProgressColor(_progressPercentage),
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ],
             ),
+          ),
+          
+          const SizedBox(height: 16),
+          
+          // Goal Info
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.fitness_center,
+                color: AppColors.primary,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Goal: ${widget.goal} • ${widget.trainingMultiplier.toStringAsFixed(1)}x training',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  Widget _buildQuickActions() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Quick Actions',
-          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-            color: AppColors.textPrimary,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        
-        const SizedBox(height: 16),
-        
-        Row(
-          children: [
-            Expanded(
-              child: _buildActionCard(
-                'Upload Photo',
-                Icons.camera_alt,
-                AppColors.primary,
-                () => _showCameraSettingsModal(context),
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _buildActionCard(
-                'View History',
-                Icons.history,
-                AppColors.success,
-                () {
-                  // TODO: Navigate to history screen
-                },
-              ),
-            ),
-          ],
-        ),
-        
-        const SizedBox(height: 16),
-        
-        Row(
-          children: [
-            Expanded(
-              child: _buildActionCard(
-                'Edit Goals',
-                Icons.edit,
-                AppColors.warning,
-                () {
-                  // TODO: Navigate to goal editing screen
-                },
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _buildActionCard(
-                'Analytics',
-                Icons.analytics,
-                AppColors.error,
-                () {
-                  // TODO: Navigate to analytics screen
-                },
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildActionCard(String title, IconData icon, Color color, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: color.withValues(alpha: 0.3)),
-        ),
-        child: Column(
-          children: [
-            Icon(
-              icon,
-              color: color,
-              size: 32,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              title,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: color,
-                fontWeight: FontWeight.w600,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMealProgressBreakdown() {
+  Widget _buildPerMealMiniRings() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -359,116 +358,373 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
         
         const SizedBox(height: 16),
         
-        ...widget.meals.entries.map((entry) {
-          if (entry.value) {
-            final mealName = entry.key;
-            final progress = _mealProgress[mealName] ?? 0.0;
-            final target = widget.dailyProteinTarget / 
-                widget.meals.values.where((enabled) => enabled).length;
-            final mealPercentage = target > 0 ? (progress / target) * 100 : 0.0;
-            
-            return Container(
-              margin: const EdgeInsets.only(bottom: 12),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.neutral.withValues(alpha: 0.2)),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    _getMealIcon(mealName),
-                    color: AppColors.primary,
-                    size: 24,
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          mealName,
-                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: AppColors.textPrimary,
-                            fontWeight: FontWeight.w600,
+        SizedBox(
+          height: 100,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: widget.meals.entries.where((entry) => entry.value).length,
+            itemBuilder: (context, index) {
+              final mealEntry = widget.meals.entries.where((entry) => entry.value).elementAt(index);
+              final mealName = mealEntry.key;
+              final progress = _mealProgress[mealName] ?? 0.0;
+              final target = widget.dailyProteinTarget / 
+                  widget.meals.values.where((enabled) => enabled).length;
+              final mealPercentage = target > 0 ? (progress / target) : 0.0;
+              
+              return Container(
+                width: 80,
+                margin: EdgeInsets.only(right: index == widget.meals.entries.where((entry) => entry.value).length - 1 ? 0 : 16),
+                child: Column(
+                  children: [
+                    // Mini Progress Ring
+                    SizedBox(
+                      width: 60,
+                      height: 60,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          CircularProgressIndicator(
+                            value: 1.0,
+                            strokeWidth: 4,
+                            backgroundColor: AppColors.neutral.withValues(alpha: 0.1),
+                            valueColor: const AlwaysStoppedAnimation<Color>(Colors.transparent),
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '${progress.toStringAsFixed(1)}g / ${target.toStringAsFixed(1)}g',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: AppColors.textSecondary,
+                          CircularProgressIndicator(
+                            value: (mealPercentage / 100).clamp(0.0, 1.0),
+                            strokeWidth: 4,
+                            backgroundColor: Colors.transparent,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              _getProgressColor(mealPercentage),
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: _getProgressColor(mealPercentage).withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      '${mealPercentage.toStringAsFixed(0)}%',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: _getProgressColor(mealPercentage),
-                        fontWeight: FontWeight.w600,
+                          Icon(
+                            _getMealIcon(mealName),
+                            color: _getProgressColor(mealPercentage),
+                            size: 20,
+                          ),
+                        ],
                       ),
                     ),
-                  ),
-                ],
-              ),
-            );
-          }
-          return const SizedBox.shrink();
-        }).toList(),
+                    
+                    const SizedBox(height: 8),
+                    
+                    Text(
+                      mealName,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    
+                    Text(
+                      '${progress.toStringAsFixed(0)}g',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
       ],
     );
   }
 
-  Widget _buildRecentActivity() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Recent Activity',
-          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-            color: AppColors.textPrimary,
-            fontWeight: FontWeight.w600,
+  Widget _buildQuickStatsPanel() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.secondaryBackground,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.neutral.withValues(alpha: 0.1)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Quick Stats',
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.w600,
+            ),
           ),
-        ),
-        
-        const SizedBox(height: 16),
-        
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: AppColors.secondaryBackground,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.neutral.withValues(alpha: 0.2)),
-          ),
-          child: Row(
+          
+          const SizedBox(height: 16),
+          
+          Row(
             children: [
-              Icon(
-                Icons.info_outline,
-                color: AppColors.textSecondary,
-                size: 20,
-              ),
-              const SizedBox(width: 12),
               Expanded(
-                child: Text(
-                  'No recent activity. Start by uploading your first meal photo!',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
+                child: _buildStatItem(
+                  'Weekly Avg',
+                  '${(_totalProgress * 7).toStringAsFixed(0)}g',
+                  Icons.trending_up,
+                  AppColors.success,
+                ),
+              ),
+              Expanded(
+                child: _buildStatItem(
+                  'Goal Hit Rate',
+                  '${_progressPercentage >= 100 ? 100 : _progressPercentage.toInt()}%',
+                  Icons.flag,
+                  AppColors.primary,
+                ),
+              ),
+              Expanded(
+                child: _buildStatItem(
+                  'Streak',
+                  '3 days',
+                  Icons.local_fire_department,
+                  AppColors.warning,
                 ),
               ),
             ],
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatItem(String label, String value, IconData icon, Color color) {
+    return Column(
+      children: [
+        Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(
+            icon,
+            color: color,
+            size: 24,
+          ),
+        ),
+        
+        const SizedBox(height: 8),
+        
+        Text(
+          value,
+          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+            color: AppColors.textPrimary,
+            fontWeight: FontWeight.bold,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        
+        Text(
+          label,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: AppColors.textSecondary,
+          ),
+          textAlign: TextAlign.center,
         ),
       ],
+    );
+  }
+
+  Widget _buildRecentItemsList() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Today\'s Foods',
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                color: AppColors.textPrimary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                // TODO: Navigate to full history
+              },
+              child: Text(
+                'View All',
+                style: TextStyle(color: AppColors.primary),
+              ),
+            ),
+          ],
+        ),
+        
+        const SizedBox(height: 16),
+        
+                 if (_recentItems.isEmpty)
+           _buildEmptyState()
+         else
+           ..._recentItems.map((item) => _buildRecentItemCard(item)),
+      ],
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Container(
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        color: AppColors.secondaryBackground,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.neutral.withValues(alpha: 0.1)),
+      ),
+      child: Column(
+        children: [
+          Icon(
+            Icons.restaurant_outlined,
+            size: 48,
+            color: AppColors.textSecondary,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'No foods logged today',
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+              color: AppColors.textSecondary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Start by taking a photo of your meal',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: AppColors.textSecondary,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRecentItemCard(Map<String, dynamic> item) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.neutral.withValues(alpha: 0.1)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          // Food Icon Placeholder
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              Icons.restaurant,
+              color: AppColors.primary,
+              size: 24,
+            ),
+          ),
+          
+          const SizedBox(width: 16),
+          
+          // Food Details
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item['name'] as String,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Text(
+                      '${item['portion'].toStringAsFixed(0)}g • ${item['protein'].toStringAsFixed(1)}g protein',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        item['meal'] as String,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  item['time'] as String,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          // Quick Actions
+          PopupMenuButton<String>(
+            icon: Icon(Icons.more_vert, color: AppColors.textSecondary),
+            onSelected: (value) {
+              // TODO: Handle quick actions
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'edit',
+                child: Row(
+                  children: [
+                    Icon(Icons.edit, size: 20),
+                    SizedBox(width: 8),
+                    Text('Edit'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'delete',
+                child: Row(
+                  children: [
+                    Icon(Icons.delete, size: 20),
+                    SizedBox(width: 8),
+                    Text('Delete'),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFloatingActionButton() {
+    return FloatingActionButton.extended(
+      onPressed: () => _showCameraSettingsModal(context),
+      backgroundColor: AppColors.primary,
+      foregroundColor: Colors.white,
+      icon: const Icon(Icons.camera_alt),
+      label: const Text('Add Food'),
+      elevation: 8,
     );
   }
 
@@ -490,7 +746,16 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   Color _getProgressColor(double percentage) {
     if (percentage >= 100) return AppColors.success;
     if (percentage >= 80) return AppColors.warning;
+    if (percentage >= 60) return AppColors.primary;
     return AppColors.error;
+  }
+
+  String _getMonthName(int month) {
+    const months = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    return months[month - 1];
   }
 
   void _showCameraSettingsModal(BuildContext context) {
@@ -500,7 +765,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
       backgroundColor: Colors.transparent,
       builder: (BuildContext context) {
         return Container(
-          height: MediaQuery.of(context).size.height * 0.65, // Reduced from 0.7 to 0.65 since content is now scrollable
+          height: MediaQuery.of(context).size.height * 0.65,
           decoration: const BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.only(
@@ -532,7 +797,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                 ),
               ),
               
-              const SizedBox(height: 8), // Reduced from 12 to 8
+              const SizedBox(height: 8),
               
               Text(
                 'Choose how you want to add your meal',
@@ -541,7 +806,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                 ),
               ),
               
-              const SizedBox(height: 32), // Reduced from 40 to 32
+              const SizedBox(height: 32),
               
               // Scrollable content area
               Expanded(
@@ -561,7 +826,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                         },
                       ),
                       
-                      const SizedBox(height: 20), // Reduced from 24 to 20
+                      const SizedBox(height: 20),
                       
                       // Gallery option
                       _buildCameraOption(
@@ -575,7 +840,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                         },
                       ),
                       
-                      const SizedBox(height: 32), // Reduced from 48 to 32
+                      const SizedBox(height: 32),
                       
                       // Cancel button
                       SizedBox(
@@ -585,7 +850,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                           style: OutlinedButton.styleFrom(
                             foregroundColor: AppColors.textSecondary,
                             side: BorderSide(color: AppColors.neutral.withValues(alpha: 0.3)),
-                            padding: const EdgeInsets.symmetric(vertical: 18), // Reduced from 20 to 18
+                            padding: const EdgeInsets.symmetric(vertical: 18),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
@@ -594,7 +859,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                         ),
                       ),
                       
-                      const SizedBox(height: 24), // Reduced from 32 to 24
+                      const SizedBox(height: 24),
                     ],
                   ),
                 ),
@@ -616,8 +881,8 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: const EdgeInsets.only(bottom: 8), // Changed to only bottom margin
-        padding: const EdgeInsets.all(20), // Reduced from 24 to 20 to save space
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: AppColors.secondaryBackground,
           borderRadius: BorderRadius.circular(16),
@@ -639,7 +904,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
               ),
             ),
             
-            const SizedBox(width: 20), // Increased from 16 to 20
+            const SizedBox(width: 20),
             
             Expanded(
               child: Column(
@@ -653,7 +918,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                     ),
                   ),
                   
-                  const SizedBox(height: 4), // Reduced from 6 to 4 to save space
+                  const SizedBox(height: 4),
                   
                   Text(
                     description,
@@ -665,7 +930,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
               ),
             ),
             
-            const SizedBox(width: 16), // Added spacing before arrow
+            const SizedBox(width: 16),
             
             Icon(
               Icons.arrow_forward_ios,
