@@ -1181,8 +1181,8 @@ class _UserHomeScreenState extends State<UserHomeScreen>
       onPressed: () => _showCameraSettingsModal(context),
       backgroundColor: AppColors.primary,
       foregroundColor: Colors.white,
-      icon: const Icon(Icons.camera_alt),
-      label: const Text('Add Food'),
+      icon: const Icon(Icons.add),
+      label: const Text("Add"),
       elevation: 8,
     );
   }
