@@ -137,7 +137,7 @@ class _ProcessingScreenState extends State<ProcessingScreen>
                       size: 28,
                     ),
                     style: IconButton.styleFrom(
-                      backgroundColor: Colors.black.withOpacity(0.5),
+                      backgroundColor: Colors.black.withValues(alpha: 0.5),
                       shape: const CircleBorder(),
                     ),
                   ),
@@ -187,7 +187,7 @@ class _ProcessingScreenState extends State<ProcessingScreen>
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: Colors.white.withOpacity(0.3),
+                        color: Colors.white.withValues(alpha: 0.3),
                         width: 3,
                       ),
                     ),
@@ -231,7 +231,7 @@ class _ProcessingScreenState extends State<ProcessingScreen>
               width: 200,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(2),
               ),
               child: LinearProgressIndicator(
@@ -248,7 +248,7 @@ class _ProcessingScreenState extends State<ProcessingScreen>
             Text(
               '${_currentStep + 1} of ${_processingSteps.length}',
               style: TextStyle(
-                color: Colors.white.withOpacity(0.7),
+                color: Colors.white.withValues(alpha: 0.7),
                 fontSize: 14,
               ),
             ),

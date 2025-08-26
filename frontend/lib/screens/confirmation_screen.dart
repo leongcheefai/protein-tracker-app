@@ -137,7 +137,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
                     width: 120,
                     height: 120,
                     decoration: BoxDecoration(
-                      color: Colors.green.withOpacity(0.1),
+                      color: Colors.green.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
                     child: Center(
@@ -191,12 +191,12 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
               margin: const EdgeInsets.symmetric(horizontal: 16),
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.blue.withOpacity(0.05),
+                color: Colors.blue.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: Colors.blue.withOpacity(0.2),
-                  width: 1,
-                ),
+                                  border: Border.all(
+                    color: Colors.blue.withValues(alpha: 0.2),
+                    width: 1,
+                  ),
               ),
               child: Row(
                 children: [
@@ -252,12 +252,12 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
               margin: const EdgeInsets.symmetric(horizontal: 16),
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.green.withOpacity(0.05),
+                color: Colors.green.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: Colors.green.withOpacity(0.2),
-                  width: 1,
-                ),
+                                  border: Border.all(
+                    color: Colors.green.withValues(alpha: 0.2),
+                    width: 1,
+                  ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
