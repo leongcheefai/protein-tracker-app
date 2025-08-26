@@ -41,30 +41,86 @@ class _UserHomeScreenState extends State<UserHomeScreen>
   // Mock recent items data
   final List<Map<String, dynamic>> _recentItems = [
     {
+      'id': '1',
       'name': 'Grilled Chicken Breast',
       'portion': 150.0,
       'protein': 46.5,
       'meal': 'Lunch',
       'time': '12:30 PM',
       'image': 'assets/images/chicken.jpg',
+      'category': 'Protein',
+      'calories': 165,
     },
     {
+      'id': '2',
       'name': 'Greek Yogurt',
       'portion': 200.0,
       'protein': 20.0,
       'meal': 'Breakfast',
       'time': '8:15 AM',
       'image': 'assets/images/yogurt.jpg',
+      'category': 'Dairy',
+      'calories': 120,
     },
     {
+      'id': '3',
       'name': 'Salmon Fillet',
       'portion': 120.0,
       'protein': 28.8,
       'meal': 'Dinner',
       'time': '7:45 PM',
       'image': 'assets/images/salmon.jpg',
+      'category': 'Protein',
+      'calories': 180,
+    },
+    {
+      'id': '4',
+      'name': 'Quinoa Bowl',
+      'portion': 100.0,
+      'protein': 4.0,
+      'meal': 'Lunch',
+      'time': '1:15 PM',
+      'image': 'assets/images/quinoa.jpg',
+      'category': 'Carbohydrate',
+      'calories': 120,
     },
   ];
+
+  // Search and filter state
+  String _searchQuery = '';
+  String _selectedMealFilter = 'All';
+  bool _showSearchBar = false;
+  
+  // Edit state
+  String? _editingItemId;
+  final Map<String, TextEditingController> _editControllers = {};
+
+  // Get filtered items
+  List<Map<String, dynamic>> get _filteredItems {
+    List<Map<String, dynamic>> items = _recentItems;
+    
+    // Apply search filter
+    if (_searchQuery.isNotEmpty) {
+      items = items.where((item) =>
+        item['name'].toString().toLowerCase().contains(_searchQuery.toLowerCase()) ||
+        item['category'].toString().toLowerCase().contains(_searchQuery.toLowerCase())
+      ).toList();
+    }
+    
+    // Apply meal filter
+    if (_selectedMealFilter != 'All') {
+      items = items.where((item) => item['meal'] == _selectedMealFilter).toList();
+    }
+    
+    return items;
+  }
+
+  // Get unique meals for filter
+  List<String> get _availableMeals {
+    final meals = _recentItems.map((item) => item['meal'] as String).toSet().toList();
+    meals.insert(0, 'All');
+    return meals;
+  }
 
   double get _totalProgress {
     return _mealProgress.values.fold(0.0, (sum, value) => sum + value);
@@ -80,6 +136,7 @@ class _UserHomeScreenState extends State<UserHomeScreen>
     super.initState();
     _initializeAnimations();
     _startAnimations();
+    _initializeEditControllers();
   }
 
   void _initializeAnimations() {
@@ -109,6 +166,14 @@ class _UserHomeScreenState extends State<UserHomeScreen>
     ));
   }
 
+  void _initializeEditControllers() {
+    for (final item in _recentItems) {
+      _editControllers[item['id']] = TextEditingController(
+        text: item['portion'].toString(),
+      );
+    }
+  }
+
   void _startAnimations() async {
     await Future.delayed(const Duration(milliseconds: 300));
     _ringController.forward();
@@ -119,7 +184,87 @@ class _UserHomeScreenState extends State<UserHomeScreen>
   void dispose() {
     _ringController.dispose();
     _pulseController.dispose();
+    for (final controller in _editControllers.values) {
+      controller.dispose();
+    }
     super.dispose();
+  }
+
+  // Quick edit functionality
+  void _startEditing(String itemId) {
+    setState(() {
+      _editingItemId = itemId;
+    });
+  }
+
+  void _saveEdit(String itemId) {
+    final controller = _editControllers[itemId];
+    if (controller != null) {
+      final newPortion = double.tryParse(controller.text);
+      if (newPortion != null && newPortion > 0) {
+        setState(() {
+          final itemIndex = _recentItems.indexWhere((item) => item['id'] == itemId);
+          if (itemIndex != -1) {
+            _recentItems[itemIndex]['portion'] = newPortion;
+            // Recalculate protein based on portion
+            final proteinPer100g = _recentItems[itemIndex]['protein'] / _recentItems[itemIndex]['portion'] * 100;
+            _recentItems[itemIndex]['protein'] = (newPortion / 100) * proteinPer100g;
+          }
+          _editingItemId = null;
+        });
+      }
+    }
+  }
+
+  void _cancelEdit() {
+    setState(() {
+      _editingItemId = null;
+    });
+    // Reset controllers to original values
+    for (final item in _recentItems) {
+      final controller = _editControllers[item['id']];
+      if (controller != null) {
+        controller.text = item['portion'].toString();
+      }
+    }
+  }
+
+  // Delete functionality
+  void _deleteItem(String itemId) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Food Item'),
+        content: const Text('Are you sure you want to delete this item? This action cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              setState(() {
+                _recentItems.removeWhere((item) => item['id'] == itemId);
+              });
+              Navigator.pop(context);
+            },
+            style: TextButton.styleFrom(foregroundColor: AppColors.error),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Toggle search bar
+  void _toggleSearchBar() {
+    setState(() {
+      _showSearchBar = !_showSearchBar;
+      if (!_showSearchBar) {
+        _searchQuery = '';
+        _selectedMealFilter = 'All';
+      }
+    });
   }
 
   @override
@@ -527,10 +672,11 @@ class _UserHomeScreenState extends State<UserHomeScreen>
     );
   }
 
-  Widget _buildRecentItemsList() {
+    Widget _buildRecentItemsList() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Header with search toggle
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -541,24 +687,133 @@ class _UserHomeScreenState extends State<UserHomeScreen>
                 fontWeight: FontWeight.w600,
               ),
             ),
-            TextButton(
-              onPressed: () {
-                // TODO: Navigate to full history
-              },
-              child: Text(
-                'View All',
-                style: TextStyle(color: AppColors.primary),
-              ),
+            Row(
+              children: [
+                IconButton(
+                  onPressed: _toggleSearchBar,
+                  icon: Icon(
+                    _showSearchBar ? Icons.close : Icons.search,
+                    color: AppColors.primary,
+                  ),
+                  tooltip: _showSearchBar ? 'Close Search' : 'Search Foods',
+                ),
+                TextButton(
+                  onPressed: () {
+                    // TODO: Navigate to full history
+                  },
+                  child: Text(
+                    'View All',
+                    style: TextStyle(color: AppColors.primary),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
         
-        const SizedBox(height: 16),
+        // Search and Filter Bar
+        if (_showSearchBar) ...[
+          const SizedBox(height: 16),
+          _buildSearchAndFilterBar(),
+          const SizedBox(height: 16),
+        ],
         
-                 if (_recentItems.isEmpty)
-           _buildEmptyState()
-         else
-           ..._recentItems.map((item) => _buildRecentItemCard(item)),
+        // Results count
+        if (_showSearchBar && _filteredItems.isNotEmpty) ...[
+          Text(
+            'Found ${_filteredItems.length} item${_filteredItems.length == 1 ? '' : 's'}',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
+        
+        // Items list
+        if (_recentItems.isEmpty)
+          _buildEmptyState()
+        else if (_filteredItems.isEmpty && (_searchQuery.isNotEmpty || _selectedMealFilter != 'All'))
+          _buildNoResultsState()
+        else
+          ..._filteredItems.map((item) => _buildRecentItemCard(item)),
+      ],
+    );
+  }
+
+  Widget _buildSearchAndFilterBar() {
+    return Column(
+      children: [
+        // Search TextField
+        TextField(
+          onChanged: (value) {
+            setState(() {
+              _searchQuery = value;
+            });
+          },
+          decoration: InputDecoration(
+            hintText: 'Search foods by name or category...',
+            prefixIcon: const Icon(Icons.search, color: AppColors.textSecondary),
+            suffixIcon: _searchQuery.isNotEmpty
+                ? IconButton(
+                    icon: const Icon(Icons.clear, color: AppColors.textSecondary),
+                    onPressed: () {
+                      setState(() {
+                        _searchQuery = '';
+                      });
+                    },
+                  )
+                : null,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: AppColors.neutral.withValues(alpha: 0.3)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: AppColors.primary, width: 2),
+            ),
+            filled: true,
+            fillColor: Colors.white,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          ),
+        ),
+        
+        const SizedBox(height: 12),
+        
+        // Meal Filter Chips
+        SizedBox(
+          height: 40,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: _availableMeals.length,
+            itemBuilder: (context, index) {
+              final meal = _availableMeals[index];
+              final isSelected = _selectedMealFilter == meal;
+              
+              return Container(
+                margin: EdgeInsets.only(right: index == _availableMeals.length - 1 ? 0 : 8),
+                child: FilterChip(
+                  label: Text(meal),
+                  selected: isSelected,
+                  onSelected: (selected) {
+                    setState(() {
+                      _selectedMealFilter = selected ? meal : 'All';
+                    });
+                  },
+                  selectedColor: AppColors.primary.withValues(alpha: 0.2),
+                  checkmarkColor: AppColors.primary,
+                  labelStyle: TextStyle(
+                    color: isSelected ? AppColors.primary : AppColors.textSecondary,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                  ),
+                  backgroundColor: Colors.white,
+                  side: BorderSide(
+                    color: isSelected ? AppColors.primary : AppColors.neutral.withValues(alpha: 0.3),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
       ],
     );
   }
@@ -594,125 +849,329 @@ class _UserHomeScreenState extends State<UserHomeScreen>
             ),
             textAlign: TextAlign.center,
           ),
+          const SizedBox(height: 16),
+          ElevatedButton.icon(
+            onPressed: () => _showCameraSettingsModal(context),
+            icon: const Icon(Icons.camera_alt),
+            label: const Text('Take Your First Photo'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNoResultsState() {
+    return Container(
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        color: AppColors.secondaryBackground,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.neutral.withValues(alpha: 0.1)),
+      ),
+      child: Column(
+        children: [
+          Icon(
+            Icons.search_off,
+            size: 48,
+            color: AppColors.textSecondary,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'No foods found',
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+              color: AppColors.textSecondary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Try adjusting your search or filter criteria',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: AppColors.textSecondary,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          OutlinedButton.icon(
+            onPressed: () {
+              setState(() {
+                _searchQuery = '';
+                _selectedMealFilter = 'All';
+              });
+            },
+            icon: const Icon(Icons.clear_all),
+            label: const Text('Clear Filters'),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppColors.primary,
+              side: BorderSide(color: AppColors.primary),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            ),
+          ),
         ],
       ),
     );
   }
 
   Widget _buildRecentItemCard(Map<String, dynamic> item) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.neutral.withValues(alpha: 0.1)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          // Food Icon Placeholder
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(
-              Icons.restaurant,
-              color: AppColors.primary,
-              size: 24,
-            ),
-          ),
-          
-          const SizedBox(width: 16),
-          
-          // Food Details
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item['name'] as String,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: AppColors.textPrimary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    Text(
-                      '${item['portion'].toStringAsFixed(0)}g • ${item['protein'].toStringAsFixed(1)}g protein',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        item['meal'] as String,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  item['time'] as String,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          
-          // Quick Actions
-          PopupMenuButton<String>(
-            icon: Icon(Icons.more_vert, color: AppColors.textSecondary),
-            onSelected: (value) {
-              // TODO: Handle quick actions
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'edit',
-                child: Row(
-                  children: [
-                    Icon(Icons.edit, size: 20),
-                    SizedBox(width: 8),
-                    Text('Edit'),
-                  ],
-                ),
+    final isEditing = _editingItemId == item['id'];
+    
+    return Dismissible(
+      key: Key(item['id']),
+      direction: DismissDirection.endToStart,
+      confirmDismiss: (direction) async {
+        return await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Delete Food Item'),
+            content: Text('Are you sure you want to delete "${item['name']}"?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancel'),
               ),
-              const PopupMenuItem(
-                value: 'delete',
-                child: Row(
-                  children: [
-                    Icon(Icons.delete, size: 20),
-                    SizedBox(width: 8),
-                    Text('Delete'),
-                  ],
-                ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                style: TextButton.styleFrom(foregroundColor: AppColors.error),
+                child: const Text('Delete'),
               ),
             ],
           ),
-        ],
+        );
+      },
+      onDismissed: (direction) {
+        _deleteItem(item['id']);
+      },
+      background: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
+          color: AppColors.error,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        child: const Icon(
+          Icons.delete,
+          color: Colors.white,
+          size: 24,
+        ),
+      ),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isEditing ? AppColors.primary : AppColors.neutral.withValues(alpha: 0.1),
+            width: isEditing ? 2 : 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: () {
+              if (!isEditing) {
+                _startEditing(item['id']);
+              }
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  // Food Icon with Category
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: _getCategoryColor(item['category']).withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      _getCategoryIcon(item['category']),
+                      color: _getCategoryColor(item['category']),
+                      size: 24,
+                    ),
+                  ),
+                  
+                  const SizedBox(width: 16),
+                  
+                  // Food Details
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          item['name'] as String,
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color: AppColors.textPrimary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        
+                        // Portion and Protein (with inline editing)
+                        if (isEditing) ...[
+                          Row(
+                            children: [
+                              Expanded(
+                                child: TextField(
+                                  controller: _editControllers[item['id']],
+                                  keyboardType: TextInputType.number,
+                                  decoration: InputDecoration(
+                                    labelText: 'Portion (g)',
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                      borderSide: BorderSide(color: AppColors.primary, width: 2),
+                                    ),
+                                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                '≈ ${_calculateProtein(item).toStringAsFixed(1)}g protein',
+                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ] else ...[
+                          Row(
+                            children: [
+                              Text(
+                                '${item['portion'].toStringAsFixed(0)}g • ${item['protein'].toStringAsFixed(1)}g protein',
+                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  item['meal'] as String,
+                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: AppColors.primary,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                        
+                        const SizedBox(height: 4),
+                        
+                        // Category and Time
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: _getCategoryColor(item['category']).withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                item['category'] as String,
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: _getCategoryColor(item['category']),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              item['time'] as String,
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  
+                  // Action Buttons
+                  if (isEditing) ...[
+                    // Save/Cancel buttons
+                    Column(
+                      children: [
+                        IconButton(
+                          onPressed: () => _saveEdit(item['id']),
+                          icon: const Icon(Icons.check, color: AppColors.success),
+                          tooltip: 'Save',
+                        ),
+                        IconButton(
+                          onPressed: _cancelEdit,
+                          icon: const Icon(Icons.close, color: AppColors.error),
+                          tooltip: 'Cancel',
+                        ),
+                      ],
+                    ),
+                  ] else ...[
+                    // Quick Actions Menu
+                    PopupMenuButton<String>(
+                      icon: Icon(Icons.more_vert, color: AppColors.textSecondary),
+                      onSelected: (value) {
+                        switch (value) {
+                          case 'edit':
+                            _startEditing(item['id']);
+                            break;
+                          case 'delete':
+                            _deleteItem(item['id']);
+                            break;
+                        }
+                      },
+                      itemBuilder: (context) => [
+                        const PopupMenuItem(
+                          value: 'edit',
+                          child: Row(
+                            children: [
+                              Icon(Icons.edit, size: 20),
+                              SizedBox(width: 8),
+                              Text('Edit'),
+                            ],
+                          ),
+                        ),
+                        const PopupMenuItem(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              Icon(Icons.delete, size: 20),
+                              SizedBox(width: 8),
+                              Text('Delete'),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -756,6 +1215,56 @@ class _UserHomeScreenState extends State<UserHomeScreen>
       'July', 'August', 'September', 'October', 'November', 'December'
     ];
     return months[month - 1];
+  }
+
+  Color _getCategoryColor(String category) {
+    switch (category.toLowerCase()) {
+      case 'protein':
+        return AppColors.error; // Red for protein
+      case 'carbohydrate':
+        return AppColors.warning; // Orange for carbs
+      case 'vegetable':
+        return AppColors.success; // Green for vegetables
+      case 'fruit':
+        return const Color(0xFF8B5CF6); // Purple for fruits
+      case 'dairy':
+        return const Color(0xFF3B82F6); // Blue for dairy
+      case 'fat':
+        return const Color(0xFFF59E0B); // Amber for fats
+      default:
+        return AppColors.neutral;
+    }
+  }
+
+  IconData _getCategoryIcon(String category) {
+    switch (category.toLowerCase()) {
+      case 'protein':
+        return Icons.fitness_center;
+      case 'carbohydrate':
+        return Icons.grain;
+      case 'vegetable':
+        return Icons.eco;
+      case 'fruit':
+        return Icons.apple;
+      case 'dairy':
+        return Icons.local_drink;
+      case 'fat':
+        return Icons.opacity;
+      default:
+        return Icons.restaurant;
+    }
+  }
+
+  double _calculateProtein(Map<String, dynamic> item) {
+    final portion = double.tryParse(_editControllers[item['id']]?.text ?? '0') ?? 0.0;
+    final originalPortion = item['portion'] as double;
+    final originalProtein = item['protein'] as double;
+    
+    if (originalPortion > 0) {
+      final proteinPer100g = (originalProtein / originalPortion) * 100;
+      return (portion / 100) * proteinPer100g;
+    }
+    return 0.0;
   }
 
   void _showCameraSettingsModal(BuildContext context) {
