@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'meal_selection_screen.dart';
 import '../main.dart';
@@ -44,17 +45,17 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return CupertinoPageScaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
+      navigationBar: CupertinoNavigationBar(
         backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+        border: null,
+        leading: CupertinoNavigationBarBackButton(
+          color: AppColors.textPrimary,
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
-      body: SafeArea(
+      child: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -67,9 +68,10 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> {
                   // Header
                   Text(
                     "What's your goal?",
-                    style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w600,
                       color: AppColors.textPrimary,
-                      fontWeight: FontWeight.bold,
                     ),
                   ),
                   
@@ -77,7 +79,8 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> {
                   
                   Text(
                     "Choose your fitness objective to optimize protein intake",
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    style: TextStyle(
+                      fontSize: 16,
                       color: AppColors.textSecondary,
                     ),
                   ),
@@ -94,7 +97,7 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> {
                     _buildGoalCard(
                       'Maintain',
                       'Keep current muscle mass',
-                      Icons.balance,
+                      CupertinoIcons.circle,
                       'Maintain',
                     ),
                     
@@ -102,8 +105,8 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> {
                     
                     _buildGoalCard(
                       'Bulk',
-                      'Build muscle and strength',
-                      Icons.trending_up,
+                      'Build muscle mass',
+                      CupertinoIcons.arrow_up_circle,
                       'Bulk',
                     ),
                     
@@ -111,154 +114,58 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> {
                     
                     _buildGoalCard(
                       'Cut',
-                      'Lose fat, preserve muscle',
-                      Icons.trending_down,
+                      'Lose fat while preserving muscle',
+                      CupertinoIcons.arrow_down_circle,
                       'Cut',
                     ),
                     
                     const SizedBox(height: 24),
                     
-                    // Daily Target Display
-                    Container(
+                    // Custom Protein Input
+                    if (_selectedGoal == 'Custom') ...[
+                      _buildCustomProteinInput(),
+                      const SizedBox(height: 24),
+                    ],
+                    
+                    // Protein Summary
+                    _buildProteinSummary(),
+                    
+                    const SizedBox(height: 32),
+                    
+                    // Continue Button
+                    SizedBox(
                       width: double.infinity,
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: AppColors.success.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: AppColors.success.withValues(alpha: 0.3)),
-                      ),
-                      child: Column(
-                        children: [
-                          Text(
-                            'Your daily target',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: AppColors.textSecondary,
+                      child: CupertinoButton(
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            CupertinoPageRoute(
+                              builder: (context) => MealSelectionScreen(
+                                height: widget.height,
+                                weight: widget.weight,
+                                trainingMultiplier: widget.trainingMultiplier,
+                                goal: _selectedGoal,
+                                dailyProteinTarget: _goalProtein,
+                              ),
                             ),
+                          );
+                        },
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.circular(8),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        child: const Text(
+                          'Continue',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
                           ),
-                          
-                          const SizedBox(height: 8),
-                          
-                          Text(
-                            '${_goalProtein.toStringAsFixed(0)}g protein',
-                            style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                              color: AppColors.success,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          
-                          const SizedBox(height: 8),
-                          
-                          Text(
-                            'Based on ${_selectedGoal.toLowerCase()} goal',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                     
-                    const SizedBox(height: 24),
-                    
-                    // Custom Protein Input (Optional)
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: AppColors.secondaryBackground,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: AppColors.neutral.withValues(alpha: 0.2)),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Checkbox(
-                                value: _useCustomProtein,
-                                onChanged: (value) {
-                                  setState(() {
-                                    _useCustomProtein = value ?? false;
-                                    if (!_useCustomProtein) {
-                                      _customProtein = 0.0;
-                                    }
-                                  });
-                                },
-                                activeColor: AppColors.primary,
-                              ),
-                              Text(
-                                'Custom protein target',
-                                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                  color: AppColors.textPrimary,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                          
-                          if (_useCustomProtein) ...[
-                            const SizedBox(height: 16),
-                            TextFormField(
-                              initialValue: _customProtein > 0 ? _customProtein.toStringAsFixed(0) : '',
-                              keyboardType: TextInputType.number,
-                              decoration: const InputDecoration(
-                                labelText: 'Enter custom protein target (g)',
-                                border: OutlineInputBorder(),
-                              ),
-                              onChanged: (value) {
-                                final number = double.tryParse(value);
-                                if (number != null && number > 0) {
-                                  setState(() {
-                                    _customProtein = number;
-                                  });
-                                }
-                              },
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                    
-                    // Add some bottom padding to ensure last element is fully visible
                     const SizedBox(height: 24),
                   ],
                 ),
-              ),
-            ),
-            
-            // Next Button - Fixed at bottom
-            Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).push(
-                    PageRouteBuilder(
-                      pageBuilder: (context, animation, secondaryAnimation) => 
-                          MealSelectionScreen(
-                            height: widget.height,
-                            weight: widget.weight,
-                            trainingMultiplier: widget.trainingMultiplier,
-                            goal: _selectedGoal,
-                            dailyProteinTarget: _goalProtein,
-                          ),
-                      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                        return SlideTransition(
-                          position: Tween<Offset>(
-                            begin: const Offset(1.0, 0.0),
-                            end: Offset.zero,
-                          ).animate(animation),
-                          child: child,
-                        );
-                      },
-                      transitionDuration: const Duration(milliseconds: 300),
-                    ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-                child: const Text('Next'),
               ),
             ),
           ],
@@ -274,13 +181,15 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> {
       onTap: () {
         setState(() {
           _selectedGoal = goal;
+          if (goal != 'Custom') {
+            _useCustomProtein = false;
+          }
         });
       },
       child: Container(
-        margin: const EdgeInsets.only(bottom: 4),
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary.withValues(alpha: 0.1) : AppColors.secondaryBackground,
+          color: isSelected ? AppColors.primary.withValues(alpha: 0.05) : AppColors.secondaryBackground,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected ? AppColors.primary : AppColors.neutral.withValues(alpha: 0.2),
@@ -290,7 +199,7 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> {
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 10,
-              offset: const Offset(0, 2),
+              offset: const Offset(0, 4),
             ),
           ],
         ),
@@ -318,9 +227,10 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> {
                 children: [
                   Text(
                     title,
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      color: isSelected ? AppColors.primary : AppColors.textPrimary,
+                    style: TextStyle(
+                      fontSize: 18,
                       fontWeight: FontWeight.w600,
+                      color: isSelected ? AppColors.primary : AppColors.textPrimary,
                     ),
                   ),
                   
@@ -328,7 +238,8 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> {
                   
                   Text(
                     description,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    style: TextStyle(
+                      fontSize: 14,
                       color: isSelected ? AppColors.primary.withValues(alpha: 0.8) : AppColors.textSecondary,
                     ),
                   ),
@@ -337,7 +248,8 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> {
                   
                   Text(
                     '${_calculateGoalProtein(goal).toStringAsFixed(0)}g protein',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    style: TextStyle(
+                      fontSize: 14,
                       color: isSelected ? AppColors.primary : AppColors.textSecondary,
                       fontWeight: FontWeight.w600,
                     ),
@@ -353,14 +265,132 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> {
                   color: AppColors.primary,
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: const Icon(
-                  Icons.check,
+                child: Icon(
+                  CupertinoIcons.check_mark,
                   color: Colors.white,
-                  size: 20,
+                  size: 16,
                 ),
               ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildCustomProteinInput() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.secondaryBackground,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Custom Protein Target',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          
+          const SizedBox(height: 12),
+          
+          CupertinoTextField(
+            controller: TextEditingController(
+              text: _customProtein > 0 ? _customProtein.toStringAsFixed(0) : '',
+            ),
+            keyboardType: TextInputType.number,
+            placeholder: 'Enter protein target (g)',
+            suffix: Text(
+              'g',
+              style: TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 14,
+                fontWeight: FontWeight.normal,
+              ),
+            ),
+            decoration: BoxDecoration(
+              border: Border.all(color: AppColors.neutral.withValues(alpha: 0.3)),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            onChanged: (value) {
+              final number = double.tryParse(value);
+              if (number != null && number > 0) {
+                setState(() {
+                  _customProtein = number;
+                  _useCustomProtein = true;
+                });
+              }
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProteinSummary() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Your Daily Protein Target',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          
+          const SizedBox(height: 12),
+          
+          Row(
+            children: [
+              Text(
+                '${_goalProtein.toStringAsFixed(0)}g',
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primary,
+                ),
+              ),
+              
+              const SizedBox(width: 16),
+              
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Based on ${widget.weight.toStringAsFixed(0)}kg weight',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    Text(
+                      '× ${widget.trainingMultiplier.toStringAsFixed(1)} activity multiplier',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

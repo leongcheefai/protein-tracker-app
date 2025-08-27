@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'goal_setting_screen.dart';
 import '../main.dart';
@@ -14,17 +15,17 @@ class TrainingFrequencyScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return CupertinoPageScaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
+      navigationBar: CupertinoNavigationBar(
         backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+        border: null,
+        leading: CupertinoNavigationBarBackButton(
+          color: AppColors.textPrimary,
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
-      body: SafeArea(
+      child: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -37,9 +38,10 @@ class TrainingFrequencyScreen extends StatelessWidget {
                   // Header
                   Text(
                     "How often do you train?",
-                    style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w600,
                       color: AppColors.textPrimary,
-                      fontWeight: FontWeight.bold,
                     ),
                   ),
                   
@@ -47,7 +49,8 @@ class TrainingFrequencyScreen extends StatelessWidget {
                   
                   Text(
                     "Select your activity level to calculate protein needs",
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    style: TextStyle(
+                      fontSize: 16,
                       color: AppColors.textSecondary,
                     ),
                   ),
@@ -66,14 +69,15 @@ class TrainingFrequencyScreen extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
-                          Icons.touch_app,
+                          CupertinoIcons.info_circle,
                           size: 16,
                           color: AppColors.primary,
                         ),
                         const SizedBox(width: 8),
                         Text(
                           'Tap any card to see details',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          style: TextStyle(
+                            fontSize: 12,
                             color: AppColors.primary,
                             fontWeight: FontWeight.w500,
                           ),
@@ -97,7 +101,7 @@ class TrainingFrequencyScreen extends StatelessWidget {
                       '1-2x/week',
                       'Occasional workouts, light activity',
                       1.2,
-                      Icons.directions_walk,
+                      CupertinoIcons.person_2,
                     ),
                     
                     const SizedBox(height: 16),
@@ -106,34 +110,33 @@ class TrainingFrequencyScreen extends StatelessWidget {
                       context,
                       'Moderate',
                       '3-4x/week',
-                      'Regular training, moderate intensity',
-                      1.8,
-                      Icons.fitness_center,
+                      'Regular workouts, moderate activity',
+                      1.4,
+                      CupertinoIcons.sportscourt,
                     ),
                     
                     const SizedBox(height: 16),
                     
                     _buildActivityCard(
                       context,
-                      'Heavy',
+                      'Active',
                       '5-6x/week',
-                      'Frequent training, high intensity',
-                      2.2,
-                      Icons.sports_gymnastics,
+                      'Frequent workouts, high activity',
+                      1.6,
+                      CupertinoIcons.sportscourt,
                     ),
                     
                     const SizedBox(height: 16),
                     
                     _buildActivityCard(
                       context,
-                      'Very Heavy',
-                      '6-7x/week',
-                      'Daily training, cutting phase',
-                      2.5,
-                      Icons.sports_martial_arts,
+                      'Very Active',
+                      'Daily + intense',
+                      'Daily intense workouts, athlete level',
+                      1.8,
+                      CupertinoIcons.flame,
                     ),
                     
-                    // Add some bottom padding to ensure last card is fully visible
                     const SizedBox(height: 24),
                   ],
                 ),
@@ -147,7 +150,7 @@ class TrainingFrequencyScreen extends StatelessWidget {
 
   Widget _buildActivityCard(
     BuildContext context,
-    String level,
+    String title,
     String frequency,
     String description,
     double multiplier,
@@ -155,10 +158,17 @@ class TrainingFrequencyScreen extends StatelessWidget {
   ) {
     return GestureDetector(
       onTap: () {
-        _showMultiplierInfo(context, level, multiplier);
+        Navigator.of(context).push(
+          CupertinoPageRoute(
+            builder: (context) => GoalSettingScreen(
+              height: height,
+              weight: weight,
+              trainingMultiplier: multiplier,
+            ),
+          ),
+        );
       },
       child: Container(
-        margin: const EdgeInsets.only(bottom: 4),
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: AppColors.secondaryBackground,
@@ -168,7 +178,7 @@ class TrainingFrequencyScreen extends StatelessWidget {
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 10,
-              offset: const Offset(0, 2),
+              offset: const Offset(0, 4),
             ),
           ],
         ),
@@ -194,206 +204,46 @@ class TrainingFrequencyScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Text(
-                        level,
-                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          color: AppColors.textPrimary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          frequency,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ],
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 4),
+                  
+                  Text(
+                    frequency,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   
                   const SizedBox(height: 4),
                   
                   Text(
                     description,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    style: TextStyle(
+                      fontSize: 14,
                       color: AppColors.textSecondary,
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 8),
-                  
-                  Text(
-                    '${multiplier.toStringAsFixed(1)}g/kg protein',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],
               ),
             ),
             
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(
-                Icons.arrow_forward_ios,
-                color: AppColors.primary,
-                size: 16,
-              ),
+            Icon(
+              CupertinoIcons.chevron_right,
+              color: AppColors.neutral.withValues(alpha: 0.5),
+              size: 20,
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  void _showMultiplierInfo(BuildContext context, String level, double multiplier) {
-    final baseProtein = weight * 0.8; // Base protein requirement
-    final adjustedProtein = weight * multiplier;
-    
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          title: Text(
-            '$level Training',
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-              color: AppColors.textPrimary,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Protein Multiplier: ${multiplier.toStringAsFixed(1)}g/kg',
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              
-              const SizedBox(height: 16),
-              
-              _buildProteinInfoRow('Base requirement', '${baseProtein.toStringAsFixed(0)}g'),
-              _buildProteinInfoRow('With $level training', '${adjustedProtein.toStringAsFixed(0)}g'),
-              _buildProteinInfoRow('Daily target', '${adjustedProtein.toStringAsFixed(0)}g'),
-            ],
-          ),
-          actions: [
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.primary,
-                      side: BorderSide(color: AppColors.primary),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: const Text(
-                      'Cancel',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      Navigator.of(context).push(
-                        PageRouteBuilder(
-                          pageBuilder: (context, animation, secondaryAnimation) => 
-                              GoalSettingScreen(
-                                height: height,
-                                weight: weight,
-                                trainingMultiplier: multiplier,
-                              ),
-                          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                            return SlideTransition(
-                              position: Tween<Offset>(
-                                begin: const Offset(1.0, 0.0),
-                                end: Offset.zero,
-                              ).animate(animation),
-                              child: child,
-                            );
-                          },
-                          transitionDuration: const Duration(milliseconds: 300),
-                        ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: const Text(
-                      'Continue',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _buildProteinInfoRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 14,
-              color: AppColors.textSecondary,
-            ),
-          ),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 14,
-              color: AppColors.textPrimary,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
       ),
     );
   }
