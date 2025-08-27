@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
 
@@ -13,16 +14,16 @@ class FoodDetectionResultsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return CupertinoPageScaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
+      navigationBar: CupertinoNavigationBar(
         backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
+        border: null,
+        leading: CupertinoNavigationBarBackButton(
           onPressed: () => Navigator.pop(context),
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          color: Colors.black,
         ),
-        title: const Text(
+        middle: const Text(
           'Detected Foods',
           style: TextStyle(
             color: Colors.black,
@@ -30,9 +31,8 @@ class FoodDetectionResultsScreen extends StatelessWidget {
             fontWeight: FontWeight.w600,
           ),
         ),
-        centerTitle: true,
       ),
-      body: Column(
+      child: Column(
         children: [
           // Photo Thumbnail
           Container(
@@ -179,7 +179,7 @@ class FoodDetectionResultsScreen extends StatelessWidget {
                           ),
                           const SizedBox(width: 12),
                           Icon(
-                            Icons.fitness_center,
+                            CupertinoIcons.heart_fill,
                             size: 16,
                             color: Colors.blue[600],
                           ),
@@ -209,7 +209,7 @@ class FoodDetectionResultsScreen extends StatelessWidget {
                 // Add More Foods Button
                 SizedBox(
                   width: double.infinity,
-                  child: OutlinedButton.icon(
+                  child: CupertinoButton(
                     onPressed: () {
                       // Navigate back to camera
                       Navigator.popUntil(
@@ -217,15 +217,27 @@ class FoodDetectionResultsScreen extends StatelessWidget {
                         (route) => route.isFirst,
                       );
                     },
-                    icon: const Icon(Icons.add_a_photo),
-                    label: const Text('Add More Foods'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.blue[600],
-                      side: BorderSide(color: Colors.blue[600]!),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
+                    color: Colors.transparent,
+                    borderRadius: BorderRadius.circular(8),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          CupertinoIcons.camera,
+                          color: Colors.blue[600],
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Add More Foods',
+                          style: TextStyle(
+                            color: Colors.blue[600],
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -235,7 +247,7 @@ class FoodDetectionResultsScreen extends StatelessWidget {
                 // Continue Button
                 SizedBox(
                   width: double.infinity,
-                  child: ElevatedButton.icon(
+                  child: CupertinoButton(
                     onPressed: () {
                       // Navigate to portion selection for the first food
                       if (detectedFoods.isNotEmpty) {
@@ -250,15 +262,27 @@ class FoodDetectionResultsScreen extends StatelessWidget {
                         );
                       }
                     },
-                    icon: const Icon(Icons.arrow_forward),
-                    label: const Text('Continue'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue[600],
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
+                    color: Colors.blue[600],
+                    borderRadius: BorderRadius.circular(8),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          CupertinoIcons.arrow_right,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        const Text(
+                          'Continue',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),

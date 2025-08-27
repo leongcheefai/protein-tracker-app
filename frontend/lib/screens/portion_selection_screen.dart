@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class PortionSelectionScreen extends StatefulWidget {
@@ -85,16 +86,16 @@ class _PortionSelectionScreenState extends State<PortionSelectionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return CupertinoPageScaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
+      navigationBar: CupertinoNavigationBar(
         backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
+        border: null,
+        leading: CupertinoNavigationBarBackButton(
           onPressed: () => Navigator.pop(context),
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          color: Colors.black,
         ),
-        title: const Text(
+        middle: const Text(
           'Portion Size',
           style: TextStyle(
             color: Colors.black,
@@ -102,9 +103,8 @@ class _PortionSelectionScreenState extends State<PortionSelectionScreen> {
             fontWeight: FontWeight.w600,
           ),
         ),
-        centerTitle: true,
       ),
-      body: Column(
+      child: Column(
         children: [
           // Food Summary
           Container(
@@ -229,7 +229,7 @@ class _PortionSelectionScreenState extends State<PortionSelectionScreen> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
-                          Icons.edit,
+                          CupertinoIcons.pencil,
                           size: 20,
                           color: _isCustomPortion ? Colors.white : Colors.grey[600],
                         ),
@@ -250,20 +250,21 @@ class _PortionSelectionScreenState extends State<PortionSelectionScreen> {
                 // Custom Input Field
                 if (_isCustomPortion) ...[
                   const SizedBox(height: 16),
-                  TextField(
+                  CupertinoTextField(
                     controller: _customPortionController,
                     keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      labelText: 'Portion (grams)',
-                      hintText: 'Enter portion size',
-                      suffixText: 'g',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+                    placeholder: 'Enter portion size',
+                    suffix: const Text(
+                      'g',
+                      style: TextStyle(
+                        color: Colors.grey,
+                        fontSize: 14,
+                        fontWeight: FontWeight.normal,
                       ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Colors.blue[600]!, width: 2),
-                      ),
+                    ),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
+                      borderRadius: BorderRadius.circular(8),
                     ),
                     onChanged: _updateCustomPortion,
                   ),
@@ -311,7 +312,7 @@ class _PortionSelectionScreenState extends State<PortionSelectionScreen> {
                   ],
                 ),
                 Icon(
-                  Icons.fitness_center,
+                  CupertinoIcons.heart_fill,
                   size: 40,
                   color: Colors.green[600],
                 ),
@@ -324,19 +325,15 @@ class _PortionSelectionScreenState extends State<PortionSelectionScreen> {
             padding: const EdgeInsets.all(16),
             child: SizedBox(
               width: double.infinity,
-              child: ElevatedButton(
+              child: CupertinoButton(
                 onPressed: _next,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue[600],
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
+                color: Colors.blue[600],
+                borderRadius: BorderRadius.circular(8),
+                padding: const EdgeInsets.symmetric(vertical: 16),
                 child: const Text(
                   'Next',
                   style: TextStyle(
+                    color: Colors.white,
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
@@ -352,17 +349,17 @@ class _PortionSelectionScreenState extends State<PortionSelectionScreen> {
   IconData _getFoodIcon(String category) {
     switch (category.toLowerCase()) {
       case 'protein':
-        return Icons.fitness_center;
+        return CupertinoIcons.heart_fill;
       case 'carbohydrate':
-        return Icons.grain;
+        return CupertinoIcons.circle;
       case 'vegetable':
-        return Icons.eco;
+        return CupertinoIcons.leaf_arrow_circlepath;
       case 'fruit':
-        return Icons.apple;
+        return CupertinoIcons.circle_fill;
       case 'dairy':
-        return Icons.local_drink;
+        return CupertinoIcons.drop;
       default:
-        return Icons.restaurant;
+        return CupertinoIcons.house;
     }
   }
 }
