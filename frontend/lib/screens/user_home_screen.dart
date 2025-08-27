@@ -774,10 +774,13 @@ class _UserHomeScreenState extends State<UserHomeScreen>
             fontSize: 14,
             color: AppColors.textPrimary,
           ),
-          prefix: const Icon(CupertinoIcons.search, color: AppColors.textSecondary, size: 18),
+          prefix: Padding(
+            padding: const EdgeInsets.only(left: 8.0),
+            child: Icon(CupertinoIcons.search, color: AppColors.textSecondary, size: 18),
+          ),
           suffix: _searchQuery.isNotEmpty
               ? CupertinoButton(
-                  padding: EdgeInsets.zero,
+                  padding: const EdgeInsets.only(right: 8.0),
                   onPressed: () {
                     setState(() {
                       _searchQuery = '';
@@ -791,7 +794,7 @@ class _UserHomeScreenState extends State<UserHomeScreen>
             borderRadius: BorderRadius.circular(12),
             color: Colors.white,
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         ),
         
         const SizedBox(height: 12),
