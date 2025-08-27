@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'training_frequency_screen.dart';
 import '../main.dart';
@@ -50,17 +51,17 @@ class _HeightWeightScreenState extends State<HeightWeightScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return CupertinoPageScaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
+      navigationBar: CupertinoNavigationBar(
         backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+        border: null,
+        leading: CupertinoNavigationBarBackButton(
+          color: AppColors.textPrimary,
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
-      body: SafeArea(
+      child: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
           child: Form(
@@ -71,9 +72,10 @@ class _HeightWeightScreenState extends State<HeightWeightScreen> {
                 // Header
                 Text(
                   "Let's calculate your protein needs",
-                  style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w600,
                     color: AppColors.textPrimary,
-                    fontWeight: FontWeight.bold,
                   ),
                 ),
                 
@@ -81,7 +83,8 @@ class _HeightWeightScreenState extends State<HeightWeightScreen> {
                 
                 Text(
                   "Enter your basic body metrics to get started",
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  style: TextStyle(
+                    fontSize: 16,
                     color: AppColors.textSecondary,
                   ),
                 ),
@@ -98,7 +101,7 @@ class _HeightWeightScreenState extends State<HeightWeightScreen> {
                   250.0,
                   _heightController,
                   _updateHeight,
-                  Icons.height,
+                  CupertinoIcons.arrow_up_arrow_down,
                 ),
                 
                 const SizedBox(height: 24),
@@ -113,7 +116,7 @@ class _HeightWeightScreenState extends State<HeightWeightScreen> {
                   200.0,
                   _weightController,
                   _updateWeight,
-                  Icons.monitor_weight,
+                  CupertinoIcons.chart_bar,
                 ),
                 
                 const SizedBox(height: 24),
@@ -124,33 +127,33 @@ class _HeightWeightScreenState extends State<HeightWeightScreen> {
                 const SizedBox(height: 32),
                 
                 // Next Button
-                ElevatedButton(
-                  onPressed: _canProceed() ? () {
-                    if (_formKey.currentState!.validate()) {
-                      Navigator.of(context).push(
-                        PageRouteBuilder(
-                          pageBuilder: (context, animation, secondaryAnimation) => 
-                              TrainingFrequencyScreen(height: _height, weight: _weight),
-                          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                            return SlideTransition(
-                              position: Tween<Offset>(
-                                begin: const Offset(1.0, 0.0),
-                                end: Offset.zero,
-                              ).animate(animation),
-                              child: child,
-                            );
-                          },
-                          transitionDuration: const Duration(milliseconds: 300),
-                        ),
-                      );
-                    }
-                  } : null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _canProceed() ? AppColors.primary : AppColors.neutral.withValues(alpha: 0.3),
-                    foregroundColor: Colors.white,
+                SizedBox(
+                  width: double.infinity,
+                  child: CupertinoButton(
+                    onPressed: _canProceed() ? () {
+                      if (_formKey.currentState!.validate()) {
+                        Navigator.of(context).push(
+                          CupertinoPageRoute(
+                            builder: (context) => TrainingFrequencyScreen(
+                              height: _height, 
+                              weight: _weight
+                            ),
+                          ),
+                        );
+                      }
+                    } : null,
+                    color: _canProceed() ? AppColors.primary : AppColors.neutral.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(8),
                     padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: const Text(
+                      'Next',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
-                  child: const Text('Next'),
                 ),
                 
                 const SizedBox(height: 24),
@@ -182,9 +185,10 @@ class _HeightWeightScreenState extends State<HeightWeightScreen> {
             const SizedBox(width: 12),
             Text(
               title,
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                color: AppColors.textPrimary,
+              style: TextStyle(
+                fontSize: 18,
                 fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
               ),
             ),
           ],
@@ -207,13 +211,15 @@ class _HeightWeightScreenState extends State<HeightWeightScreen> {
                 children: [
                   Text(
                     '${min.toInt()}$unit',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    style: TextStyle(
+                      fontSize: 14,
                       color: AppColors.textSecondary,
                     ),
                   ),
                   Text(
                     '${max.toInt()}$unit',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    style: TextStyle(
+                      fontSize: 14,
                       color: AppColors.textSecondary,
                     ),
                   ),
@@ -222,22 +228,14 @@ class _HeightWeightScreenState extends State<HeightWeightScreen> {
               
               const SizedBox(height: 6),
               
-              SliderTheme(
-                data: SliderTheme.of(context).copyWith(
-                  activeTrackColor: AppColors.primary,
-                  inactiveTrackColor: AppColors.neutral.withValues(alpha: 0.3),
-                  thumbColor: AppColors.primary,
-                  overlayColor: AppColors.primary.withValues(alpha: 0.2),
-                  trackHeight: 6,
-                  thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 12),
-                ),
-                child: Slider(
-                  value: value,
-                  min: min,
-                  max: max,
-                  divisions: (max - min).toInt(),
-                  onChanged: onChanged,
-                ),
+              CupertinoSlider(
+                value: value,
+                min: min,
+                max: max,
+                divisions: (max - min).toInt(),
+                onChanged: onChanged,
+                activeColor: AppColors.primary,
+                thumbColor: AppColors.primary,
               ),
             ],
           ),
@@ -246,33 +244,22 @@ class _HeightWeightScreenState extends State<HeightWeightScreen> {
         const SizedBox(height: 12),
         
         // Manual Input
-        TextFormField(
+        CupertinoTextField(
           controller: controller,
           keyboardType: TextInputType.number,
-          decoration: InputDecoration(
-            labelText: 'Enter $title',
-            suffixText: unit,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: AppColors.primary, width: 2),
+          placeholder: 'Enter $title',
+          suffix: Text(
+            unit,
+            style: TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 14,
+              fontWeight: FontWeight.normal,
             ),
           ),
-          validator: (value) {
-            if (value == null || value.isEmpty) {
-              return 'Please enter your $title';
-            }
-            final number = double.tryParse(value);
-            if (number == null) {
-              return 'Please enter a valid number';
-            }
-            if (number < min || number > max) {
-              return '$title must be between ${min.toInt()}$unit and ${max.toInt()}$unit';
-            }
-            return null;
-          },
+          decoration: BoxDecoration(
+            border: Border.all(color: AppColors.neutral.withValues(alpha: 0.3)),
+            borderRadius: BorderRadius.circular(8),
+          ),
           onChanged: (value) {
             final number = double.tryParse(value);
             if (number != null && number >= min && number <= max) {
@@ -313,7 +300,7 @@ class _HeightWeightScreenState extends State<HeightWeightScreen> {
       child: Row(
         children: [
           Icon(
-            Icons.info_outline,
+            CupertinoIcons.info_circle,
             color: bmiColor,
             size: 20,
           ),
@@ -324,15 +311,17 @@ class _HeightWeightScreenState extends State<HeightWeightScreen> {
               children: [
                 Text(
                   'Your BMI: ${bmi.toStringAsFixed(1)}',
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    color: AppColors.textPrimary,
+                  style: TextStyle(
+                    fontSize: 18,
                     fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   bmiCategory,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  style: TextStyle(
+                    fontSize: 14,
                     color: bmiColor,
                     fontWeight: FontWeight.w600,
                   ),

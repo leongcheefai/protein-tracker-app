@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'height_weight_screen.dart';
 import '../main.dart';
@@ -7,9 +8,9 @@ class WelcomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return CupertinoPageScaffold(
       backgroundColor: AppColors.background,
-      body: SafeArea(
+      child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
           child: Column(
@@ -32,7 +33,7 @@ class WelcomeScreen extends StatelessWidget {
                   ],
                 ),
                 child: Icon(
-                  Icons.restaurant,
+                  CupertinoIcons.creditcard,
                   size: 100,
                   color: AppColors.primary,
                 ),
@@ -43,9 +44,10 @@ class WelcomeScreen extends StatelessWidget {
               // App Tagline
               Text(
                 'Track protein intake with just a photo',
-                style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w600,
                   color: AppColors.textPrimary,
-                  fontWeight: FontWeight.bold,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -55,7 +57,7 @@ class WelcomeScreen extends StatelessWidget {
               // Key Benefits
               _buildBenefitItem(
                 context,
-                Icons.camera_alt,
+                CupertinoIcons.camera,
                 'AI-powered food recognition',
                 'Simply take a photo of your meal',
               ),
@@ -64,7 +66,7 @@ class WelcomeScreen extends StatelessWidget {
               
               _buildBenefitItem(
                 context,
-                Icons.track_changes,
+                CupertinoIcons.chart_bar,
                 'Accurate protein tracking',
                 'Get precise protein content for your foods',
               ),
@@ -73,7 +75,7 @@ class WelcomeScreen extends StatelessWidget {
               
               _buildBenefitItem(
                 context,
-                Icons.trending_up,
+                CupertinoIcons.graph_circle,
                 'Progress monitoring',
                 'Track your daily protein goals and progress',
               ),
@@ -91,7 +93,7 @@ class WelcomeScreen extends StatelessWidget {
                 child: Row(
                   children: [
                     Icon(
-                      Icons.security,
+                      CupertinoIcons.shield,
                       color: AppColors.success,
                       size: 20,
                     ),
@@ -99,7 +101,8 @@ class WelcomeScreen extends StatelessWidget {
                     Expanded(
                       child: Text(
                         'Your photos are never stored',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        style: TextStyle(
+                          fontSize: 14,
                           color: AppColors.textSecondary,
                         ),
                       ),
@@ -111,30 +114,28 @@ class WelcomeScreen extends StatelessWidget {
               const Spacer(),
               
               // Get Started Button
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).push(
-                    PageRouteBuilder(
-                      pageBuilder: (context, animation, secondaryAnimation) => const HeightWeightScreen(),
-                      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                        return SlideTransition(
-                          position: Tween<Offset>(
-                            begin: const Offset(1.0, 0.0),
-                            end: Offset.zero,
-                          ).animate(animation),
-                          child: child,
-                        );
-                      },
-                      transitionDuration: const Duration(milliseconds: 300),
-                    ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
+              SizedBox(
+                width: double.infinity,
+                child: CupertinoButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      CupertinoPageRoute(
+                        builder: (context) => const HeightWeightScreen(),
+                      ),
+                    );
+                  },
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.circular(8),
                   padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: const Text(
+                    'Get Started',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
-                child: const Text('Get Started'),
               ),
               
               const SizedBox(height: 24),
@@ -168,15 +169,17 @@ class WelcomeScreen extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: AppColors.textPrimary,
+                style: TextStyle(
+                  fontSize: 18,
                   fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 description,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                style: TextStyle(
+                  fontSize: 14,
                   color: AppColors.textSecondary,
                 ),
               ),
