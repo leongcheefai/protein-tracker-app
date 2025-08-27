@@ -506,21 +506,22 @@ class _UserHomeScreenState extends State<UserHomeScreen>
         const SizedBox(height: 16),
         
         SizedBox(
-          height: 100,
+          height: 120, // Increased height to prevent bottom overflow
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            itemCount: widget.meals.entries.where((entry) => entry.value).length,
+            itemCount: widget.meals.entries.length, // Show all meals, not just enabled ones
             itemBuilder: (context, index) {
-              final mealEntry = widget.meals.entries.where((entry) => entry.value).elementAt(index);
+              final mealEntry = widget.meals.entries.elementAt(index);
               final mealName = mealEntry.key;
+              final isEnabled = mealEntry.value;
               final progress = _mealProgress[mealName] ?? 0.0;
               final target = widget.dailyProteinTarget / 
                   widget.meals.values.where((enabled) => enabled).length;
               final mealPercentage = target > 0 ? (progress / target) : 0.0;
               
               return Container(
-                width: 80,
-                margin: EdgeInsets.only(right: index == widget.meals.entries.where((entry) => entry.value).length - 1 ? 0 : 16),
+                width: 90, // Increased width to prevent text truncation
+                margin: EdgeInsets.only(right: index == widget.meals.entries.length - 1 ? 0 : 16),
                 child: Column(
                   children: [
                     // Mini Progress Ring
@@ -537,16 +538,16 @@ class _UserHomeScreenState extends State<UserHomeScreen>
                             valueColor: const AlwaysStoppedAnimation<Color>(Colors.transparent),
                           ),
                           CircularProgressIndicator(
-                            value: (mealPercentage / 100).clamp(0.0, 1.0),
+                            value: isEnabled ? (mealPercentage / 100).clamp(0.0, 1.0) : 0.0,
                             strokeWidth: 4,
                             backgroundColor: Colors.transparent,
                             valueColor: AlwaysStoppedAnimation<Color>(
-                              _getProgressColor(mealPercentage),
+                              isEnabled ? _getProgressColor(mealPercentage) : AppColors.neutral.withValues(alpha: 0.3),
                             ),
                           ),
                           Icon(
                             _getMealIcon(mealName),
-                            color: _getProgressColor(mealPercentage),
+                            color: isEnabled ? _getProgressColor(mealPercentage) : AppColors.neutral.withValues(alpha: 0.3),
                             size: 20,
                           ),
                         ],
@@ -557,21 +558,25 @@ class _UserHomeScreenState extends State<UserHomeScreen>
                     
                     Text(
                       mealName,
-                      style: const TextStyle(
-                        color: AppColors.textPrimary,
+                      style: TextStyle(
+                        color: isEnabled ? AppColors.textPrimary : AppColors.neutral.withValues(alpha: 0.3),
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                       ),
                       textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
                     ),
                     
                     Text(
-                      '${progress.toStringAsFixed(0)}g',
-                      style: const TextStyle(
-                        color: AppColors.textSecondary,
+                      isEnabled ? '${progress.toStringAsFixed(0)}g' : '0g',
+                      style: TextStyle(
+                        color: isEnabled ? AppColors.textSecondary : AppColors.neutral.withValues(alpha: 0.3),
                         fontSize: 14,
                       ),
                       textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
                     ),
                   ],
                 ),
@@ -761,7 +766,15 @@ class _UserHomeScreenState extends State<UserHomeScreen>
             });
           },
           placeholder: 'Search foods by name or category...',
-          prefix: const Icon(CupertinoIcons.search, color: AppColors.textSecondary),
+          placeholderStyle: const TextStyle(
+            fontSize: 14,
+            color: AppColors.textSecondary,
+          ),
+          style: const TextStyle(
+            fontSize: 14,
+            color: AppColors.textPrimary,
+          ),
+          prefix: const Icon(CupertinoIcons.search, color: AppColors.textSecondary, size: 18),
           suffix: _searchQuery.isNotEmpty
               ? CupertinoButton(
                   padding: EdgeInsets.zero,
@@ -770,7 +783,7 @@ class _UserHomeScreenState extends State<UserHomeScreen>
                       _searchQuery = '';
                     });
                   },
-                  child: const Icon(CupertinoIcons.clear, color: AppColors.textSecondary),
+                  child: const Icon(CupertinoIcons.clear, color: AppColors.textSecondary, size: 18),
                 )
               : null,
           decoration: BoxDecoration(
@@ -778,7 +791,7 @@ class _UserHomeScreenState extends State<UserHomeScreen>
             borderRadius: BorderRadius.circular(12),
             color: Colors.white,
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         ),
         
         const SizedBox(height: 12),
@@ -802,10 +815,10 @@ class _UserHomeScreenState extends State<UserHomeScreen>
                     });
                   },
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
                       color: isSelected ? AppColors.primary.withValues(alpha: 0.2) : Colors.white,
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(16),
                       border: Border.all(
                         color: isSelected ? AppColors.primary : AppColors.neutral.withValues(alpha: 0.3),
                       ),
@@ -815,7 +828,10 @@ class _UserHomeScreenState extends State<UserHomeScreen>
                       style: TextStyle(
                         color: isSelected ? AppColors.primary : AppColors.textSecondary,
                         fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                        fontSize: 13,
                       ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
                     ),
                   ),
                 ),
@@ -1082,12 +1098,16 @@ class _UserHomeScreenState extends State<UserHomeScreen>
                                 ),
                               ),
                               const SizedBox(width: 8),
-                              Text(
-                                '≈ ${_calculateProtein(item).toStringAsFixed(1)}g protein',
-                                style: const TextStyle(
-                                  color: AppColors.primary,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
+                              Flexible(
+                                child: Text(
+                                  '≈ ${_calculateProtein(item).toStringAsFixed(1)}g protein',
+                                  style: const TextStyle(
+                                    color: AppColors.primary,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
                                 ),
                               ),
                             ],
@@ -1095,26 +1115,34 @@ class _UserHomeScreenState extends State<UserHomeScreen>
                         ] else ...[
                           Row(
                             children: [
-                              Text(
-                                '${item['portion'].toStringAsFixed(0)}g • ${item['protein'].toStringAsFixed(1)}g protein',
-                                style: const TextStyle(
-                                  color: AppColors.textSecondary,
-                                  fontSize: 16,
+                              Expanded(
+                                child: Text(
+                                  '${item['portion'].toStringAsFixed(0)}g • ${item['protein'].toStringAsFixed(1)}g protein',
+                                  style: const TextStyle(
+                                    color: AppColors.textSecondary,
+                                    fontSize: 16,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
                                 ),
                               ),
                               const SizedBox(width: 8),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                decoration: BoxDecoration(
-                                  color: AppColors.primary.withValues(alpha: 0.1),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Text(
-                                  item['meal'] as String,
-                                  style: const TextStyle(
-                                    color: AppColors.primary,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
+                              Flexible(
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primary.withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    item['meal'] as String,
+                                    style: const TextStyle(
+                                      color: AppColors.textSecondary,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
                                   ),
                                 ),
                               ),
@@ -1127,27 +1155,35 @@ class _UserHomeScreenState extends State<UserHomeScreen>
                         // Category and Time
                         Row(
                           children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: _getCategoryColor(item['category']).withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                item['category'] as String,
-                                style: TextStyle(
-                                  color: _getCategoryColor(item['category']),
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500,
+                            Flexible(
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: _getCategoryColor(item['category']).withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  item['category'] as String,
+                                  style: TextStyle(
+                                    color: _getCategoryColor(item['category']),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
                                 ),
                               ),
                             ),
                             const SizedBox(width: 8),
-                            Text(
-                              item['time'] as String,
-                              style: const TextStyle(
-                                color: AppColors.textSecondary,
-                                fontSize: 12,
+                            Flexible(
+                              child: Text(
+                                item['time'] as String,
+                                style: const TextStyle(
+                                  color: AppColors.textSecondary,
+                                  fontSize: 12,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
                               ),
                             ),
                           ],
