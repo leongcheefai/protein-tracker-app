@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../main.dart';
 
@@ -176,25 +177,25 @@ class _QuickAddScreenState extends State<QuickAddScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return CupertinoPageScaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
+      navigationBar: CupertinoNavigationBar(
         backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
+        border: null,
+        leading: CupertinoNavigationBarBackButton(
           onPressed: () => Navigator.pop(context),
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          color: AppColors.textPrimary,
         ),
-        title: Text(
+        middle: Text(
           'Quick Add Protein',
-          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+          style: const TextStyle(
             color: AppColors.textPrimary,
+            fontSize: 24,
             fontWeight: FontWeight.w600,
           ),
         ),
-        centerTitle: true,
       ),
-      body: SafeArea(
+      child: SafeArea(
         child: AnimatedBuilder(
           animation: _fadeAnimation,
           builder: (context, child) {
@@ -268,7 +269,7 @@ class _QuickAddScreenState extends State<QuickAddScreen>
               borderRadius: BorderRadius.circular(16),
             ),
             child: const Icon(
-              Icons.flash_on,
+              CupertinoIcons.bolt,
               color: Colors.white,
               size: 30,
             ),
@@ -280,16 +281,18 @@ class _QuickAddScreenState extends State<QuickAddScreen>
               children: [
                 Text(
                   'Quick Protein Log',
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  style: const TextStyle(
                     color: AppColors.textPrimary,
+                    fontSize: 24,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   'Log your protein intake without taking photos',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  style: const TextStyle(
                     color: AppColors.textSecondary,
+                    fontSize: 16,
                   ),
                 ),
               ],
@@ -306,27 +309,23 @@ class _QuickAddScreenState extends State<QuickAddScreen>
       children: [
         Text(
           'Food Name',
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+          style: const TextStyle(
             color: AppColors.textPrimary,
+            fontSize: 18,
             fontWeight: FontWeight.w600,
           ),
         ),
         const SizedBox(height: 8),
-        TextField(
+        CupertinoTextField(
           controller: _foodNameController,
-          decoration: InputDecoration(
-            hintText: 'e.g., Chicken Breast, Greek Yogurt',
-            prefixIcon: const Icon(Icons.restaurant, color: AppColors.textSecondary),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: AppColors.primary, width: 2),
-            ),
-            filled: true,
-            fillColor: Colors.white,
+          placeholder: 'e.g., Chicken Breast, Greek Yogurt',
+          prefix: Icon(CupertinoIcons.house, color: AppColors.textSecondary),
+          decoration: BoxDecoration(
+            border: Border.all(color: AppColors.neutral.withValues(alpha: 0.3)),
+            borderRadius: BorderRadius.circular(12),
+            color: Colors.white,
           ),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           onChanged: (value) {
             setState(() {});
           },
@@ -341,8 +340,9 @@ class _QuickAddScreenState extends State<QuickAddScreen>
       children: [
         Text(
           'Portion Size',
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+          style: const TextStyle(
             color: AppColors.textPrimary,
+            fontSize: 18,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -398,7 +398,7 @@ class _QuickAddScreenState extends State<QuickAddScreen>
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
-                  Icons.edit,
+                  CupertinoIcons.pencil,
                   size: 20,
                   color: _isCustomPortion ? Colors.white : Colors.grey[600],
                 ),
@@ -419,23 +419,24 @@ class _QuickAddScreenState extends State<QuickAddScreen>
         // Custom Input Field
         if (_isCustomPortion) ...[
           const SizedBox(height: 16),
-          TextField(
+          CupertinoTextField(
             controller: _customPortionController,
             keyboardType: TextInputType.number,
-            decoration: InputDecoration(
-              labelText: 'Portion (grams)',
-              hintText: 'Enter portion size',
-              suffixText: 'g',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+            placeholder: 'Enter portion size',
+            suffix: const Text(
+              'g',
+              style: TextStyle(
+                color: Colors.grey,
+                fontSize: 14,
+                fontWeight: FontWeight.normal,
               ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: AppColors.primary, width: 2),
-              ),
-              filled: true,
-              fillColor: Colors.white,
             ),
+            decoration: BoxDecoration(
+              border: Border.all(color: AppColors.neutral.withValues(alpha: 0.3)),
+              borderRadius: BorderRadius.circular(12),
+              color: Colors.white,
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             onChanged: _updateCustomPortion,
           ),
         ],
@@ -449,29 +450,32 @@ class _QuickAddScreenState extends State<QuickAddScreen>
       children: [
         Text(
           'Protein Amount',
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+          style: const TextStyle(
             color: AppColors.textPrimary,
+            fontSize: 18,
             fontWeight: FontWeight.w600,
           ),
         ),
         const SizedBox(height: 8),
-        TextField(
+        CupertinoTextField(
           controller: _proteinController,
           keyboardType: TextInputType.number,
-          decoration: InputDecoration(
-            hintText: '25.0',
-            suffixText: 'g protein',
-            prefixIcon: const Icon(Icons.fitness_center, color: AppColors.primary),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
+          placeholder: '25.0',
+          suffix: const Text(
+            'g protein',
+            style: TextStyle(
+              color: Colors.grey,
+              fontSize: 14,
+              fontWeight: FontWeight.normal,
             ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: AppColors.primary, width: 2),
-            ),
-            filled: true,
-            fillColor: Colors.white,
           ),
+          prefix: Icon(CupertinoIcons.heart_fill, color: AppColors.primary),
+          decoration: BoxDecoration(
+            border: Border.all(color: AppColors.neutral.withValues(alpha: 0.3)),
+            borderRadius: BorderRadius.circular(12),
+            color: Colors.white,
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           onChanged: (value) {
             setState(() {});
           },
@@ -479,8 +483,9 @@ class _QuickAddScreenState extends State<QuickAddScreen>
         const SizedBox(height: 8),
         Text(
           'Enter the total protein content for your portion',
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+          style: const TextStyle(
             color: AppColors.textSecondary,
+            fontSize: 14,
           ),
         ),
       ],
@@ -493,8 +498,9 @@ class _QuickAddScreenState extends State<QuickAddScreen>
       children: [
         Text(
           'Assign to Meal',
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+          style: const TextStyle(
             color: AppColors.textPrimary,
+            fontSize: 18,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -637,15 +643,16 @@ class _QuickAddScreenState extends State<QuickAddScreen>
           Row(
             children: [
               Icon(
-                Icons.assessment,
+                CupertinoIcons.chart_bar,
                 color: AppColors.success,
                 size: 24,
               ),
               const SizedBox(width: 12),
               Text(
                 'Summary',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                style: const TextStyle(
                   color: AppColors.textPrimary,
+                  fontSize: 24,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -662,16 +669,18 @@ class _QuickAddScreenState extends State<QuickAddScreen>
                   children: [
                     Text(
                       'Food',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      style: const TextStyle(
                         color: AppColors.textSecondary,
+                        fontSize: 14,
                       ),
                     ),
                     Text(
                       _foodNameController.text.trim().isEmpty 
                           ? 'Not specified' 
                           : _foodNameController.text.trim(),
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      style: const TextStyle(
                         color: AppColors.textPrimary,
+                        fontSize: 18,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -684,14 +693,16 @@ class _QuickAddScreenState extends State<QuickAddScreen>
                   children: [
                     Text(
                       'Portion',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      style: const TextStyle(
                         color: AppColors.textSecondary,
+                        fontSize: 14,
                       ),
                     ),
                     Text(
                       '${_selectedPortion.toInt()}g',
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      style: const TextStyle(
                         color: AppColors.textPrimary,
+                        fontSize: 18,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -704,14 +715,16 @@ class _QuickAddScreenState extends State<QuickAddScreen>
                   children: [
                     Text(
                       'Protein',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      style: const TextStyle(
                         color: AppColors.textSecondary,
+                        fontSize: 14,
                       ),
                     ),
                     Text(
                       '${_proteinAmount.toStringAsFixed(1)}g',
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      style: const TextStyle(
                         color: AppColors.textPrimary,
+                        fontSize: 18,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -731,7 +744,7 @@ class _QuickAddScreenState extends State<QuickAddScreen>
             ),
             child: Text(
               'Meal: ${_getMealDisplayName(_selectedMeal)}',
-              style: TextStyle(
+              style: const TextStyle(
                 color: AppColors.primary,
                 fontWeight: FontWeight.w600,
               ),
@@ -745,20 +758,15 @@ class _QuickAddScreenState extends State<QuickAddScreen>
   Widget _buildSubmitButton() {
     return SizedBox(
       width: double.infinity,
-      child: ElevatedButton(
+      child: CupertinoButton(
         onPressed: _canSubmit ? _submit : null,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          elevation: _canSubmit ? 4 : 0,
-        ),
+        color: _canSubmit ? AppColors.primary : Colors.grey,
+        borderRadius: BorderRadius.circular(12),
+        padding: const EdgeInsets.symmetric(vertical: 16),
         child: Text(
           'Add to ${_getMealDisplayName(_selectedMeal)}',
           style: const TextStyle(
+            color: Colors.white,
             fontSize: 18,
             fontWeight: FontWeight.w600,
           ),
@@ -770,15 +778,15 @@ class _QuickAddScreenState extends State<QuickAddScreen>
   IconData _getMealIcon(String meal) {
     switch (meal) {
       case 'breakfast':
-        return Icons.wb_sunny;
+        return CupertinoIcons.sun_max;
       case 'lunch':
-        return Icons.restaurant;
+        return CupertinoIcons.house;
       case 'dinner':
-        return Icons.nights_stay;
+        return CupertinoIcons.moon;
       case 'snack':
-        return Icons.coffee;
+        return CupertinoIcons.circle;
       default:
-        return Icons.restaurant;
+        return CupertinoIcons.house;
     }
   }
 

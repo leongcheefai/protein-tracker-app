@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../main.dart';
 
@@ -231,24 +232,24 @@ class _UserHomeScreenState extends State<UserHomeScreen>
 
   // Delete functionality
   void _deleteItem(String itemId) {
-    showDialog(
+    showCupertinoDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => CupertinoAlertDialog(
         title: const Text('Delete Food Item'),
         content: const Text('Are you sure you want to delete this item? This action cannot be undone.'),
         actions: [
-          TextButton(
+          CupertinoDialogAction(
             onPressed: () => Navigator.pop(context),
             child: const Text('Cancel'),
           ),
-          TextButton(
+          CupertinoDialogAction(
             onPressed: () {
               setState(() {
                 _recentItems.removeWhere((item) => item['id'] == itemId);
               });
               Navigator.pop(context);
             },
-            style: TextButton.styleFrom(foregroundColor: AppColors.error),
+            isDestructiveAction: true,
             child: const Text('Delete'),
           ),
         ],
@@ -269,9 +270,31 @@ class _UserHomeScreenState extends State<UserHomeScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return CupertinoPageScaffold(
       backgroundColor: AppColors.background,
-      body: SafeArea(
+      navigationBar: CupertinoNavigationBar(
+        backgroundColor: AppColors.background,
+        border: null,
+        middle: const Text(
+          'Protein Pace',
+          style: TextStyle(
+            color: AppColors.textPrimary,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        trailing: CupertinoButton(
+          padding: EdgeInsets.zero,
+          onPressed: () {
+            // TODO: Navigate to settings screen
+          },
+          child: Icon(
+            CupertinoIcons.settings,
+            color: AppColors.textPrimary,
+          ),
+        ),
+      ),
+      child: SafeArea(
         child: CustomScrollView(
           slivers: [
             // Enhanced Header
@@ -312,7 +335,6 @@ class _UserHomeScreenState extends State<UserHomeScreen>
           ],
         ),
       ),
-      floatingActionButton: _buildFloatingActionButton(),
     );
   }
 
@@ -320,46 +342,21 @@ class _UserHomeScreenState extends State<UserHomeScreen>
     final now = DateTime.now();
     final dateString = '${_getMonthName(now.month)} ${now.day}, ${now.year}';
     
-    return SliverAppBar(
-      expandedHeight: 120,
-      floating: false,
-      pinned: true,
-      backgroundColor: AppColors.background,
-      elevation: 0,
-      flexibleSpace: FlexibleSpaceBar(
-        background: Container(
-          padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Protein Pace',
-                    style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                      color: AppColors.textPrimary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.settings, color: AppColors.textPrimary),
-                    onPressed: () {
-                      // TODO: Navigate to settings screen
-                    },
-                  ),
-                ],
+    return SliverToBoxAdapter(
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 8),
+            Text(
+              dateString,
+              style: const TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 16,
               ),
-              const SizedBox(height: 8),
-              Text(
-                dateString,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -429,15 +426,17 @@ class _UserHomeScreenState extends State<UserHomeScreen>
                         children: [
                           Text(
                             '${_totalProgress.toStringAsFixed(1)}g',
-                            style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                            style: const TextStyle(
                               color: AppColors.textPrimary,
+                              fontSize: 32,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           Text(
                             'of ${widget.dailyProteinTarget.toStringAsFixed(1)}g',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            style: const TextStyle(
                               color: AppColors.textSecondary,
+                              fontSize: 16,
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -449,8 +448,9 @@ class _UserHomeScreenState extends State<UserHomeScreen>
                             ),
                             child: Text(
                               '${_progressPercentage.toStringAsFixed(1)}%',
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              style: TextStyle(
                                 color: _getProgressColor(_progressPercentage),
+                                fontSize: 14,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -471,15 +471,16 @@ class _UserHomeScreenState extends State<UserHomeScreen>
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
-                Icons.fitness_center,
+                CupertinoIcons.heart_fill,
                 color: AppColors.primary,
                 size: 20,
               ),
               const SizedBox(width: 8),
               Text(
                 'Goal: ${widget.goal} • ${widget.trainingMultiplier.toStringAsFixed(1)}x training',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                style: const TextStyle(
                   color: AppColors.textSecondary,
+                  fontSize: 16,
                 ),
               ),
             ],
@@ -495,8 +496,9 @@ class _UserHomeScreenState extends State<UserHomeScreen>
       children: [
         Text(
           'Meal Progress',
-          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+          style: const TextStyle(
             color: AppColors.textPrimary,
+            fontSize: 24,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -555,8 +557,9 @@ class _UserHomeScreenState extends State<UserHomeScreen>
                     
                     Text(
                       mealName,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      style: const TextStyle(
                         color: AppColors.textPrimary,
+                        fontSize: 14,
                         fontWeight: FontWeight.w600,
                       ),
                       textAlign: TextAlign.center,
@@ -564,8 +567,9 @@ class _UserHomeScreenState extends State<UserHomeScreen>
                     
                     Text(
                       '${progress.toStringAsFixed(0)}g',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      style: const TextStyle(
                         color: AppColors.textSecondary,
+                        fontSize: 14,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -592,8 +596,9 @@ class _UserHomeScreenState extends State<UserHomeScreen>
         children: [
           Text(
             'Quick Stats',
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+            style: const TextStyle(
               color: AppColors.textPrimary,
+              fontSize: 24,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -606,7 +611,7 @@ class _UserHomeScreenState extends State<UserHomeScreen>
                 child: _buildStatItem(
                   'Weekly Avg',
                   '${(_totalProgress * 7).toStringAsFixed(0)}g',
-                  Icons.trending_up,
+                  CupertinoIcons.chart_bar,
                   AppColors.success,
                 ),
               ),
@@ -614,7 +619,7 @@ class _UserHomeScreenState extends State<UserHomeScreen>
                 child: _buildStatItem(
                   'Goal Hit Rate',
                   '${_progressPercentage >= 100 ? 100 : _progressPercentage.toInt()}%',
-                  Icons.flag,
+                  CupertinoIcons.flag,
                   AppColors.primary,
                 ),
               ),
@@ -622,7 +627,7 @@ class _UserHomeScreenState extends State<UserHomeScreen>
                 child: _buildStatItem(
                   'Streak',
                   '3 days',
-                  Icons.local_fire_department,
+                  CupertinoIcons.flame,
                   AppColors.warning,
                 ),
               ),
@@ -654,8 +659,9 @@ class _UserHomeScreenState extends State<UserHomeScreen>
         
         Text(
           value,
-          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+          style: const TextStyle(
             color: AppColors.textPrimary,
+            fontSize: 24,
             fontWeight: FontWeight.bold,
           ),
           textAlign: TextAlign.center,
@@ -663,8 +669,9 @@ class _UserHomeScreenState extends State<UserHomeScreen>
         
         Text(
           label,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+          style: const TextStyle(
             color: AppColors.textSecondary,
+            fontSize: 14,
           ),
           textAlign: TextAlign.center,
         ),
@@ -682,22 +689,24 @@ class _UserHomeScreenState extends State<UserHomeScreen>
           children: [
             Text(
               'Today\'s Foods',
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+              style: const TextStyle(
                 color: AppColors.textPrimary,
+                fontSize: 24,
                 fontWeight: FontWeight.w600,
               ),
             ),
             Row(
               children: [
-                IconButton(
+                CupertinoButton(
+                  padding: EdgeInsets.zero,
                   onPressed: _toggleSearchBar,
-                  icon: Icon(
-                    _showSearchBar ? Icons.close : Icons.search,
+                  child: Icon(
+                    _showSearchBar ? CupertinoIcons.clear : CupertinoIcons.search,
                     color: AppColors.primary,
                   ),
-                  tooltip: _showSearchBar ? 'Close Search' : 'Search Foods',
                 ),
-                TextButton(
+                CupertinoButton(
+                  padding: EdgeInsets.zero,
                   onPressed: () {
                     // TODO: Navigate to full history
                   },
@@ -722,8 +731,9 @@ class _UserHomeScreenState extends State<UserHomeScreen>
         if (_showSearchBar && _filteredItems.isNotEmpty) ...[
           Text(
             'Found ${_filteredItems.length} item${_filteredItems.length == 1 ? '' : 's'}',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            style: const TextStyle(
               color: AppColors.textSecondary,
+              fontSize: 16,
             ),
           ),
           const SizedBox(height: 12),
@@ -744,37 +754,31 @@ class _UserHomeScreenState extends State<UserHomeScreen>
     return Column(
       children: [
         // Search TextField
-        TextField(
+        CupertinoTextField(
           onChanged: (value) {
             setState(() {
               _searchQuery = value;
             });
           },
-          decoration: InputDecoration(
-            hintText: 'Search foods by name or category...',
-            prefixIcon: const Icon(Icons.search, color: AppColors.textSecondary),
-            suffixIcon: _searchQuery.isNotEmpty
-                ? IconButton(
-                    icon: const Icon(Icons.clear, color: AppColors.textSecondary),
-                    onPressed: () {
-                      setState(() {
-                        _searchQuery = '';
-                      });
-                    },
-                  )
-                : null,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: AppColors.neutral.withValues(alpha: 0.3)),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: AppColors.primary, width: 2),
-            ),
-            filled: true,
-            fillColor: Colors.white,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          placeholder: 'Search foods by name or category...',
+          prefix: const Icon(CupertinoIcons.search, color: AppColors.textSecondary),
+          suffix: _searchQuery.isNotEmpty
+              ? CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: () {
+                    setState(() {
+                      _searchQuery = '';
+                    });
+                  },
+                  child: const Icon(CupertinoIcons.clear, color: AppColors.textSecondary),
+                )
+              : null,
+          decoration: BoxDecoration(
+            border: Border.all(color: AppColors.neutral.withValues(alpha: 0.3)),
+            borderRadius: BorderRadius.circular(12),
+            color: Colors.white,
           ),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         ),
         
         const SizedBox(height: 12),
@@ -791,23 +795,28 @@ class _UserHomeScreenState extends State<UserHomeScreen>
               
               return Container(
                 margin: EdgeInsets.only(right: index == _availableMeals.length - 1 ? 0 : 8),
-                child: FilterChip(
-                  label: Text(meal),
-                  selected: isSelected,
-                  onSelected: (selected) {
+                child: GestureDetector(
+                  onTap: () {
                     setState(() {
-                      _selectedMealFilter = selected ? meal : 'All';
+                      _selectedMealFilter = isSelected ? 'All' : meal;
                     });
                   },
-                  selectedColor: AppColors.primary.withValues(alpha: 0.2),
-                  checkmarkColor: AppColors.primary,
-                  labelStyle: TextStyle(
-                    color: isSelected ? AppColors.primary : AppColors.textSecondary,
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                  ),
-                  backgroundColor: Colors.white,
-                  side: BorderSide(
-                    color: isSelected ? AppColors.primary : AppColors.neutral.withValues(alpha: 0.3),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: isSelected ? AppColors.primary.withValues(alpha: 0.2) : Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: isSelected ? AppColors.primary : AppColors.neutral.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Text(
+                      meal,
+                      style: TextStyle(
+                        color: isSelected ? AppColors.primary : AppColors.textSecondary,
+                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                      ),
+                    ),
                   ),
                 ),
               );
@@ -829,35 +838,52 @@ class _UserHomeScreenState extends State<UserHomeScreen>
       child: Column(
         children: [
           Icon(
-            Icons.restaurant_outlined,
+            CupertinoIcons.house,
             size: 48,
             color: AppColors.textSecondary,
           ),
           const SizedBox(height: 16),
           Text(
             'No foods logged today',
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+            style: const TextStyle(
               color: AppColors.textSecondary,
+              fontSize: 24,
               fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(height: 8),
           Text(
             'Start by taking a photo of your meal',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            style: const TextStyle(
               color: AppColors.textSecondary,
+              fontSize: 16,
             ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
-          ElevatedButton.icon(
+          CupertinoButton(
             onPressed: () => _showCameraSettingsModal(context),
-            icon: const Icon(Icons.camera_alt),
-            label: const Text('Take Your First Photo'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            color: AppColors.primary,
+            borderRadius: BorderRadius.circular(8),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  CupertinoIcons.camera,
+                  color: Colors.white,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                const Text(
+                  'Take Your First Photo',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -876,40 +902,57 @@ class _UserHomeScreenState extends State<UserHomeScreen>
       child: Column(
         children: [
           Icon(
-            Icons.search_off,
+            CupertinoIcons.search,
             size: 48,
             color: AppColors.textSecondary,
           ),
           const SizedBox(height: 16),
           Text(
             'No foods found',
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+            style: const TextStyle(
               color: AppColors.textSecondary,
+              fontSize: 24,
               fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(height: 8),
           Text(
             'Try adjusting your search or filter criteria',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            style: const TextStyle(
               color: AppColors.textSecondary,
+              fontSize: 16,
             ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
-          OutlinedButton.icon(
+          CupertinoButton(
             onPressed: () {
               setState(() {
                 _searchQuery = '';
                 _selectedMealFilter = 'All';
               });
             },
-            icon: const Icon(Icons.clear_all),
-            label: const Text('Clear Filters'),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.primary,
-              side: BorderSide(color: AppColors.primary),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  CupertinoIcons.clear,
+                  color: AppColors.primary,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Clear Filters',
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -924,19 +967,19 @@ class _UserHomeScreenState extends State<UserHomeScreen>
       key: Key(item['id']),
       direction: DismissDirection.endToStart,
       confirmDismiss: (direction) async {
-        return await showDialog<bool>(
+        return await showCupertinoDialog<bool>(
           context: context,
-          builder: (context) => AlertDialog(
+          builder: (context) => CupertinoAlertDialog(
             title: const Text('Delete Food Item'),
             content: Text('Are you sure you want to delete "${item['name']}"?'),
             actions: [
-              TextButton(
+              CupertinoDialogAction(
                 onPressed: () => Navigator.pop(context, false),
                 child: const Text('Cancel'),
               ),
-              TextButton(
+              CupertinoDialogAction(
                 onPressed: () => Navigator.pop(context, true),
-                style: TextButton.styleFrom(foregroundColor: AppColors.error),
+                isDestructiveAction: true,
                 child: const Text('Delete'),
               ),
             ],
@@ -955,7 +998,7 @@ class _UserHomeScreenState extends State<UserHomeScreen>
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 20),
         child: const Icon(
-          Icons.delete,
+          CupertinoIcons.delete,
           color: Colors.white,
           size: 24,
         ),
@@ -1014,8 +1057,9 @@ class _UserHomeScreenState extends State<UserHomeScreen>
                       children: [
                         Text(
                           item['name'] as String,
-                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          style: const TextStyle(
                             color: AppColors.textPrimary,
+                            fontSize: 18,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -1026,27 +1070,23 @@ class _UserHomeScreenState extends State<UserHomeScreen>
                           Row(
                             children: [
                               Expanded(
-                                child: TextField(
+                                child: CupertinoTextField(
                                   controller: _editControllers[item['id']],
                                   keyboardType: TextInputType.number,
-                                  decoration: InputDecoration(
-                                    labelText: 'Portion (g)',
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                      borderSide: BorderSide(color: AppColors.primary, width: 2),
-                                    ),
-                                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                  placeholder: 'Portion (g)',
+                                  decoration: BoxDecoration(
+                                    border: Border.all(color: AppColors.neutral.withValues(alpha: 0.3)),
+                                    borderRadius: BorderRadius.circular(8),
                                   ),
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                 ),
                               ),
                               const SizedBox(width: 8),
                               Text(
                                 '≈ ${_calculateProtein(item).toStringAsFixed(1)}g protein',
-                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                style: const TextStyle(
                                   color: AppColors.primary,
+                                  fontSize: 16,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -1057,8 +1097,9 @@ class _UserHomeScreenState extends State<UserHomeScreen>
                             children: [
                               Text(
                                 '${item['portion'].toStringAsFixed(0)}g • ${item['protein'].toStringAsFixed(1)}g protein',
-                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                style: const TextStyle(
                                   color: AppColors.textSecondary,
+                                  fontSize: 16,
                                 ),
                               ),
                               const SizedBox(width: 8),
@@ -1070,8 +1111,9 @@ class _UserHomeScreenState extends State<UserHomeScreen>
                                 ),
                                 child: Text(
                                   item['meal'] as String,
-                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  style: const TextStyle(
                                     color: AppColors.primary,
+                                    fontSize: 12,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -1093,8 +1135,9 @@ class _UserHomeScreenState extends State<UserHomeScreen>
                               ),
                               child: Text(
                                 item['category'] as String,
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                style: TextStyle(
                                   color: _getCategoryColor(item['category']),
+                                  fontSize: 12,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
@@ -1102,8 +1145,9 @@ class _UserHomeScreenState extends State<UserHomeScreen>
                             const SizedBox(width: 8),
                             Text(
                               item['time'] as String,
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              style: const TextStyle(
                                 color: AppColors.textSecondary,
+                                fontSize: 12,
                               ),
                             ),
                           ],
@@ -1117,54 +1161,65 @@ class _UserHomeScreenState extends State<UserHomeScreen>
                     // Save/Cancel buttons
                     Column(
                       children: [
-                        IconButton(
+                        CupertinoButton(
+                          padding: EdgeInsets.zero,
                           onPressed: () => _saveEdit(item['id']),
-                          icon: const Icon(Icons.check, color: AppColors.success),
-                          tooltip: 'Save',
+                          child: Icon(CupertinoIcons.check_mark, color: AppColors.success),
                         ),
-                        IconButton(
+                        CupertinoButton(
+                          padding: EdgeInsets.zero,
                           onPressed: _cancelEdit,
-                          icon: const Icon(Icons.close, color: AppColors.error),
-                          tooltip: 'Cancel',
+                          child: Icon(CupertinoIcons.clear, color: AppColors.error),
                         ),
                       ],
                     ),
                   ] else ...[
                     // Quick Actions Menu
-                    PopupMenuButton<String>(
-                      icon: Icon(Icons.more_vert, color: AppColors.textSecondary),
-                      onSelected: (value) {
-                        switch (value) {
-                          case 'edit':
-                            _startEditing(item['id']);
-                            break;
-                          case 'delete':
-                            _deleteItem(item['id']);
-                            break;
-                        }
+                    CupertinoButton(
+                      padding: EdgeInsets.zero,
+                      onPressed: () {
+                        showCupertinoModalPopup(
+                          context: context,
+                          builder: (context) => CupertinoActionSheet(
+                            actions: [
+                              CupertinoActionSheetAction(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                  _startEditing(item['id']);
+                                },
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(CupertinoIcons.pencil, size: 20),
+                                    const SizedBox(width: 8),
+                                    const Text('Edit'),
+                                  ],
+                                ),
+                              ),
+                              CupertinoActionSheetAction(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                  _deleteItem(item['id']);
+                                },
+                                isDestructiveAction: true,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(CupertinoIcons.delete, size: 20),
+                                    const SizedBox(width: 8),
+                                    const Text('Delete'),
+                                  ],
+                                ),
+                              ),
+                            ],
+                            cancelButton: CupertinoActionSheetAction(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text('Cancel'),
+                            ),
+                          ),
+                        );
                       },
-                      itemBuilder: (context) => [
-                        const PopupMenuItem(
-                          value: 'edit',
-                          child: Row(
-                            children: [
-                              Icon(Icons.edit, size: 20),
-                              SizedBox(width: 8),
-                              Text('Edit'),
-                            ],
-                          ),
-                        ),
-                        const PopupMenuItem(
-                          value: 'delete',
-                          child: Row(
-                            children: [
-                              Icon(Icons.delete, size: 20),
-                              SizedBox(width: 8),
-                              Text('Delete'),
-                            ],
-                          ),
-                        ),
-                      ],
+                      child: Icon(CupertinoIcons.ellipsis, color: AppColors.textSecondary),
                     ),
                   ],
                 ],
@@ -1176,29 +1231,18 @@ class _UserHomeScreenState extends State<UserHomeScreen>
     );
   }
 
-  Widget _buildFloatingActionButton() {
-    return FloatingActionButton.extended(
-      onPressed: () => _showCameraSettingsModal(context),
-      backgroundColor: AppColors.primary,
-      foregroundColor: Colors.white,
-      icon: const Icon(Icons.add),
-      label: const Text("Add"),
-      elevation: 8,
-    );
-  }
-
   IconData _getMealIcon(String mealName) {
     switch (mealName) {
       case 'Breakfast':
-        return Icons.wb_sunny;
+        return CupertinoIcons.sun_max;
       case 'Lunch':
-        return Icons.restaurant;
+        return CupertinoIcons.house;
       case 'Dinner':
-        return Icons.dinner_dining;
+        return CupertinoIcons.moon;
       case 'Snack':
-        return Icons.coffee;
+        return CupertinoIcons.circle;
       default:
-        return Icons.restaurant;
+        return CupertinoIcons.house;
     }
   }
 
@@ -1239,19 +1283,19 @@ class _UserHomeScreenState extends State<UserHomeScreen>
   IconData _getCategoryIcon(String category) {
     switch (category.toLowerCase()) {
       case 'protein':
-        return Icons.fitness_center;
+        return CupertinoIcons.heart_fill;
       case 'carbohydrate':
-        return Icons.grain;
+        return CupertinoIcons.circle;
       case 'vegetable':
-        return Icons.eco;
+        return CupertinoIcons.leaf_arrow_circlepath;
       case 'fruit':
-        return Icons.apple;
+        return CupertinoIcons.circle_fill;
       case 'dairy':
-        return Icons.local_drink;
+        return CupertinoIcons.drop;
       case 'fat':
-        return Icons.opacity;
+        return CupertinoIcons.drop;
       default:
-        return Icons.restaurant;
+        return CupertinoIcons.house;
     }
   }
 
@@ -1268,10 +1312,8 @@ class _UserHomeScreenState extends State<UserHomeScreen>
   }
 
   void _showCameraSettingsModal(BuildContext context) {
-    showModalBottomSheet(
+    showCupertinoModalPopup(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
       builder: (BuildContext context) {
         return Container(
           height: MediaQuery.of(context).size.height * 0.65,
@@ -1300,8 +1342,9 @@ class _UserHomeScreenState extends State<UserHomeScreen>
               // Title
               Text(
                 'Upload Photo',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                style: const TextStyle(
                   color: AppColors.textPrimary,
+                  fontSize: 24,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -1310,8 +1353,9 @@ class _UserHomeScreenState extends State<UserHomeScreen>
               
               Text(
                 'Choose how you want to add your meal',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                style: const TextStyle(
                   color: AppColors.textSecondary,
+                  fontSize: 16,
                 ),
               ),
               
@@ -1327,7 +1371,7 @@ class _UserHomeScreenState extends State<UserHomeScreen>
                       _buildCameraOption(
                         context,
                         'Take Photo',
-                        Icons.camera_alt,
+                        CupertinoIcons.camera,
                         'Use your camera to take a new photo',
                         () {
                           Navigator.pop(context);
@@ -1341,7 +1385,7 @@ class _UserHomeScreenState extends State<UserHomeScreen>
                       _buildCameraOption(
                         context,
                         'Choose from Gallery',
-                        Icons.photo_library,
+                        CupertinoIcons.photo,
                         'Select an existing photo from your gallery',
                         () {
                           Navigator.pop(context);
@@ -1354,17 +1398,19 @@ class _UserHomeScreenState extends State<UserHomeScreen>
                       // Cancel button
                       SizedBox(
                         width: double.infinity,
-                        child: OutlinedButton(
+                        child: CupertinoButton(
                           onPressed: () => Navigator.pop(context),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: AppColors.textSecondary,
-                            side: BorderSide(color: AppColors.neutral.withValues(alpha: 0.3)),
-                            padding: const EdgeInsets.symmetric(vertical: 18),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
+                          color: Colors.transparent,
+                          borderRadius: BorderRadius.circular(8),
+                          padding: const EdgeInsets.symmetric(vertical: 18),
+                          child: Text(
+                            'Cancel',
+                            style: TextStyle(
+                              color: AppColors.textSecondary,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
-                          child: const Text('Cancel'),
                         ),
                       ),
                       
@@ -1421,8 +1467,9 @@ class _UserHomeScreenState extends State<UserHomeScreen>
                 children: [
                   Text(
                     title,
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    style: const TextStyle(
                       color: AppColors.textPrimary,
+                      fontSize: 24,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -1431,8 +1478,9 @@ class _UserHomeScreenState extends State<UserHomeScreen>
                   
                   Text(
                     description,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    style: const TextStyle(
                       color: AppColors.textSecondary,
+                      fontSize: 16,
                     ),
                   ),
                 ],
@@ -1442,7 +1490,7 @@ class _UserHomeScreenState extends State<UserHomeScreen>
             const SizedBox(width: 16),
             
             Icon(
-              Icons.arrow_forward_ios,
+              CupertinoIcons.chevron_right,
               color: AppColors.neutral,
               size: 16,
             ),
