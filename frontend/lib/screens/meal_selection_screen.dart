@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../main.dart';
 
@@ -30,10 +31,10 @@ class _MealSelectionScreenState extends State<MealSelectionScreen> {
   };
 
   final Map<String, IconData> _mealIcons = {
-    'Breakfast': Icons.wb_sunny,
-    'Lunch': Icons.restaurant,
-    'Dinner': Icons.dinner_dining,
-    'Snack': Icons.coffee,
+    'Breakfast': CupertinoIcons.sun_max,
+    'Lunch': CupertinoIcons.house,
+    'Dinner': CupertinoIcons.moon,
+    'Snack': CupertinoIcons.circle,
   };
 
   double get _mealProteinTarget {
@@ -43,17 +44,17 @@ class _MealSelectionScreenState extends State<MealSelectionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return CupertinoPageScaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
+      navigationBar: CupertinoNavigationBar(
         backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+        border: null,
+        leading: CupertinoNavigationBarBackButton(
+          color: AppColors.textPrimary,
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
-      body: SafeArea(
+      child: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -66,9 +67,10 @@ class _MealSelectionScreenState extends State<MealSelectionScreen> {
                   // Header
                   Text(
                     "Which meals do you want to track?",
-                    style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w600,
                       color: AppColors.textPrimary,
-                      fontWeight: FontWeight.bold,
                     ),
                   ),
                   
@@ -76,7 +78,8 @@ class _MealSelectionScreenState extends State<MealSelectionScreen> {
                   
                   Text(
                     "Configure your meal tracking preferences and protein distribution",
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    style: TextStyle(
+                      fontSize: 16,
                       color: AppColors.textSecondary,
                     ),
                   ),
@@ -113,9 +116,10 @@ class _MealSelectionScreenState extends State<MealSelectionScreen> {
                         children: [
                           Text(
                             'Daily Protein Target',
-                            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                              color: AppColors.primary,
+                            style: TextStyle(
+                              fontSize: 18,
                               fontWeight: FontWeight.w600,
+                              color: AppColors.primary,
                             ),
                           ),
                           
@@ -123,9 +127,10 @@ class _MealSelectionScreenState extends State<MealSelectionScreen> {
                           
                           Text(
                             '${widget.dailyProteinTarget.toStringAsFixed(0)}g total',
-                            style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
                               color: AppColors.primary,
-                              fontWeight: FontWeight.bold,
                             ),
                           ),
                           
@@ -135,32 +140,34 @@ class _MealSelectionScreenState extends State<MealSelectionScreen> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: _meals.entries.map((entry) {
-                              if (entry.value) {
-                                return Column(
-                                  children: [
-                                    Icon(
-                                      _mealIcons[entry.key],
-                                      color: AppColors.primary,
-                                      size: 24,
+                              final isEnabled = entry.value;
+                              return Column(
+                                children: [
+                                  Icon(
+                                    _mealIcons[entry.key],
+                                    color: isEnabled ? AppColors.primary : AppColors.neutral.withValues(alpha: 0.3),
+                                    size: 24,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    entry.key,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: isEnabled ? AppColors.textSecondary : AppColors.neutral.withValues(alpha: 0.3),
                                     ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      entry.key,
-                                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                        color: AppColors.textSecondary,
-                                      ),
+                                  ),
+                                  Text(
+                                    isEnabled 
+                                        ? '${_mealProteinTarget.toStringAsFixed(0)}g'
+                                        : '0g',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: isEnabled ? AppColors.primary : AppColors.neutral.withValues(alpha: 0.3),
+                                      fontWeight: FontWeight.w600,
                                     ),
-                                    Text(
-                                      '${_mealProteinTarget.toStringAsFixed(0)}g',
-                                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                        color: AppColors.primary,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ],
-                                );
-                              }
-                              return const SizedBox.shrink();
+                                  ),
+                                ],
+                              );
                             }).toList(),
                           ),
                         ],
@@ -177,16 +184,24 @@ class _MealSelectionScreenState extends State<MealSelectionScreen> {
             // Start Tracking Button - Fixed at bottom
             Padding(
               padding: const EdgeInsets.all(24.0),
-              child: ElevatedButton(
-                onPressed: () {
-                  _showCompletionDialog(context);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.success,
-                  foregroundColor: Colors.white,
+              child: SizedBox(
+                width: double.infinity,
+                child: CupertinoButton(
+                  onPressed: () {
+                    _showCompletionDialog(context);
+                  },
+                  color: AppColors.success,
+                  borderRadius: BorderRadius.circular(8),
                   padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: const Text(
+                    'Start Tracking',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
-                child: const Text('Start Tracking'),
               ),
             ),
           ],
@@ -212,7 +227,7 @@ class _MealSelectionScreenState extends State<MealSelectionScreen> {
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
-            offset: const Offset(0, 2),
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -240,9 +255,10 @@ class _MealSelectionScreenState extends State<MealSelectionScreen> {
               children: [
                 Text(
                   mealName,
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    color: isEnabled ? AppColors.primary : AppColors.textPrimary,
+                  style: TextStyle(
+                    fontSize: 18,
                     fontWeight: FontWeight.w600,
+                    color: isEnabled ? AppColors.primary : AppColors.textPrimary,
                   ),
                 ),
                 
@@ -252,7 +268,8 @@ class _MealSelectionScreenState extends State<MealSelectionScreen> {
                   isEnabled 
                       ? '${_mealProteinTarget.toStringAsFixed(0)}g protein target'
                       : 'Not tracking this meal',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  style: TextStyle(
+                    fontSize: 14,
                     color: isEnabled ? AppColors.primary.withValues(alpha: 0.8) : AppColors.textSecondary,
                   ),
                 ),
@@ -260,15 +277,15 @@ class _MealSelectionScreenState extends State<MealSelectionScreen> {
             ),
           ),
           
-          Switch(
+          CupertinoSwitch(
             value: isEnabled,
             onChanged: (value) {
               setState(() {
                 _meals[mealName] = value;
               });
             },
-            activeThumbColor: AppColors.primary,
-            activeTrackColor: AppColors.primary.withValues(alpha: 0.3),
+            activeTrackColor: AppColors.primary,
+            inactiveTrackColor: AppColors.primary.withValues(alpha: 0.3),
           ),
         ],
       ),
@@ -276,27 +293,25 @@ class _MealSelectionScreenState extends State<MealSelectionScreen> {
   }
 
   void _showCompletionDialog(BuildContext context) {
-    showDialog(
+    showCupertinoDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
+        return CupertinoAlertDialog(
           title: Row(
             children: [
               Icon(
-                Icons.check_circle,
+                CupertinoIcons.check_mark_circled,
                 color: AppColors.success,
                 size: 28,
               ),
               const SizedBox(width: 12),
               Text(
                 'Setup Complete!',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: AppColors.textPrimary,
+                style: TextStyle(
+                  fontSize: 18,
                   fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
                 ),
               ),
             ],
@@ -307,7 +322,8 @@ class _MealSelectionScreenState extends State<MealSelectionScreen> {
             children: [
               Text(
                 'Your protein tracking is now configured:',
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                style: TextStyle(
+                  fontSize: 16,
                   color: AppColors.textSecondary,
                 ),
               ),
@@ -322,7 +338,8 @@ class _MealSelectionScreenState extends State<MealSelectionScreen> {
               
               Text(
                 'You\'re all set to start tracking your protein intake!',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                style: TextStyle(
+                  fontSize: 14,
                   color: AppColors.success,
                   fontWeight: FontWeight.w600,
                 ),
@@ -330,27 +347,24 @@ class _MealSelectionScreenState extends State<MealSelectionScreen> {
             ],
           ),
           actions: [
-            ElevatedButton(
+            CupertinoDialogAction(
               onPressed: () {
                 Navigator.of(context).pop();
-                              // Navigate to user home screen to start tracking
-              Navigator.pushReplacementNamed(
-                context,
-                '/user-home',
-                arguments: {
-                  'height': widget.height,
-                  'weight': widget.weight,
-                  'trainingMultiplier': widget.trainingMultiplier,
-                  'goal': widget.goal,
-                  'dailyProteinTarget': widget.dailyProteinTarget,
-                  'meals': _meals,
-                },
-              );
+                // Navigate to user home screen to start tracking
+                Navigator.pushReplacementNamed(
+                  context,
+                  '/user-home',
+                  arguments: {
+                    'height': widget.height,
+                    'weight': widget.weight,
+                    'trainingMultiplier': widget.trainingMultiplier,
+                    'goal': widget.goal,
+                    'dailyProteinTarget': widget.dailyProteinTarget,
+                    'meals': _meals,
+                  },
+                );
               },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.success,
-                foregroundColor: Colors.white,
-              ),
+              isDefaultAction: true,
               child: const Text('Start Tracking'),
             ),
           ],
@@ -367,13 +381,15 @@ class _MealSelectionScreenState extends State<MealSelectionScreen> {
         children: [
           Text(
             label,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            style: TextStyle(
+              fontSize: 14,
               color: AppColors.textSecondary,
             ),
           ),
           Text(
             value,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            style: TextStyle(
+              fontSize: 14,
               color: AppColors.textPrimary,
               fontWeight: FontWeight.w600,
             ),

@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'welcome_screen.dart';
 import '../main.dart';
@@ -49,12 +50,8 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
     await Future.delayed(const Duration(milliseconds: 2000));
     if (mounted) {
       Navigator.of(context).pushReplacement(
-        PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) => const WelcomeScreen(),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return FadeTransition(opacity: animation, child: child);
-          },
-          transitionDuration: const Duration(milliseconds: 500),
+        CupertinoPageRoute(
+          builder: (context) => const WelcomeScreen(),
         ),
       );
     }
@@ -69,9 +66,9 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return CupertinoPageScaffold(
       backgroundColor: AppColors.background,
-      body: SafeArea(
+      child: SafeArea(
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -97,7 +94,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                         ],
                       ),
                       child: const Icon(
-                        Icons.fitness_center,
+                        CupertinoIcons.heart_fill,
                         size: 60,
                         color: Colors.white,
                       ),
@@ -116,9 +113,10 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                     opacity: _fadeAnimation,
                     child: Text(
                       'Protein Pace',
-                      style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                      style: TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.w600,
                         color: AppColors.textPrimary,
-                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   );
@@ -135,7 +133,8 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                     opacity: _fadeAnimation,
                     child: Text(
                       'Track protein intake with just a photo',
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      style: TextStyle(
+                        fontSize: 16,
                         color: AppColors.textSecondary,
                       ),
                       textAlign: TextAlign.center,
@@ -155,9 +154,9 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                     child: SizedBox(
                       width: 40,
                       height: 40,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 3,
-                        valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                      child: CupertinoActivityIndicator(
+                        radius: 20,
+                        color: AppColors.primary,
                       ),
                     ),
                   );
@@ -174,7 +173,8 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                     opacity: _fadeAnimation,
                     child: Text(
                       'Version 1.0.0',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      style: TextStyle(
+                        fontSize: 12,
                         color: AppColors.textSecondary,
                       ),
                     ),
