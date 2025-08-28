@@ -316,19 +316,40 @@ class _QuickAddScreenState extends State<QuickAddScreen>
           ),
         ),
         const SizedBox(height: 8),
-        CupertinoTextField(
-          controller: _foodNameController,
-          placeholder: 'e.g., Chicken Breast, Greek Yogurt',
-          prefix: Icon(CupertinoIcons.house, color: AppColors.textSecondary),
+        Container(
           decoration: BoxDecoration(
             border: Border.all(color: AppColors.neutral.withValues(alpha: 0.3)),
             borderRadius: BorderRadius.circular(12),
             color: Colors.white,
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          onChanged: (value) {
-            setState(() {});
-          },
+          child: Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(left: 16.0),
+                child: Icon(
+                  CupertinoIcons.house,
+                  color: AppColors.textSecondary,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: CupertinoTextField(
+                  controller: _foodNameController,
+                  placeholder: 'e.g., Chicken Breast, Greek Yogurt',
+                  decoration: const BoxDecoration(
+                    border: null,
+                    color: Colors.transparent,
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 0),
+                  onChanged: (value) {
+                    setState(() {});
+                  },
+                ),
+              ),
+              const SizedBox(width: 16),
+            ],
+          ),
         ),
       ],
     );
@@ -419,25 +440,39 @@ class _QuickAddScreenState extends State<QuickAddScreen>
         // Custom Input Field
         if (_isCustomPortion) ...[
           const SizedBox(height: 16),
-          CupertinoTextField(
-            controller: _customPortionController,
-            keyboardType: TextInputType.number,
-            placeholder: 'Enter portion size',
-            suffix: const Text(
-              'g',
-              style: TextStyle(
-                color: Colors.grey,
-                fontSize: 14,
-                fontWeight: FontWeight.normal,
-              ),
-            ),
+          Container(
             decoration: BoxDecoration(
               border: Border.all(color: AppColors.neutral.withValues(alpha: 0.3)),
               borderRadius: BorderRadius.circular(12),
               color: Colors.white,
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            onChanged: _updateCustomPortion,
+            child: Row(
+              children: [
+                Expanded(
+                  child: CupertinoTextField(
+                    controller: _customPortionController,
+                    keyboardType: TextInputType.number,
+                    placeholder: 'Enter portion size',
+                    decoration: const BoxDecoration(
+                      border: null,
+                      color: Colors.transparent,
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                    onChanged: _updateCustomPortion,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                const Text(
+                  'g',
+                  style: TextStyle(
+                    color: Colors.grey,
+                    fontSize: 14,
+                    fontWeight: FontWeight.normal,
+                  ),
+                ),
+                const SizedBox(width: 16),
+              ],
+            ),
           ),
         ],
       ],
@@ -457,28 +492,50 @@ class _QuickAddScreenState extends State<QuickAddScreen>
           ),
         ),
         const SizedBox(height: 8),
-        CupertinoTextField(
-          controller: _proteinController,
-          keyboardType: TextInputType.number,
-          placeholder: '25.0',
-          suffix: const Text(
-            'g protein',
-            style: TextStyle(
-              color: Colors.grey,
-              fontSize: 14,
-              fontWeight: FontWeight.normal,
-            ),
-          ),
-          prefix: Icon(CupertinoIcons.heart_fill, color: AppColors.primary),
+        Container(
           decoration: BoxDecoration(
             border: Border.all(color: AppColors.neutral.withValues(alpha: 0.3)),
             borderRadius: BorderRadius.circular(12),
             color: Colors.white,
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          onChanged: (value) {
-            setState(() {});
-          },
+          child: Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(left: 16.0),
+                child: Icon(
+                  CupertinoIcons.heart_fill,
+                  color: AppColors.primary,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: CupertinoTextField(
+                  controller: _proteinController,
+                  keyboardType: TextInputType.number,
+                  placeholder: '25.0',
+                  decoration: const BoxDecoration(
+                    border: null,
+                    color: Colors.transparent,
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 0),
+                  onChanged: (value) {
+                    setState(() {});
+                  },
+                ),
+              ),
+              const SizedBox(width: 8),
+              const Text(
+                'g protein',
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontSize: 14,
+                  fontWeight: FontWeight.normal,
+                ),
+              ),
+              const SizedBox(width: 16),
+            ],
+          ),
         ),
         const SizedBox(height: 8),
         Text(
@@ -652,7 +709,7 @@ class _QuickAddScreenState extends State<QuickAddScreen>
                 'Summary',
                 style: const TextStyle(
                   color: AppColors.textPrimary,
-                  fontSize: 24,
+                  fontSize: 20,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -680,7 +737,7 @@ class _QuickAddScreenState extends State<QuickAddScreen>
                           : _foodNameController.text.trim(),
                       style: const TextStyle(
                         color: AppColors.textPrimary,
-                        fontSize: 18,
+                        fontSize: 16,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -702,7 +759,7 @@ class _QuickAddScreenState extends State<QuickAddScreen>
                       '${_selectedPortion.toInt()}g',
                       style: const TextStyle(
                         color: AppColors.textPrimary,
-                        fontSize: 18,
+                        fontSize: 16,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -724,7 +781,7 @@ class _QuickAddScreenState extends State<QuickAddScreen>
                       '${_proteinAmount.toStringAsFixed(1)}g',
                       style: const TextStyle(
                         color: AppColors.textPrimary,
-                        fontSize: 18,
+                        fontSize: 16,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -746,6 +803,7 @@ class _QuickAddScreenState extends State<QuickAddScreen>
               'Meal: ${_getMealDisplayName(_selectedMeal)}',
               style: const TextStyle(
                 color: AppColors.primary,
+                fontSize: 16,
                 fontWeight: FontWeight.w600,
               ),
             ),
