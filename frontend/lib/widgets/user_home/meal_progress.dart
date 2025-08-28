@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../../utils/meal_utils.dart';
 import '../../utils/progress_utils.dart';

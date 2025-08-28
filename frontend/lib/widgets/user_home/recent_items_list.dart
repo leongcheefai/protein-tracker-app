@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'search_filter.dart';
 import 'empty_states.dart';
 import 'food_item_card.dart';

@@ -296,7 +296,7 @@ class _MealAssignmentScreenState extends State<MealAssignmentScreen> {
                       ),
                     ),
                   );
-                }).toList(),
+                }),
               ],
             ),
           ),

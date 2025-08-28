@@ -101,7 +101,7 @@ class _PhotoCaptureScreenState extends State<PhotoCaptureScreen>
                         size: 28,
                       ),
                       style: IconButton.styleFrom(
-                        backgroundColor: Colors.black.withOpacity(0.5),
+                        backgroundColor: Colors.black.withValues(alpha: 0.5),
                         shape: const CircleBorder(),
                       ),
                     ),
@@ -132,7 +132,7 @@ class _PhotoCaptureScreenState extends State<PhotoCaptureScreen>
                     end: Alignment.bottomCenter,
                     colors: [
                       Colors.transparent,
-                      Colors.black.withOpacity(0.8),
+                      Colors.black.withValues(alpha: 0.8),
                     ],
                   ),
                 ),
@@ -200,7 +200,7 @@ class _PhotoCaptureScreenState extends State<PhotoCaptureScreen>
                       height: 200,
                       decoration: BoxDecoration(
                         border: Border.all(
-                          color: Colors.white.withOpacity(0.3),
+                          color: Colors.white.withValues(alpha: 0.3),
                           width: 2,
                         ),
                         borderRadius: BorderRadius.circular(16),
@@ -228,7 +228,7 @@ class GridPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.white.withOpacity(0.2)
+      ..color = Colors.white.withValues(alpha: 0.2)
       ..strokeWidth = 0.5;
 
     // Vertical lines
