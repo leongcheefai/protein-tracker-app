@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'search_filter.dart';
 import 'empty_states.dart';
 import 'food_item_card.dart';
+import '../../screens/history_screen.dart';
 
 class RecentItemsList extends StatelessWidget {
   final List<Map<String, dynamic>> recentItems;
@@ -12,6 +13,8 @@ class RecentItemsList extends StatelessWidget {
   final List<String> availableMeals;
   final String? editingItemId;
   final Map<String, TextEditingController> editControllers;
+  final double dailyProteinTarget;
+  final Map<String, bool> meals;
   final VoidCallback onToggleSearchBar;
   final Function(String) onSearchChanged;
   final Function(String) onMealFilterChanged;
@@ -34,6 +37,8 @@ class RecentItemsList extends StatelessWidget {
     required this.availableMeals,
     required this.editingItemId,
     required this.editControllers,
+    required this.dailyProteinTarget,
+    required this.meals,
     required this.onToggleSearchBar,
     required this.onSearchChanged,
     required this.onMealFilterChanged,
@@ -77,7 +82,15 @@ class RecentItemsList extends StatelessWidget {
                 CupertinoButton(
                   padding: EdgeInsets.zero,
                   onPressed: () {
-                    // TODO: Navigate to full history
+                    Navigator.push(
+                      context,
+                      CupertinoPageRoute(
+                        builder: (context) => HistoryScreen(
+                          dailyProteinTarget: dailyProteinTarget,
+                          meals: meals,
+                        ),
+                      ),
+                    );
                   },
                   child: const Text(
                     'View All',

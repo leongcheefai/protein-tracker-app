@@ -6,6 +6,8 @@ import '../widgets/user_home/meal_progress.dart';
 import '../widgets/user_home/quick_stats.dart';
 import '../widgets/user_home/recent_items_list.dart';
 import '../widgets/user_home/camera_modal.dart';
+import 'history_screen.dart';
+import 'quick_add_screen.dart';
 
 class UserHomeScreen extends StatefulWidget {
   final double height;
@@ -356,6 +358,109 @@ class _UserHomeScreenState extends State<UserHomeScreen>
                     
                     const SizedBox(height: 32),
                     
+                    // Quick Actions Grid
+                    Container(
+                      padding: const EdgeInsets.all(20.0),
+                      decoration: BoxDecoration(
+                        color: CupertinoColors.white,
+                        borderRadius: BorderRadius.circular(16.0),
+                        boxShadow: [
+                          BoxShadow(
+                            color: CupertinoColors.black.withOpacity(0.05),
+                            blurRadius: 10.0,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Quick Actions',
+                            style: TextStyle(
+                              color: AppColors.textPrimary,
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _buildQuickActionCard(
+                                  icon: CupertinoIcons.camera,
+                                  title: 'Upload Photo',
+                                  subtitle: 'Take a photo of your meal',
+                                  onTap: () => _showCameraSettingsModal(context),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: _buildQuickActionCard(
+                                  icon: CupertinoIcons.chart_bar,
+                                  title: 'View History',
+                                  subtitle: 'Check your progress',
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      CupertinoPageRoute(
+                                        builder: (context) => HistoryScreen(
+                                          dailyProteinTarget: widget.dailyProteinTarget,
+                                          meals: widget.meals,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _buildQuickActionCard(
+                                  icon: CupertinoIcons.slider_horizontal_3,
+                                  title: 'Edit Goals',
+                                  subtitle: 'Update your targets',
+                                  onTap: () {
+                                    // TODO: Navigate to goals editing screen
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: _buildQuickActionCard(
+                                  icon: CupertinoIcons.add,
+                                  title: 'Quick Add',
+                                  subtitle: 'Add protein manually',
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      CupertinoPageRoute(
+                                        builder: (context) => QuickAddScreen(
+                                          mealProgress: _mealProgress,
+                                          mealTargets: {
+                                            'Breakfast': widget.dailyProteinTarget / 4,
+                                            'Lunch': widget.dailyProteinTarget / 4,
+                                            'Dinner': widget.dailyProteinTarget / 4,
+                                            'Snack': widget.dailyProteinTarget / 4,
+                                          },
+                                          enabledMeals: widget.meals,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    
+                    const SizedBox(height: 32),
+                    
                     // Recent Items List
                     RecentItemsList(
                       recentItems: _recentItems,
@@ -366,6 +471,8 @@ class _UserHomeScreenState extends State<UserHomeScreen>
                       availableMeals: _availableMeals,
                       editingItemId: _editingItemId,
                       editControllers: _editControllers,
+                      dailyProteinTarget: widget.dailyProteinTarget,
+                      meals: widget.meals,
                       onToggleSearchBar: _toggleSearchBar,
                       onSearchChanged: (value) {
                         setState(() {
@@ -396,6 +503,57 @@ class _UserHomeScreenState extends State<UserHomeScreen>
                   ],
                 ),
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuickActionCard({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16.0),
+        decoration: BoxDecoration(
+          color: AppColors.background,
+          borderRadius: BorderRadius.circular(12.0),
+          border: Border.all(
+            color: AppColors.background,
+            width: 1,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(
+              icon,
+              color: AppColors.primary,
+              size: 24,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              title,
+              style: const TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              subtitle,
+              style: const TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 12,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),
