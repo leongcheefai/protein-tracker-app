@@ -366,7 +366,7 @@ class _UserHomeScreenState extends State<UserHomeScreen>
                         borderRadius: BorderRadius.circular(16.0),
                         boxShadow: [
                           BoxShadow(
-                            color: CupertinoColors.black.withOpacity(0.05),
+                            color: CupertinoColors.black.withValues(alpha: 0.05),
                             blurRadius: 10.0,
                             offset: const Offset(0, 2),
                           ),
