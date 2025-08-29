@@ -132,24 +132,24 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
             const SizedBox(height: 16),
             
             // Breakfast
-                         _buildMealTimeRow(
-               'Breakfast',
-               'breakfast',
-               settings.mealReminderTimes['breakfast'] ?? '08:00',
-               const Icon(CupertinoIcons.sunrise_fill, color: CupertinoColors.systemOrange),
-               settings,
-             ),
+            _buildMealTimeRow(
+              'Breakfast',
+              'breakfast',
+              settings.mealReminderTimes['breakfast'] ?? '08:00',
+              const Icon(CupertinoIcons.sunrise_fill, color: CupertinoColors.systemOrange),
+              settings,
+            ),
             
             const SizedBox(height: 12),
             
             // Lunch
-                         _buildMealTimeRow(
-               'Lunch',
-               'lunch',
-               settings.mealReminderTimes['lunch'] ?? '12:30',
-               const Icon(CupertinoIcons.sun_max_fill, color: CupertinoColors.systemYellow),
-               settings,
-             ),
+            _buildMealTimeRow(
+              'Lunch',
+              'lunch',
+              settings.mealReminderTimes['lunch'] ?? '12:30',
+              const Icon(CupertinoIcons.sun_max_fill, color: CupertinoColors.systemYellow),
+              settings,
+            ),
             
             const SizedBox(height: 12),
             
@@ -165,13 +165,13 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
             const SizedBox(height: 12),
             
             // Dinner
-                         _buildMealTimeRow(
-               'Dinner',
-               'dinner',
-               settings.mealReminderTimes['dinner'] ?? '19:00',
-               const Icon(CupertinoIcons.moon_fill, color: CupertinoColors.systemPurple),
-               settings,
-             ),
+            _buildMealTimeRow(
+              'Dinner',
+              'dinner',
+              settings.mealReminderTimes['dinner'] ?? '19:00',
+              const Icon(CupertinoIcons.moon_fill, color: CupertinoColors.systemPurple),
+              settings,
+            ),
           ],
         );
       },

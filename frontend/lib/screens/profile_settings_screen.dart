@@ -260,25 +260,25 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                                     const Text(
-                     'Height (cm)',
-                     style: TextStyle(
-                       fontSize: 16,
-                       color: CupertinoColors.black,
-                     ),
-                   ),
+                  const Text(
+                    'Height (cm)',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: CupertinoColors.black,
+                    ),
+                  ),
                   const SizedBox(height: 8),
-                                     CupertinoTextField(
-                     controller: _heightController,
-                     keyboardType: TextInputType.number,
-                     placeholder: '170',
-                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                     style: const TextStyle(
-                       fontSize: 16,
-                       color: CupertinoColors.black,
-                     ),
-                     onChanged: (value) => _updateDailyTarget(),
-                   ),
+                  CupertinoTextField(
+                    controller: _heightController,
+                    keyboardType: TextInputType.number,
+                    placeholder: '170',
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: CupertinoColors.black,
+                    ),
+                    onChanged: (value) => _updateDailyTarget(),
+                  ),
                 ],
               ),
             ),
@@ -287,25 +287,25 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                                     const Text(
-                     'Weight (kg)',
-                     style: TextStyle(
-                       fontSize: 16,
-                       color: CupertinoColors.black,
-                     ),
-                   ),
+                  const Text(
+                    'Weight (kg)',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: CupertinoColors.black,
+                    ),
+                  ),
                   const SizedBox(height: 8),
-                                     CupertinoTextField(
-                     controller: _weightController,
-                     keyboardType: TextInputType.number,
-                     placeholder: '70',
-                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                     style: const TextStyle(
-                       fontSize: 16,
-                       color: CupertinoColors.black,
-                     ),
-                     onChanged: (value) => _updateDailyTarget(),
-                   ),
+                  CupertinoTextField(
+                    controller: _weightController,
+                    keyboardType: TextInputType.number,
+                    placeholder: '70',
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: CupertinoColors.black,
+                    ),
+                    onChanged: (value) => _updateDailyTarget(),
+                  ),
                 ],
               ),
             ),
@@ -319,14 +319,14 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-                 const Text(
-           'Training Frequency',
-           style: TextStyle(
-             fontSize: 18,
-             fontWeight: FontWeight.w600,
-             color: CupertinoColors.black,
-           ),
-         ),
+        const Text(
+          'Training Frequency',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: CupertinoColors.black,
+          ),
+        ),
         const SizedBox(height: 16),
         
         Column(
