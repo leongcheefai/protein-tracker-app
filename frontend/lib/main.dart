@@ -9,6 +9,8 @@ import 'screens/meal_assignment_screen.dart';
 import 'screens/confirmation_screen.dart';
 import 'screens/user_home_screen.dart';
 import 'screens/history_screen.dart';
+import 'screens/meal_breakdown_view.dart';
+import 'screens/stats_overview.dart';
 
 void main() {
   runApp(const ProteinPaceApp());
@@ -96,6 +98,21 @@ class ProteinPaceApp extends StatelessWidget {
           return HistoryScreen(
             dailyProteinTarget: args['dailyProteinTarget'] as double,
             meals: args['meals'] as Map<String, bool>,
+          );
+        },
+        '/meal-breakdown': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+          return MealBreakdownView(
+            date: args['date'] as String,
+            dailyTotal: args['dailyTotal'] as double,
+            dailyGoal: args['dailyGoal'] as double,
+            meals: args['meals'] as Map<String, Map<String, dynamic>>,
+          );
+        },
+        '/stats-overview': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+          return StatsOverview(
+            dailyProteinTarget: args['dailyProteinTarget'] as double,
           );
         },
       },

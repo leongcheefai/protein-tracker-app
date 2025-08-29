@@ -126,6 +126,44 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       ),
                     ),
                   ),
+                  const SizedBox(height: 12),
+                  
+                  // View Stats Button
+                  Container(
+                    width: double.infinity,
+                    margin: const EdgeInsets.only(bottom: 16.0),
+                    child: CupertinoButton(
+                      onPressed: () {
+                        Navigator.pushNamed(
+                          context,
+                          '/stats-overview',
+                          arguments: {
+                            'dailyProteinTarget': widget.dailyProteinTarget,
+                          },
+                        );
+                      },
+                      padding: const EdgeInsets.symmetric(vertical: 12.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            CupertinoIcons.chart_bar_fill,
+                            color: AppColors.primary,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'View Stats',
+                            style: TextStyle(
+                              color: AppColors.primary,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                   
                   // Date Range Selector
                   Row(
@@ -192,20 +230,33 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   final date = DateTime.parse(dayData['date']);
                   final isToday = date.isAtSameMomentAs(DateTime.now().subtract(const Duration(days: 1)));
                   
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 16.0),
-                    decoration: BoxDecoration(
-                      color: CupertinoColors.white,
-                      borderRadius: BorderRadius.circular(16.0),
-                      boxShadow: [
-                        BoxShadow(
-                          color: CupertinoColors.black.withValues(alpha: 0.05),
-                          blurRadius: 10.0,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Column(
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.pushNamed(
+                        context,
+                        '/meal-breakdown',
+                        arguments: {
+                          'date': dayData['date'],
+                          'dailyTotal': dayData['totalProtein'],
+                          'dailyGoal': dayData['goal'],
+                          'meals': dayData['meals'],
+                        },
+                      );
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 16.0),
+                      decoration: BoxDecoration(
+                        color: CupertinoColors.white,
+                        borderRadius: BorderRadius.circular(16.0),
+                        boxShadow: [
+                          BoxShadow(
+                            color: CupertinoColors.black.withValues(alpha: 0.05),
+                            blurRadius: 10.0,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Column(
                       children: [
                         // Enhanced Day Header with Streak
                         Container(
@@ -486,8 +537,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         ),
                       ],
                     ),
-                  );
-                },
+                  ),
+                );
+              },
               ),
             ),
           ],

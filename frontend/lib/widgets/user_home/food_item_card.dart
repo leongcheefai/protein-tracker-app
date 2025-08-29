@@ -135,9 +135,19 @@ class FoodItemCard extends StatelessWidget {
                                   controller: editController,
                                   keyboardType: TextInputType.number,
                                   placeholder: 'Portion (g)',
+                                  style: const TextStyle(
+                                    color: Color(0xFF111827), // AppColors.textPrimary
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                  placeholderStyle: const TextStyle(
+                                    color: Color(0xFF9CA3AF), // AppColors.neutral
+                                    fontSize: 16,
+                                  ),
                                   decoration: BoxDecoration(
                                     border: Border.all(color: const Color(0xFF9CA3AF).withValues(alpha: 0.3)), // AppColors.neutral
                                     borderRadius: BorderRadius.circular(8),
+                                    color: Colors.white,
                                   ),
                                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                 ),
