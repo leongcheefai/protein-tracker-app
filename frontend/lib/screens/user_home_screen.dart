@@ -588,6 +588,20 @@ class _UserHomeScreenState extends State<UserHomeScreen>
             },
             child: const Text('Notification Settings'),
           ),
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.of(context).pop();
+              Navigator.of(context).pushNamed('/privacy-settings');
+            },
+            child: const Text('Privacy & Data'),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.of(context).pop();
+              Navigator.of(context).pushNamed('/about-help');
+            },
+            child: const Text('About & Help'),
+          ),
         ],
         cancelButton: CupertinoActionSheetAction(
           onPressed: () => Navigator.of(context).pop(),

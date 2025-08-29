@@ -14,6 +14,8 @@ import 'screens/meal_breakdown_view.dart';
 import 'screens/stats_overview.dart';
 import 'screens/profile_settings_screen.dart';
 import 'screens/notification_settings_screen.dart';
+import 'screens/privacy_settings_screen.dart';
+import 'screens/about_help_screen.dart';
 import 'utils/user_settings_provider.dart';
 
 void main() {
@@ -132,6 +134,8 @@ class ProteinPaceApp extends StatelessWidget {
             );
           },
           '/notification-settings': (context) => const NotificationSettingsScreen(),
+        '/privacy-settings': (context) => const PrivacySettingsScreen(),
+        '/about-help': (context) => const AboutHelpScreen(),
         },
       ),
     );
