@@ -303,9 +303,7 @@ class _UserHomeScreenState extends State<UserHomeScreen>
         ),
         trailing: CupertinoButton(
           padding: EdgeInsets.zero,
-          onPressed: () {
-            // TODO: Navigate to settings screen
-          },
+          onPressed: () => _showSettingsMenu(context),
           child: Icon(
             CupertinoIcons.settings,
             color: AppColors.textPrimary,
@@ -556,6 +554,44 @@ class _UserHomeScreenState extends State<UserHomeScreen>
               overflow: TextOverflow.ellipsis,
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  void _showSettingsMenu(BuildContext context) {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (context) => CupertinoActionSheet(
+        title: const Text('Settings'),
+        actions: [
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.of(context).pop();
+              Navigator.of(context).pushNamed(
+                '/profile-settings',
+                arguments: {
+                  'height': widget.height,
+                  'weight': widget.weight,
+                  'trainingMultiplier': widget.trainingMultiplier,
+                  'goal': widget.goal,
+                  'dailyProteinTarget': widget.dailyProteinTarget,
+                },
+              );
+            },
+            child: const Text('Profile Settings'),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.of(context).pop();
+              Navigator.of(context).pushNamed('/notification-settings');
+            },
+            child: const Text('Notification Settings'),
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
         ),
       ),
     );
