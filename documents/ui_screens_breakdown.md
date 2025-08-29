@@ -297,7 +297,7 @@ This document breaks down the UI development phases and individual screens for t
 ### **Phase 5: Settings & Profile (Week 6-7)**
 *Milestone: M6 – Notifications*
 
-#### 4.5 Profile Settings
+#### 5.1 Profile Settings
 - **Purpose:** Update personal information and goals
 - **Elements:**
   - Profile photo (optional)
@@ -307,7 +307,7 @@ This document breaks down the UI development phases and individual screens for t
   - "Save Changes" button
 - **Navigation:** → Settings Menu
 
-#### 4.6 Notification Settings
+#### 5.2 Notification Settings
 - **Purpose:** Configure meal reminders and timing
 - **Elements:**
   - "Enable Notifications" toggle
@@ -321,7 +321,7 @@ This document breaks down the UI development phases and individual screens for t
   - "Save" button
 - **Navigation:** → Settings Menu
 
-#### 4.7 Privacy Settings
+#### 5.3 Privacy Settings
 - **Purpose:** Manage data and privacy preferences
 - **Elements:**
   - "Data Export" button
@@ -331,7 +331,7 @@ This document breaks down the UI development phases and individual screens for t
   - Contact support link
 - **Navigation:** → Settings Menu
 
-#### 4.8 About & Help
+#### 5.4 About & Help
 - **Purpose:** App information and support
 - **Elements:**
   - App version
@@ -346,7 +346,7 @@ This document breaks down the UI development phases and individual screens for t
 ### **Phase 6: Error & Edge Cases (Week 7-8)**
 *Milestone: M7 – Polish & Beta*
 
-#### 4.9 Permission Denied Screens
+#### 6.1 Permission Denied Screens
 - **Purpose:** Handle denied permissions gracefully
 - **Elements:**
   - Permission type (Camera, Notifications)
@@ -355,7 +355,7 @@ This document breaks down the UI development phases and individual screens for t
   - "Maybe Later" button
 - **States:** Camera denied, notifications denied, storage denied
 
-#### 4.10 Network Error States
+#### 6.2 Network Error States
 - **Purpose:** Handle offline/connection issues
 - **Elements:**
   - Error icon
@@ -364,7 +364,7 @@ This document breaks down the UI development phases and individual screens for t
   - Offline mode indicator
 - **States:** No internet, API error, timeout
 
-#### 4.11 Empty States
+#### 6.3 Empty States
 - **Purpose:** Guide first-time users and show no-data scenarios
 - **Elements:**
   - Illustrative icon
@@ -373,7 +373,7 @@ This document breaks down the UI development phases and individual screens for t
   - Tips or guidance
 - **States:** First time, no data, no results
 
-#### 4.12 Loading States
+#### 6.4 Loading States
 - **Purpose:** Show progress and prevent blank screens
 - **Elements:**
   - Skeleton screens
