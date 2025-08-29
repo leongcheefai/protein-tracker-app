@@ -89,85 +89,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
       child: SafeArea(
         child: Column(
           children: [
-            // Enhanced Date Range Selector with Today Quick Access
+            // Enhanced Date Range Selector with Compact Icon Buttons
             Container(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
-                  // Today Quick Access Button
-                  Container(
-                    width: double.infinity,
-                    margin: const EdgeInsets.only(bottom: 16.0),
-                    child: CupertinoButton.filled(
-                      onPressed: () {
-                        // TODO: Navigate to today's data
-                        setState(() {
-                          _selectedDateRange = '7 days';
-                        });
-                      },
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(
-                            CupertinoIcons.calendar,
-                            color: CupertinoColors.white,
-                            size: 20,
-                          ),
-                          const SizedBox(width: 8),
-                          const Text(
-                            'Today',
-                            style: TextStyle(
-                              color: CupertinoColors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  
-                  // View Stats Button
-                  Container(
-                    width: double.infinity,
-                    margin: const EdgeInsets.only(bottom: 16.0),
-                    child: CupertinoButton(
-                      onPressed: () {
-                        Navigator.pushNamed(
-                          context,
-                          '/stats-overview',
-                          arguments: {
-                            'dailyProteinTarget': widget.dailyProteinTarget,
-                          },
-                        );
-                      },
-                      padding: const EdgeInsets.symmetric(vertical: 12.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(
-                            CupertinoIcons.chart_bar_fill,
-                            color: AppColors.primary,
-                            size: 20,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'View Stats',
-                            style: TextStyle(
-                              color: AppColors.primary,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  
-                  // Date Range Selector
+                  // Header Row with Icon Buttons and Date Range
                   Row(
                     children: [
+                      // Date Range Label
                       const Text(
                         'Date Range:',
                         style: TextStyle(
@@ -177,6 +107,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         ),
                       ),
                       const SizedBox(width: 12),
+                      
+                      // Date Range Selector
                       Expanded(
                         child: Container(
                           decoration: BoxDecoration(
@@ -212,6 +144,43 @@ class _HistoryScreenState extends State<HistoryScreen> {
                               }
                             },
                           ),
+                        ),
+                      ),
+                      
+                      const SizedBox(width: 16),
+                      
+                      // Today Quick Access Icon Button
+                      CupertinoButton(
+                        padding: const EdgeInsets.all(8.0),
+                        onPressed: () {
+                          // TODO: Navigate to today's data
+                          setState(() {
+                            _selectedDateRange = '7 days';
+                          });
+                        },
+                        child: Icon(
+                          CupertinoIcons.calendar,
+                          color: AppColors.primary,
+                          size: 24,
+                        ),
+                      ),
+                      
+                      // View Stats Icon Button
+                      CupertinoButton(
+                        padding: const EdgeInsets.all(8.0),
+                        onPressed: () {
+                          Navigator.pushNamed(
+                            context,
+                            '/stats-overview',
+                            arguments: {
+                              'dailyProteinTarget': widget.dailyProteinTarget,
+                            },
+                          );
+                        },
+                        child: Icon(
+                          CupertinoIcons.chart_bar_fill,
+                          color: AppColors.primary,
+                          size: 24,
                         ),
                       ),
                     ],
