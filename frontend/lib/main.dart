@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'screens/splash_screen.dart';
 import 'screens/camera_launch_screen.dart';
 import 'screens/photo_capture_screen.dart';
@@ -8,6 +8,7 @@ import 'screens/portion_selection_screen.dart';
 import 'screens/meal_assignment_screen.dart';
 import 'screens/confirmation_screen.dart';
 import 'screens/user_home_screen.dart';
+import 'screens/history_screen.dart';
 
 void main() {
   runApp(const ProteinPaceApp());
@@ -18,48 +19,16 @@ class ProteinPaceApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return CupertinoApp(
       title: 'Protein Pace',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF2563EB),
-          brightness: Brightness.light,
-        ),
-        useMaterial3: true,
-        fontFamily: 'SF Pro Display',
-        textTheme: const TextTheme(
-          displayLarge: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-          displayMedium: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
-          displaySmall: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-          headlineMedium: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-          bodyLarge: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
-          bodyMedium: TextStyle(fontSize: 14, fontWeight: FontWeight.normal),
-          bodySmall: TextStyle(fontSize: 12, fontWeight: FontWeight.normal),
-          labelLarge: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-        ),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            minimumSize: const Size(double.infinity, 48),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            textStyle: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
+      theme: const CupertinoThemeData(
+        primaryColor: AppColors.primary,
+        brightness: Brightness.light,
+        textTheme: CupertinoTextThemeData(
+          textStyle: TextStyle(
+            fontFamily: 'SF Pro Display',
           ),
-        ),
-        inputDecorationTheme: InputDecorationTheme(
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: Color(0xFFD1D5DB)),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: Color(0xFF2563EB), width: 2),
-          ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
         ),
       ),
       initialRoute: '/',
@@ -118,6 +87,13 @@ class ProteinPaceApp extends StatelessWidget {
             weight: args['weight'] as double,
             trainingMultiplier: args['trainingMultiplier'] as double,
             goal: args['goal'] as String,
+            dailyProteinTarget: args['dailyProteinTarget'] as double,
+            meals: args['meals'] as Map<String, bool>,
+          );
+        },
+        '/history': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+          return HistoryScreen(
             dailyProteinTarget: args['dailyProteinTarget'] as double,
             meals: args['meals'] as Map<String, bool>,
           );

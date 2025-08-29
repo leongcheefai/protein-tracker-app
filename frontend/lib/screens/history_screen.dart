@@ -60,7 +60,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   ];
 
   String _selectedDateRange = '7 days';
-  final List<String> _dateRanges = ['7 days', '30 days', '90 days', '1 year'];
+  final List<String> _dateRanges = ['7 days', '30 days', '1 year'];
 
   @override
   Widget build(BuildContext context) {
@@ -89,38 +89,94 @@ class _HistoryScreenState extends State<HistoryScreen> {
       child: SafeArea(
         child: Column(
           children: [
-            // Date Range Selector
+            // Enhanced Date Range Selector with Today Quick Access
             Container(
               padding: const EdgeInsets.all(16.0),
-              child: Row(
+              child: Column(
                 children: [
-                  const Text(
-                    'Date Range:',
-                    style: TextStyle(
-                      color: AppColors.textPrimary,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
+                  // Today Quick Access Button
+                  Container(
+                    width: double.infinity,
+                    margin: const EdgeInsets.only(bottom: 16.0),
+                    child: CupertinoButton.filled(
+                      onPressed: () {
+                        // TODO: Navigate to today's data
+                        setState(() {
+                          _selectedDateRange = '7 days';
+                        });
+                      },
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            CupertinoIcons.calendar,
+                            color: CupertinoColors.white,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          const Text(
+                            'Today',
+                            style: TextStyle(
+                              color: CupertinoColors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: CupertinoSlidingSegmentedControl<String>(
-                      groupValue: _selectedDateRange,
-                      children: {
-                        for (final range in _dateRanges)
-                          range: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Text(range),
+                  
+                  // Date Range Selector
+                  Row(
+                    children: [
+                      const Text(
+                        'Date Range:',
+                        style: TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: AppColors.secondaryBackground,
+                            borderRadius: BorderRadius.circular(8.0),
                           ),
-                      },
-                      onValueChanged: (value) {
-                        if (value != null) {
-                          setState(() {
-                            _selectedDateRange = value;
-                          });
-                        }
-                      },
-                    ),
+                          child: CupertinoSlidingSegmentedControl<String>(
+                            groupValue: _selectedDateRange,
+                            backgroundColor: AppColors.secondaryBackground,
+                            thumbColor: AppColors.primary,
+                            children: {
+                              for (final range in _dateRanges)
+                                range: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                                  child: Text(
+                                    range,
+                                    style: TextStyle(
+                                      color: _selectedDateRange == range 
+                                          ? CupertinoColors.white 
+                                          : AppColors.textPrimary,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                            },
+                            onValueChanged: (value) {
+                              if (value != null) {
+                                setState(() {
+                                  _selectedDateRange = value;
+                                });
+                              }
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -140,10 +196,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     margin: const EdgeInsets.only(bottom: 16.0),
                     decoration: BoxDecoration(
                       color: CupertinoColors.white,
-                      borderRadius: BorderRadius.circular(12.0),
+                      borderRadius: BorderRadius.circular(16.0),
                       boxShadow: [
                         BoxShadow(
-                          color: CupertinoColors.black.withOpacity(0.05),
+                          color: CupertinoColors.black.withValues(alpha: 0.05),
                           blurRadius: 10.0,
                           offset: const Offset(0, 2),
                         ),
@@ -151,14 +207,14 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     ),
                     child: Column(
                       children: [
-                        // Day Header
+                        // Enhanced Day Header with Streak
                         Container(
                           padding: const EdgeInsets.all(16.0),
                           decoration: BoxDecoration(
-                            color: isToday ? AppColors.primary.withOpacity(0.1) : null,
+                            color: isToday ? AppColors.primary.withValues(alpha: 0.1) : null,
                             borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(12.0),
-                              topRight: Radius.circular(12.0),
+                              topLeft: Radius.circular(16.0),
+                              topRight: Radius.circular(16.0),
                             ),
                           ),
                           child: Row(
@@ -190,24 +246,44 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                     Container(
                                       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
                                       decoration: BoxDecoration(
-                                        color: CupertinoColors.systemGreen.withOpacity(0.2),
+                                        color: AppColors.success.withValues(alpha: 0.2),
                                         borderRadius: BorderRadius.circular(12.0),
                                       ),
                                       child: const Text(
                                         'Goal Met!',
                                         style: TextStyle(
-                                          color: CupertinoColors.systemGreen,
+                                          color: AppColors.success,
                                           fontSize: 12,
                                           fontWeight: FontWeight.w600,
                                         ),
                                       ),
                                     ),
                                   const SizedBox(width: 8),
-                                  Text(
-                                    '${dayData['streak']} day streak',
-                                    style: const TextStyle(
-                                      color: AppColors.textSecondary,
-                                      fontSize: 12,
+                                  // Enhanced Streak Indicator
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.primary.withValues(alpha: 0.1),
+                                      borderRadius: BorderRadius.circular(12.0),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Icon(
+                                          CupertinoIcons.flame_fill,
+                                          color: AppColors.primary,
+                                          size: 16,
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          '${dayData['streak']} day streak',
+                                          style: const TextStyle(
+                                            color: AppColors.primary,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ],
@@ -216,48 +292,60 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           ),
                         ),
 
-                        // Progress Summary
+                        // Enhanced Progress Summary with Better Protein Ring
                         Container(
                           padding: const EdgeInsets.all(16.0),
                           child: Row(
                             children: [
-                              // Protein Ring
+                              // Enhanced Protein Ring
                               SizedBox(
-                                width: 60,
-                                height: 60,
+                                width: 80,
+                                height: 80,
                                 child: Stack(
                                   children: [
                                     // Background circle
                                     Container(
-                                      width: 60,
-                                      height: 60,
+                                      width: 80,
+                                      height: 80,
                                       decoration: BoxDecoration(
                                         shape: BoxShape.circle,
                                         border: Border.all(
-                                          color: AppColors.background,
-                                          width: 4,
+                                          color: AppColors.secondaryBackground,
+                                          width: 6,
                                         ),
                                       ),
                                     ),
-                                    // Progress circle
+                                    // Progress circle with gradient
                                     Container(
-                                      width: 60,
-                                      height: 60,
+                                      width: 80,
+                                      height: 80,
                                       decoration: BoxDecoration(
                                         shape: BoxShape.circle,
                                         border: Border.all(
                                           color: _getProgressColor(dayData['totalProtein'], dayData['goal']),
-                                          width: 4,
+                                          width: 6,
                                         ),
                                       ),
                                       child: Center(
-                                        child: Text(
-                                          '${(dayData['totalProtein'] / dayData['goal'] * 100).round()}%',
-                                          style: const TextStyle(
-                                            color: AppColors.textPrimary,
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w600,
-                                          ),
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              '${(dayData['totalProtein'] / dayData['goal'] * 100).round()}%',
+                                              style: const TextStyle(
+                                                color: AppColors.textPrimary,
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            Text(
+                                              'Goal',
+                                              style: TextStyle(
+                                                color: AppColors.textSecondary,
+                                                fontSize: 10,
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ),
                                     ),
@@ -274,7 +362,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                       '${dayData['totalProtein'].round()}g / ${dayData['goal'].round()}g',
                                       style: const TextStyle(
                                         color: AppColors.textPrimary,
-                                        fontSize: 20,
+                                        fontSize: 24,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
@@ -285,6 +373,25 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                         fontSize: 14,
                                       ),
                                     ),
+                                    const SizedBox(height: 8),
+                                    // Progress bar
+                                    Container(
+                                      height: 6,
+                                      decoration: BoxDecoration(
+                                        color: AppColors.secondaryBackground,
+                                        borderRadius: BorderRadius.circular(3),
+                                      ),
+                                      child: FractionallySizedBox(
+                                        alignment: Alignment.centerLeft,
+                                        widthFactor: (dayData['totalProtein'] / dayData['goal']).clamp(0.0, 1.0),
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            color: _getProgressColor(dayData['totalProtein'], dayData['goal']),
+                                            borderRadius: BorderRadius.circular(3),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),
@@ -292,22 +399,22 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           ),
                         ),
 
-                        // Meal Breakdown
+                        // Enhanced Meal Breakdown
                         Container(
                           padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 16.0),
                           child: Column(
                             children: [
                               Container(
-                               height: 1,
-                               color: AppColors.background,
-                             ),
-                              const SizedBox(height: 8),
+                                height: 1,
+                                color: AppColors.secondaryBackground,
+                              ),
+                              const SizedBox(height: 12),
                               ...dayData['meals'].entries.map((meal) {
                                 final mealData = meal.value as Map<String, dynamic>;
                                 final progress = mealData['actual'] / mealData['target'];
                                 
                                 return Padding(
-                                  padding: const EdgeInsets.only(bottom: 8.0),
+                                  padding: const EdgeInsets.only(bottom: 12.0),
                                   child: Row(
                                     children: [
                                       SizedBox(
@@ -325,38 +432,39 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                         child: Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                                                                         Row(
-                                               children: [
-                                                 Expanded(
-                                                   child: Container(
-                                                     height: 4,
-                                                     decoration: BoxDecoration(
-                                                       color: AppColors.background,
-                                                       borderRadius: BorderRadius.circular(2),
-                                                     ),
-                                                     child: FractionallySizedBox(
-                                                       alignment: Alignment.centerLeft,
-                                                       widthFactor: progress.clamp(0.0, 1.0),
-                                                       child: Container(
-                                                         decoration: BoxDecoration(
-                                                           color: _getProgressColor(mealData['actual'], mealData['target']),
-                                                           borderRadius: BorderRadius.circular(2),
-                                                         ),
-                                                       ),
-                                                     ),
-                                                   ),
-                                                 ),
-                                                 const SizedBox(width: 8),
-                                                 Text(
-                                                   '${mealData['actual'].round()}g',
-                                                   style: const TextStyle(
-                                                     color: AppColors.textPrimary,
-                                                     fontSize: 14,
-                                                     fontWeight: FontWeight.w600,
-                                                   ),
-                                                 ),
-                                               ],
-                                             ),
+                                            Row(
+                                              children: [
+                                                Expanded(
+                                                  child: Container(
+                                                    height: 6,
+                                                    decoration: BoxDecoration(
+                                                      color: AppColors.secondaryBackground,
+                                                      borderRadius: BorderRadius.circular(3),
+                                                    ),
+                                                    child: FractionallySizedBox(
+                                                      alignment: Alignment.centerLeft,
+                                                      widthFactor: progress.clamp(0.0, 1.0),
+                                                      child: Container(
+                                                        decoration: BoxDecoration(
+                                                          color: _getProgressColor(mealData['actual'], mealData['target']),
+                                                          borderRadius: BorderRadius.circular(3),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 8),
+                                                Text(
+                                                  '${mealData['actual'].round()}g',
+                                                  style: const TextStyle(
+                                                    color: AppColors.textPrimary,
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 4),
                                             Text(
                                               mealData['items'].join(', '),
                                               style: const TextStyle(
@@ -394,7 +502,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     
     if (difference == 0) return 'Today';
     if (difference == 1) return 'Yesterday';
-    if (difference < 7) return '${difference} days ago';
+    if (difference < 7) return '$difference days ago';
     
     return '${date.day}/${date.month}/${date.year}';
   }
@@ -425,8 +533,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   Color _getProgressColor(double actual, double target) {
     final percentage = actual / target;
-    if (percentage >= 1.0) return CupertinoColors.systemGreen;
-    if (percentage >= 0.8) return CupertinoColors.systemOrange;
-    return CupertinoColors.systemRed;
+    if (percentage >= 1.0) return AppColors.success;
+    if (percentage >= 0.8) return AppColors.warning;
+    return AppColors.error;
   }
 }
