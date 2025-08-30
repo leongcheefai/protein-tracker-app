@@ -2,6 +2,8 @@ import 'package:flutter/cupertino.dart';
 import '../main.dart';
 import 'permission_denied_screen.dart';
 import 'network_error_screen.dart';
+import 'empty_states_screen.dart';
+import 'loading_states_screen.dart';
 
 class ErrorDemoScreen extends StatelessWidget {
   const ErrorDemoScreen({super.key});
@@ -155,6 +157,94 @@ class ErrorDemoScreen extends StatelessWidget {
                 () => _showNetworkError(context, NetworkErrorType.unknown),
                 CupertinoIcons.exclamationmark_circle,
                 AppColors.neutral,
+              ),
+              
+              const SizedBox(height: 32),
+              
+              // Empty States Screens
+              const Text(
+                'Empty States Screens',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              
+              const SizedBox(height: 16),
+              
+              _buildDemoButton(
+                context,
+                'First Time User',
+                'Test first time empty state screen',
+                () => _showEmptyState(context, EmptyStateType.firstTime),
+                CupertinoIcons.rocket,
+                AppColors.primary,
+              ),
+              
+              const SizedBox(height: 12),
+              
+              _buildDemoButton(
+                context,
+                'No History',
+                'Test no history empty state screen',
+                () => _showEmptyState(context, EmptyStateType.noHistory),
+                CupertinoIcons.clock,
+                AppColors.neutral,
+              ),
+              
+              const SizedBox(height: 12),
+              
+              _buildDemoButton(
+                context,
+                'No Meals',
+                'Test no meals empty state screen',
+                () => _showEmptyState(context, EmptyStateType.noMeals),
+                CupertinoIcons.camera,
+                AppColors.primary,
+              ),
+              
+              const SizedBox(height: 32),
+              
+              // Loading States Screens
+              const Text(
+                'Loading States Screens',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              
+              const SizedBox(height: 16),
+              
+              _buildDemoButton(
+                context,
+                'Processing',
+                'Test processing loading screen',
+                () => _showLoadingState(context, LoadingStateType.processing),
+                CupertinoIcons.gear,
+                AppColors.warning,
+              ),
+              
+              const SizedBox(height: 12),
+              
+              _buildDemoButton(
+                context,
+                'Analyzing',
+                'Test analyzing loading screen',
+                () => _showLoadingState(context, LoadingStateType.analyzing),
+                CupertinoIcons.search,
+                AppColors.success,
+              ),
+              
+              _buildDemoButton(
+                context,
+                'With Progress',
+                'Test loading screen with progress bar',
+                () => _showLoadingStateWithProgress(context),
+                CupertinoIcons.cloud_upload,
+                AppColors.primary,
               ),
               
               const SizedBox(height: 32),
@@ -313,6 +403,52 @@ class ErrorDemoScreen extends StatelessWidget {
             // In a real app, you would navigate back
           },
           showOfflineMode: errorType == NetworkErrorType.noInternet,
+        ),
+      ),
+    );
+  }
+
+  void _showEmptyState(BuildContext context, EmptyStateType emptyStateType) {
+    Navigator.of(context).push(
+      CupertinoPageRoute(
+        builder: (context) => EmptyStatesScreen(
+          emptyStateType: emptyStateType,
+          onActionPressed: () {
+            Navigator.of(context).pop();
+            // In a real app, you would handle the action
+          },
+        ),
+      ),
+    );
+  }
+
+  void _showLoadingState(BuildContext context, LoadingStateType loadingStateType) {
+    Navigator.of(context).push(
+      CupertinoPageRoute(
+        builder: (context) => LoadingStatesScreen(
+          loadingStateType: loadingStateType,
+          cancellable: true,
+          onCancel: () {
+            Navigator.of(context).pop();
+            // In a real app, you would cancel the operation
+          },
+        ),
+      ),
+    );
+  }
+
+  void _showLoadingStateWithProgress(BuildContext context) {
+    Navigator.of(context).push(
+      CupertinoPageRoute(
+        builder: (context) => LoadingStatesScreen(
+          loadingStateType: LoadingStateType.uploading,
+          showProgress: true,
+          progressValue: 0.65, // Demo progress value
+          cancellable: true,
+          onCancel: () {
+            Navigator.of(context).pop();
+            // In a real app, you would cancel the upload
+          },
         ),
       ),
     );

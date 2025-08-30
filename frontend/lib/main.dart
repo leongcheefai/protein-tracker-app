@@ -18,6 +18,8 @@ import 'screens/privacy_settings_screen.dart';
 import 'screens/about_help_screen.dart';
 import 'screens/permission_denied_screen.dart';
 import 'screens/network_error_screen.dart';
+import 'screens/empty_states_screen.dart';
+import 'screens/loading_states_screen.dart';
 import 'screens/error_demo_screen.dart';
 import 'utils/user_settings_provider.dart';
 
@@ -158,6 +160,29 @@ class ProteinPaceApp extends StatelessWidget {
             );
           },
           '/error-demo': (context) => const ErrorDemoScreen(),
+          '/empty-states': (context) {
+            final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+            return EmptyStatesScreen(
+              emptyStateType: args['emptyStateType'] as EmptyStateType,
+              customTitle: args['customTitle'] as String?,
+              customMessage: args['customMessage'] as String?,
+              customActionText: args['customActionText'] as String?,
+              onActionPressed: args['onActionPressed'] as VoidCallback?,
+              showIllustration: args['showIllustration'] as bool? ?? true,
+            );
+          },
+          '/loading-states': (context) {
+            final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+            return LoadingStatesScreen(
+              loadingStateType: args['loadingStateType'] as LoadingStateType,
+              customTitle: args['customTitle'] as String?,
+              customMessage: args['customMessage'] as String?,
+              showProgress: args['showProgress'] as bool? ?? false,
+              progressValue: args['progressValue'] as double?,
+              onCancel: args['onCancel'] as VoidCallback?,
+              cancellable: args['cancellable'] as bool? ?? false,
+            );
+          },
         },
       ),
     );

@@ -72,15 +72,92 @@ Navigator.of(context).push(
 - `NetworkErrorType.serverError` - Server-side issues
 - `NetworkErrorType.unknown` - Unknown network errors
 
-### 3. Error Demo Screen (`error_demo_screen.dart`)
+### 3. Empty States Screen (`empty_states_screen.dart`)
+
+**Purpose:** Handle gracefully when there's no data to display and guide first-time users.
+
+**Features:**
+- Multiple empty state types: First Time, No Data, No Results, No History, No Meals, No Progress
+- Custom titles, messages, and action text support
+- Contextual icons and colors for each state type
+- Action buttons with customizable callbacks
+- Helpful tips section with contextual guidance
+- Optional illustration display
+
+**Usage:**
+```dart
+Navigator.of(context).push(
+  CupertinoPageRoute(
+    builder: (context) => EmptyStatesScreen(
+      emptyStateType: EmptyStateType.firstTime,
+      customTitle: "Custom title",
+      customMessage: "Custom message",
+      customActionText: "Custom action",
+      onActionPressed: () => // Handle action,
+      showIllustration: true,
+    ),
+  ),
+);
+```
+
+**Empty State Types:**
+- `EmptyStateType.firstTime` - Welcome new users
+- `EmptyStateType.noData` - No data available
+- `EmptyStateType.noResults` - Search returned no results
+- `EmptyStateType.noHistory` - No meal history
+- `EmptyStateType.noMeals` - No meals logged
+- `EmptyStateType.noProgress` - No progress data
+
+### 4. Loading States Screen (`loading_states_screen.dart`)
+
+**Purpose:** Show progress and prevent blank screens during data loading and processing.
+
+**Features:**
+- Multiple loading types: Initial Load, Data Fetch, Processing, Uploading, Analyzing, Saving, Refreshing
+- Custom titles and messages support
+- Animated icons with pulse and rotation effects
+- Optional progress bar with percentage display
+- Animated loading dots with staggered animation
+- Cancellable operations support
+- Contextual icons and colors for each loading type
+
+**Usage:**
+```dart
+Navigator.of(context).push(
+  CupertinoPageRoute(
+    builder: (context) => LoadingStatesScreen(
+      loadingStateType: LoadingStateType.processing,
+      customTitle: "Custom title",
+      customMessage: "Custom message",
+      showProgress: true,
+      progressValue: 0.75,
+      cancellable: true,
+      onCancel: () => // Handle cancellation,
+    ),
+  ),
+);
+```
+
+**Loading State Types:**
+- `LoadingStateType.initialLoad` - App initialization
+- `LoadingStateType.dataFetch` - Data retrieval
+- `LoadingStateType.processing` - Data processing
+- `LoadingStateType.uploading` - File uploads
+- `LoadingStateType.analyzing` - AI analysis
+- `LoadingStateType.saving` - Data persistence
+- `LoadingStateType.refreshing` - Data refresh
+
+### 5. Error Demo Screen (`error_demo_screen.dart`)
 
 **Purpose:** Demonstrate and test all error screen variations.
 
 **Features:**
 - Interactive buttons for each permission type
 - Interactive buttons for each network error type
-- Real-time navigation to error screens
-- Comprehensive testing interface
+- Interactive buttons for each empty state type
+- Interactive buttons for each loading state type
+- Real-time navigation to all error and edge case screens
+- Comprehensive testing interface for Phase 6
 
 **Route:** `/error-demo`
 
@@ -112,6 +189,8 @@ All error screens are integrated into the main app routing system in `main.dart`
 ```dart
 '/permission-denied': (context) => // Permission denied screen
 '/network-error': (context) => // Network error screen
+'/empty-states': (context) => // Empty states screen
+'/loading-states': (context) => // Loading states screen
 '/error-demo': (context) => // Demo screen
 ```
 
