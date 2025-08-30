@@ -198,11 +198,18 @@ class _HeightWeightScreenState extends State<HeightWeightScreen> {
         
         // Slider
         Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: AppColors.secondaryBackground,
+            color: AppColors.background,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.neutral.withValues(alpha: 0.2)),
+            border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.neutral.withValues(alpha: 0.1),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
           child: Column(
             children: [
@@ -214,6 +221,7 @@ class _HeightWeightScreenState extends State<HeightWeightScreen> {
                     style: TextStyle(
                       fontSize: 14,
                       color: AppColors.textSecondary,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                   Text(
@@ -221,12 +229,13 @@ class _HeightWeightScreenState extends State<HeightWeightScreen> {
                     style: TextStyle(
                       fontSize: 14,
                       color: AppColors.textSecondary,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ],
               ),
               
-              const SizedBox(height: 6),
+              const SizedBox(height: 12),
               
               CupertinoSlider(
                 value: value,
@@ -237,35 +246,83 @@ class _HeightWeightScreenState extends State<HeightWeightScreen> {
                 activeColor: AppColors.primary,
                 thumbColor: AppColors.primary,
               ),
+              
+              const SizedBox(height: 8),
+              
+              // Current value display
+              Text(
+                '${value.toInt()}$unit',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.primary,
+                ),
+              ),
             ],
           ),
         ),
         
         const SizedBox(height: 12),
         
+        // Manual Input Label
+        Text(
+          'Or enter manually:',
+          style: TextStyle(
+            fontSize: 14,
+            color: AppColors.textSecondary,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        
+        const SizedBox(height: 8),
+        
         // Manual Input
-        CupertinoTextField(
-          controller: controller,
-          keyboardType: TextInputType.number,
-          placeholder: 'Enter $title',
-          suffix: Text(
-            unit,
-            style: TextStyle(
-              color: AppColors.textSecondary,
-              fontSize: 14,
-              fontWeight: FontWeight.normal,
-            ),
-          ),
+        Container(
           decoration: BoxDecoration(
-            border: Border.all(color: AppColors.neutral.withValues(alpha: 0.3)),
-            borderRadius: BorderRadius.circular(8),
+            color: AppColors.background,
+            border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.neutral.withValues(alpha: 0.1),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
-          onChanged: (value) {
-            final number = double.tryParse(value);
-            if (number != null && number >= min && number <= max) {
-              onChanged(number);
-            }
-          },
+          child: CupertinoTextField(
+            controller: controller,
+            keyboardType: TextInputType.number,
+            placeholder: 'Enter $title',
+            placeholderStyle: TextStyle(
+              color: AppColors.textSecondary.withValues(alpha: 0.6),
+              fontSize: 16,
+            ),
+            style: TextStyle(
+              color: AppColors.textPrimary,
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            suffix: Padding(
+              padding: const EdgeInsets.only(right: 16),
+              child: Text(
+                unit,
+                style: TextStyle(
+                  color: AppColors.primary,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            decoration: null, // Remove the decoration to avoid conflicts
+            onChanged: (value) {
+              final number = double.tryParse(value);
+              if (number != null && number >= min && number <= max) {
+                onChanged(number);
+              }
+            },
+          ),
         ),
       ],
     );
@@ -291,11 +348,18 @@ class _HeightWeightScreenState extends State<HeightWeightScreen> {
     }
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.secondaryBackground,
+        color: bmiColor.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: bmiColor.withValues(alpha: 0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: bmiColor.withValues(alpha: 0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         children: [
