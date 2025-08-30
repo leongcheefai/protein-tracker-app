@@ -16,6 +16,9 @@ import 'screens/profile_settings_screen.dart';
 import 'screens/notification_settings_screen.dart';
 import 'screens/privacy_settings_screen.dart';
 import 'screens/about_help_screen.dart';
+import 'screens/permission_denied_screen.dart';
+import 'screens/network_error_screen.dart';
+import 'screens/error_demo_screen.dart';
 import 'utils/user_settings_provider.dart';
 
 void main() {
@@ -134,8 +137,27 @@ class ProteinPaceApp extends StatelessWidget {
             );
           },
           '/notification-settings': (context) => const NotificationSettingsScreen(),
-        '/privacy-settings': (context) => const PrivacySettingsScreen(),
-        '/about-help': (context) => const AboutHelpScreen(),
+          '/privacy-settings': (context) => const PrivacySettingsScreen(),
+          '/about-help': (context) => const AboutHelpScreen(),
+          '/permission-denied': (context) {
+            final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+            return PermissionDeniedScreen(
+              permissionType: args['permissionType'] as PermissionType,
+              onRetry: args['onRetry'] as VoidCallback?,
+              onMaybeLater: args['onMaybeLater'] as VoidCallback?,
+            );
+          },
+          '/network-error': (context) {
+            final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+            return NetworkErrorScreen(
+              errorType: args['errorType'] as NetworkErrorType,
+              customMessage: args['customMessage'] as String?,
+              onRetry: args['onRetry'] as VoidCallback?,
+              onGoBack: args['onGoBack'] as VoidCallback?,
+              showOfflineMode: args['showOfflineMode'] as bool? ?? false,
+            );
+          },
+          '/error-demo': (context) => const ErrorDemoScreen(),
         },
       ),
     );
