@@ -153,7 +153,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       CupertinoButton(
                         padding: const EdgeInsets.all(8.0),
                         onPressed: () {
-                          // TODO: Navigate to today's data
                           setState(() {
                             _selectedDateRange = '7 days';
                           });
