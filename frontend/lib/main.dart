@@ -191,13 +191,24 @@ class ProteinPaceApp extends StatelessWidget {
 
 // App Colors
 class AppColors {
-  static const primary = Color(0xFF2563EB);
-  static const success = Color(0xFF10B981);
-  static const warning = Color(0xFFF59E0B);
-  static const error = Color(0xFFEF4444);
-  static const neutral = Color(0xFF6B7280);
-  static const background = Color(0xFFFFFFFF);
-  static const secondaryBackground = Color(0xFFF9FAFB);
-  static const textPrimary = Color(0xFF111827);
-  static const textSecondary = Color(0xFF6B7280);
+  // New green + beige color scheme
+  static const primary = Color(0xFF4F7C8A);        // Sage green - main brand color
+  static const secondary = Color(0xFF7FB069);      // Fresh green - accent color
+  static const accent = Color(0xFFF5F1E8);        // Warm beige - secondary accent
+  
+  // Success, warning, error colors (keeping some green for consistency)
+  static const success = Color(0xFF7FB069);       // Fresh green for success states
+  static const warning = Color(0xFFE6A23C);       // Warm amber for warnings
+  static const error = Color(0xFFE74C3C);         // Warm red for errors
+  
+  // Neutral colors
+  static const neutral = Color(0xFF8B8B8B);       // Warm gray
+  
+  // Background colors
+  static const background = Color(0xFFFDFCFA);    // Warm white background
+  static const secondaryBackground = Color(0xFFFAF8F3); // Light beige background
+  
+  // Text colors
+  static const textPrimary = Color(0xFF2C3E50);   // Dark blue-gray for primary text
+  static const textSecondary = Color(0xFF7F8C8D); // Medium gray for secondary text
 }

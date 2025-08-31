@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import '../../main.dart';
 import '../../utils/category_utils.dart';
+import '../../utils/meal_utils.dart';
 
 class FoodItemCard extends StatelessWidget {
   final Map<String, dynamic> item;
@@ -255,12 +257,12 @@ class FoodItemCard extends StatelessWidget {
                         CupertinoButton(
                           padding: EdgeInsets.zero,
                           onPressed: onSave,
-                          child: const Icon(CupertinoIcons.check_mark, color: Color(0xFF10B981)), // AppColors.success
+                          child: const Icon(CupertinoIcons.check_mark, color: AppColors.success), // AppColors.success
                         ),
                         CupertinoButton(
                           padding: EdgeInsets.zero,
                           onPressed: onCancel,
-                          child: const Icon(CupertinoIcons.clear, color: Color(0xFFEF4444)), // AppColors.error
+                          child: const Icon(CupertinoIcons.clear, color: AppColors.error), // AppColors.error
                         ),
                       ],
                     ),
@@ -310,7 +312,7 @@ class FoodItemCard extends StatelessWidget {
                           ),
                         );
                       },
-                      child: const Icon(CupertinoIcons.ellipsis, color: Color(0xFF6B7280)), // AppColors.textSecondary
+                      child: const Icon(CupertinoIcons.ellipsis, color: AppColors.textSecondary), // AppColors.textSecondary
                     ),
                   ],
                 ],

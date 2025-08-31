@@ -1,4 +1,6 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import '../../main.dart';
 
 class QuickStats extends StatelessWidget {
   final double totalProgress;
@@ -15,9 +17,9 @@ class QuickStats extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFFF9FAFB), // AppColors.secondaryBackground
+        color: AppColors.secondaryBackground,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF9CA3AF).withValues(alpha: 0.1)), // AppColors.neutral
+        border: Border.all(color: AppColors.neutral.withValues(alpha: 0.1)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -25,7 +27,7 @@ class QuickStats extends StatelessWidget {
           const Text(
             'Quick Stats',
             style: TextStyle(
-              color: Color(0xFF111827), // AppColors.textPrimary
+              color: AppColors.textPrimary,
               fontSize: 24,
               fontWeight: FontWeight.w600,
             ),
@@ -48,7 +50,7 @@ class QuickStats extends StatelessWidget {
                   'Goal Hit Rate',
                   '${progressPercentage >= 100 ? 100 : progressPercentage.toInt()}%',
                   CupertinoIcons.flag,
-                  const Color(0xFF3B82F6), // AppColors.primary
+                  AppColors.primary,
                 ),
               ),
               Expanded(
@@ -88,7 +90,7 @@ class QuickStats extends StatelessWidget {
         Text(
           value,
           style: const TextStyle(
-            color: Color(0xFF111827), // AppColors.textPrimary
+            color: AppColors.textPrimary,
             fontSize: 24,
             fontWeight: FontWeight.bold,
           ),
@@ -98,7 +100,7 @@ class QuickStats extends StatelessWidget {
         Text(
           label,
           style: const TextStyle(
-            color: Color(0xFF6B7280), // AppColors.textSecondary
+            color: AppColors.textSecondary,
             fontSize: 14,
           ),
           textAlign: TextAlign.center,

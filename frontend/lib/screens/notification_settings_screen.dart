@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../utils/user_settings_provider.dart';
+import '../main.dart';
 
 class NotificationSettingsScreen extends StatefulWidget {
   const NotificationSettingsScreen({super.key});
@@ -15,7 +17,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
         middle: Text('Notification Settings'),
-        backgroundColor: CupertinoColors.systemBackground,
+        backgroundColor: AppColors.background,
       ),
       child: SafeArea(
         child: SingleChildScrollView(
@@ -58,9 +60,9 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
         return Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: CupertinoColors.systemBackground,
+            color: AppColors.secondaryBackground,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: CupertinoColors.systemGrey4),
+            border: Border.all(color: AppColors.neutral.withValues(alpha: 0.2)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -69,7 +71,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                 children: [
                   const Icon(
                     CupertinoIcons.bell_fill,
-                    color: CupertinoColors.activeBlue,
+                    color: AppColors.primary,
                     size: 24,
                   ),
                   const SizedBox(width: 12),
@@ -79,7 +81,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: CupertinoColors.black,
+                        color: AppColors.textPrimary,
                       ),
                     ),
                   ),
@@ -88,7 +90,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                     onChanged: (value) {
                       settings.updateNotificationSettings(notificationsEnabled: value);
                     },
-                    activeTrackColor: CupertinoColors.activeBlue,
+                    activeTrackColor: AppColors.primary,
                   ),
                 ],
               ),
@@ -97,7 +99,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                 'Receive reminders for meal tracking and daily summaries',
                 style: TextStyle(
                   fontSize: 14,
-                  color: CupertinoColors.systemGrey,
+                  color: AppColors.textSecondary,
                 ),
               ),
             ],
@@ -118,7 +120,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: CupertinoColors.black,
+                color: AppColors.textPrimary,
               ),
             ),
             const SizedBox(height: 8),
@@ -126,7 +128,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
               'Set when you want to be reminded to track your meals',
               style: TextStyle(
                 fontSize: 14,
-                color: CupertinoColors.systemGrey,
+                color: AppColors.textSecondary,
               ),
             ),
             const SizedBox(height: 16),
@@ -136,7 +138,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
               'Breakfast',
               'breakfast',
               settings.mealReminderTimes['breakfast'] ?? '08:00',
-              const Icon(CupertinoIcons.sunrise_fill, color: CupertinoColors.systemOrange),
+              const Icon(CupertinoIcons.sunrise_fill, color: AppColors.warning),
               settings,
             ),
             
@@ -147,7 +149,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
               'Lunch',
               'lunch',
               settings.mealReminderTimes['lunch'] ?? '12:30',
-              const Icon(CupertinoIcons.sun_max_fill, color: CupertinoColors.systemYellow),
+              const Icon(CupertinoIcons.sun_max_fill, color: AppColors.warning),
               settings,
             ),
             
@@ -158,7 +160,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
               'Snack',
               'snack',
               settings.mealReminderTimes['snack'] ?? '16:00',
-              const Icon(CupertinoIcons.circle_fill, color: CupertinoColors.systemGrey),
+              const Icon(CupertinoIcons.circle_fill, color: AppColors.neutral),
               settings,
             ),
             
@@ -169,7 +171,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
               'Dinner',
               'dinner',
               settings.mealReminderTimes['dinner'] ?? '19:00',
-              const Icon(CupertinoIcons.moon_fill, color: CupertinoColors.systemPurple),
+              const Icon(CupertinoIcons.moon_fill, color: AppColors.secondary),
               settings,
             ),
           ],
@@ -182,9 +184,9 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: CupertinoColors.systemBackground,
+        color: AppColors.secondaryBackground,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: CupertinoColors.systemGrey4),
+        border: Border.all(color: AppColors.neutral.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
@@ -199,14 +201,14 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: CupertinoColors.black,
+                    color: AppColors.textPrimary,
                   ),
                 ),
                 Text(
                   'Reminder at $currentTime',
                   style: TextStyle(
                     fontSize: 14,
-                    color: CupertinoColors.systemGrey,
+                    color: AppColors.textSecondary,
                   ),
                 ),
               ],
@@ -214,7 +216,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
           ),
           CupertinoButton(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            color: CupertinoColors.systemGrey6,
+            color: AppColors.accent,
             borderRadius: BorderRadius.circular(8),
             onPressed: () => _showTimePicker(context, mealKey, currentTime, settings),
             child: Text(
@@ -222,7 +224,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: CupertinoColors.black,
+                color: AppColors.textPrimary,
               ),
             ),
           ),
@@ -242,7 +244,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: CupertinoColors.black,
+                color: AppColors.textPrimary,
               ),
             ),
             const SizedBox(height: 8),
@@ -250,7 +252,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
               'Set quiet hours when notifications won\'t disturb you',
               style: TextStyle(
                 fontSize: 14,
-                color: CupertinoColors.systemGrey,
+                color: AppColors.textSecondary,
               ),
             ),
             const SizedBox(height: 16),
@@ -280,15 +282,15 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: CupertinoColors.systemGrey6,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: CupertinoColors.systemGrey4),
+                color: AppColors.accent,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppColors.neutral.withValues(alpha: 0.2)),
               ),
               child: Row(
                 children: [
                   const Icon(
                     CupertinoIcons.moon_fill,
-                    color: CupertinoColors.systemGrey,
+                    color: AppColors.secondary,
                     size: 20,
                   ),
                   const SizedBox(width: 12),
@@ -297,7 +299,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                       'Quiet hours: ${settings.doNotDisturbStart} - ${settings.doNotDisturbEnd}',
                       style: TextStyle(
                         fontSize: 14,
-                        color: CupertinoColors.systemGrey,
+                        color: AppColors.textSecondary,
                       ),
                     ),
                   ),
@@ -319,13 +321,13 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color: CupertinoColors.black,
+            color: AppColors.textPrimary,
           ),
         ),
         const SizedBox(height: 8),
         CupertinoButton(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          color: CupertinoColors.systemGrey6,
+          color: AppColors.accent,
           borderRadius: BorderRadius.circular(8),
           onPressed: () => _showTimePicker(context, '', currentTime, null, onTimeChanged: onTimeChanged),
           child: Row(
@@ -336,12 +338,12 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: CupertinoColors.black,
+                  color: AppColors.textPrimary,
                 ),
               ),
               const Icon(
                 CupertinoIcons.clock,
-                color: CupertinoColors.systemGrey,
+                color: AppColors.textSecondary,
                 size: 20,
               ),
             ],
@@ -357,9 +359,9 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
         return Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: CupertinoColors.systemBackground,
+            color: AppColors.secondaryBackground,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: CupertinoColors.systemGrey4),
+            border: Border.all(color: AppColors.neutral.withValues(alpha: 0.2)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -368,7 +370,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                 children: [
                   const Icon(
                     CupertinoIcons.chart_bar_fill,
-                    color: CupertinoColors.activeGreen,
+                    color: AppColors.primary,
                     size: 24,
                   ),
                   const SizedBox(width: 12),
@@ -381,14 +383,14 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
-                            color: CupertinoColors.black,
+                            color: AppColors.textPrimary,
                           ),
                         ),
                         Text(
                           'Daily protein intake summary at 21:30',
                           style: TextStyle(
                             fontSize: 14,
-                            color: CupertinoColors.systemGrey,
+                            color: AppColors.textSecondary,
                           ),
                         ),
                       ],
@@ -399,7 +401,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                     onChanged: (value) {
                       settings.updateNotificationSettings(nightlySummaryEnabled: value);
                     },
-                    activeTrackColor: CupertinoColors.activeGreen,
+                    activeTrackColor: AppColors.primary,
                   ),
                 ],
               ),
@@ -413,16 +415,20 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
   Widget _buildSaveButton() {
     return SizedBox(
       width: double.infinity,
-      child: CupertinoButton.filled(
+      child: CupertinoButton(
         onPressed: () {
           // Show success message and navigate back
           _showSuccessDialog();
         },
+        color: AppColors.primary,
+        borderRadius: BorderRadius.circular(12),
+        padding: const EdgeInsets.symmetric(vertical: 16),
         child: const Text(
           'Save Settings',
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,
+            color: Colors.white,
           ),
         ),
       ),
@@ -439,12 +445,12 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
       context: context,
       builder: (context) => Container(
         height: 300,
-        color: CupertinoColors.systemBackground,
+        color: AppColors.background,
         child: Column(
           children: [
             Container(
               height: 50,
-              color: CupertinoColors.systemGrey6,
+              color: AppColors.accent,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [

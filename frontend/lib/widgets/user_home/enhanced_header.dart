@@ -1,4 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import '../../main.dart';
 import '../../utils/meal_utils.dart';
 
 class EnhancedHeader extends StatelessWidget {
@@ -18,7 +20,7 @@ class EnhancedHeader extends StatelessWidget {
           Text(
             dateString,
             style: const TextStyle(
-              color: Color(0xFF6B7280), // AppColors.textSecondary
+              color: AppColors.textSecondary,
               fontSize: 16,
             ),
           ),

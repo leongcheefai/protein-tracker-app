@@ -2,16 +2,22 @@
 
 ### **Color Palette**
 - **Primary Colors:**
-  - Primary Blue: `#2563EB` (protein rings, buttons)
-  - Success Green: `#10B981` (goal met, completed states)
-  - Warning Amber: `#F59E0B` (close to goal, attention needed)
-  - Error Red: `#EF4444` (behind goal, errors)
-  - Neutral Gray: `#6B7280` (text, borders)
+  - Primary Sage Green: `#4F7C8A` (protein rings, buttons, main brand)
+  - Secondary Fresh Green: `#7FB069` (accent elements, success states)
+  - Warm Beige: `#F5F1E8` (secondary accent, highlights)
+  - Success Green: `#7FB069` (goal met, completed states)
+  - Warning Amber: `#E6A23C` (close to goal, attention needed)
+  - Error Red: `#E74C3C` (behind goal, errors)
 
 - **Background Colors:**
-  - Primary Background: `#FFFFFF` (light mode)
-  - Secondary Background: `#F9FAFB` (cards, sections)
-  - Dark Background: `#111827` (dark mode support)
+  - Primary Background: `#FDFCFA` (warm white - light mode)
+  - Secondary Background: `#FAF8F3` (light beige - cards, sections)
+  - Dark Background: `#2C3E50` (dark mode support - warm dark)
+
+- **Text Colors:**
+  - Primary Text: `#2C3E50` (dark blue-gray for main content)
+  - Secondary Text: `#7F8C8D` (medium gray for secondary content)
+  - Neutral Gray: `#8B8B8B` (borders, dividers)
 
 ### **Typography Scale**
 - **Headings:**
