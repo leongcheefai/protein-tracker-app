@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import '../../main.dart';
 
 class CameraModal extends StatelessWidget {
   final VoidCallback onTakePhoto;
@@ -16,7 +17,7 @@ class CameraModal extends StatelessWidget {
     return Container(
       height: MediaQuery.of(context).size.height * 0.65,
       decoration: const BoxDecoration(
-        color: Colors.white,
+        color: AppColors.background,
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(24),
           topRight: Radius.circular(24),
@@ -30,7 +31,7 @@ class CameraModal extends StatelessWidget {
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: const Color(0xFF9CA3AF).withValues(alpha: 0.3), // AppColors.neutral
+              color: AppColors.neutral.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -41,7 +42,7 @@ class CameraModal extends StatelessWidget {
           const Text(
             'Upload Photo',
             style: TextStyle(
-              color: Color(0xFF111827), // AppColors.textPrimary
+              color: AppColors.textPrimary,
               fontSize: 24,
               fontWeight: FontWeight.w600,
             ),
@@ -52,7 +53,7 @@ class CameraModal extends StatelessWidget {
           const Text(
             'Choose how you want to add your meal',
             style: TextStyle(
-              color: Color(0xFF6B7280), // AppColors.textSecondary
+              color: AppColors.textSecondary,
               fontSize: 16,
             ),
           ),
@@ -98,7 +99,7 @@ class CameraModal extends StatelessWidget {
                       child: const Text(
                         'Cancel',
                         style: TextStyle(
-                          color: Color(0xFF6B7280), // AppColors.textSecondary
+                          color: AppColors.textSecondary,
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
@@ -129,9 +130,9 @@ class CameraModal extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: const Color(0xFFF9FAFB), // AppColors.secondaryBackground
+          color: AppColors.secondaryBackground,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFF9CA3AF).withValues(alpha: 0.2)), // AppColors.neutral
+          border: Border.all(color: AppColors.neutral.withValues(alpha: 0.2)),
         ),
         child: Row(
           children: [
@@ -139,12 +140,12 @@ class CameraModal extends StatelessWidget {
               width: 56,
               height: 56,
               decoration: BoxDecoration(
-                color: const Color(0xFF3B82F6).withValues(alpha: 0.1), // AppColors.primary
+                color: AppColors.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Icon(
                 icon,
-                color: const Color(0xFF3B82F6), // AppColors.primary
+                color: AppColors.primary,
                 size: 28,
               ),
             ),
@@ -158,7 +159,7 @@ class CameraModal extends StatelessWidget {
                   Text(
                     title,
                     style: const TextStyle(
-                      color: Color(0xFF111827), // AppColors.textPrimary
+                      color: AppColors.textPrimary,
                       fontSize: 24,
                       fontWeight: FontWeight.w600,
                     ),
@@ -169,7 +170,7 @@ class CameraModal extends StatelessWidget {
                   Text(
                     description,
                     style: const TextStyle(
-                      color: Color(0xFF6B7280), // AppColors.textSecondary
+                      color: AppColors.textSecondary,
                       fontSize: 16,
                     ),
                   ),
@@ -181,7 +182,7 @@ class CameraModal extends StatelessWidget {
             
             const Icon(
               CupertinoIcons.chevron_right,
-              color: Color(0xFF9CA3AF), // AppColors.neutral
+              color: AppColors.neutral,
               size: 16,
             ),
           ],

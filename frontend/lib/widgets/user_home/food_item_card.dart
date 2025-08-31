@@ -138,18 +138,18 @@ class FoodItemCard extends StatelessWidget {
                                   keyboardType: TextInputType.number,
                                   placeholder: 'Portion (g)',
                                   style: const TextStyle(
-                                    color: Color(0xFF111827), // AppColors.textPrimary
+                                    color: AppColors.textPrimary,
                                     fontSize: 16,
                                     fontWeight: FontWeight.w500,
                                   ),
                                   placeholderStyle: const TextStyle(
-                                    color: Color(0xFF9CA3AF), // AppColors.neutral
+                                    color: AppColors.neutral,
                                     fontSize: 16,
                                   ),
                                   decoration: BoxDecoration(
-                                    border: Border.all(color: const Color(0xFF9CA3AF).withValues(alpha: 0.3)), // AppColors.neutral
+                                    border: Border.all(color: AppColors.neutral.withValues(alpha: 0.3)),
                                     borderRadius: BorderRadius.circular(8),
-                                    color: Colors.white,
+                                    color: AppColors.background,
                                   ),
                                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                 ),
@@ -159,7 +159,7 @@ class FoodItemCard extends StatelessWidget {
                                 child: Text(
                                   '≈ ${calculatedProtein.toStringAsFixed(1)}g protein',
                                   style: const TextStyle(
-                                    color: Color(0xFF3B82F6), // AppColors.primary
+                                    color: AppColors.primary,
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -176,7 +176,7 @@ class FoodItemCard extends StatelessWidget {
                                 child: Text(
                                   '${item['portion'].toStringAsFixed(0)}g • ${item['protein'].toStringAsFixed(1)}g protein',
                                   style: const TextStyle(
-                                    color: Color(0xFF6B7280), // AppColors.textSecondary
+                                    color: AppColors.textSecondary,
                                     fontSize: 16,
                                   ),
                                   overflow: TextOverflow.ellipsis,
@@ -188,13 +188,13 @@ class FoodItemCard extends StatelessWidget {
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFF3B82F6).withValues(alpha: 0.1), // AppColors.primary
+                                    color: AppColors.primary.withValues(alpha: 0.1),
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Text(
                                     item['meal'] as String,
                                     style: const TextStyle(
-                                      color: Color(0xFF6B7280), // AppColors.textSecondary
+                                      color: AppColors.textSecondary,
                                       fontSize: 12,
                                       fontWeight: FontWeight.w600,
                                     ),

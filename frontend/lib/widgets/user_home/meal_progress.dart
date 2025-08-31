@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../main.dart';
 import '../../utils/meal_utils.dart';
 import '../../utils/progress_utils.dart';
 
@@ -22,7 +23,7 @@ class MealProgress extends StatelessWidget {
         const Text(
           'Meal Progress',
           style: TextStyle(
-            color: Color(0xFF111827), // AppColors.textPrimary
+            color: AppColors.textPrimary,
             fontSize: 24,
             fontWeight: FontWeight.w600,
           ),
@@ -59,7 +60,7 @@ class MealProgress extends StatelessWidget {
                           CircularProgressIndicator(
                             value: 1.0,
                             strokeWidth: 4,
-                            backgroundColor: const Color(0xFF9CA3AF).withValues(alpha: 0.1), // AppColors.neutral
+                            backgroundColor: AppColors.neutral.withValues(alpha: 0.1),
                             valueColor: const AlwaysStoppedAnimation<Color>(Colors.transparent),
                           ),
                           CircularProgressIndicator(
@@ -67,12 +68,12 @@ class MealProgress extends StatelessWidget {
                             strokeWidth: 4,
                             backgroundColor: Colors.transparent,
                             valueColor: AlwaysStoppedAnimation<Color>(
-                              isEnabled ? ProgressUtils.getProgressColor(mealPercentage) : const Color(0xFF9CA3AF).withValues(alpha: 0.3), // AppColors.neutral
+                              isEnabled ? ProgressUtils.getProgressColor(mealPercentage) : AppColors.neutral.withValues(alpha: 0.3),
                             ),
                           ),
                           Icon(
                             MealUtils.getMealIcon(mealName),
-                            color: isEnabled ? ProgressUtils.getProgressColor(mealPercentage) : const Color(0xFF9CA3AF).withValues(alpha: 0.3), // AppColors.neutral
+                            color: isEnabled ? ProgressUtils.getProgressColor(mealPercentage) : AppColors.neutral.withValues(alpha: 0.3),
                             size: 20,
                           ),
                         ],
@@ -84,7 +85,7 @@ class MealProgress extends StatelessWidget {
                     Text(
                       mealName,
                       style: TextStyle(
-                        color: isEnabled ? const Color(0xFF111827) : const Color(0xFF9CA3AF).withValues(alpha: 0.3), // AppColors.textPrimary vs neutral
+                        color: isEnabled ? AppColors.textPrimary : AppColors.neutral.withValues(alpha: 0.3),
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                       ),
@@ -96,7 +97,7 @@ class MealProgress extends StatelessWidget {
                     Text(
                       isEnabled ? '${progress.toStringAsFixed(0)}g' : '0g',
                       style: TextStyle(
-                        color: isEnabled ? const Color(0xFF6B7280) : const Color(0xFF9CA3AF).withValues(alpha: 0.3), // AppColors.textSecondary vs neutral
+                        color: isEnabled ? AppColors.textSecondary : AppColors.neutral.withValues(alpha: 0.3),
                         fontSize: 14,
                       ),
                       textAlign: TextAlign.center,

@@ -172,7 +172,7 @@ class _LoadingStatesScreenState extends State<LoadingStatesScreen>
         backgroundColor: AppColors.background,
         border: const Border(
           bottom: BorderSide(
-            color: Color(0xFFE5E7EB),
+            color: AppColors.neutral,
             width: 0.5,
           ),
         ),
@@ -304,7 +304,7 @@ class _LoadingStatesScreenState extends State<LoadingStatesScreen>
                   color: AppColors.secondaryBackground,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: const Color(0xFFE5E7EB),
+                    color: AppColors.neutral,
                     width: 1,
                   ),
                 ),

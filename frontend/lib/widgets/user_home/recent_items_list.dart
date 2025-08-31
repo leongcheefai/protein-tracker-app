@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import '../../main.dart';
 import 'search_filter.dart';
 import 'empty_states.dart';
 import 'food_item_card.dart';
@@ -64,7 +65,7 @@ class RecentItemsList extends StatelessWidget {
             const Text(
               'Today\'s Foods',
               style: TextStyle(
-                color: Color(0xFF111827), // AppColors.textPrimary
+                color: AppColors.textPrimary,
                 fontSize: 24,
                 fontWeight: FontWeight.w600,
               ),
@@ -76,7 +77,7 @@ class RecentItemsList extends StatelessWidget {
                   onPressed: onToggleSearchBar,
                   child: Icon(
                     showSearchBar ? CupertinoIcons.clear : CupertinoIcons.search,
-                    color: const Color(0xFF3B82F6), // AppColors.primary
+                    color: AppColors.primary,
                   ),
                 ),
                 CupertinoButton(
@@ -92,10 +93,10 @@ class RecentItemsList extends StatelessWidget {
                       ),
                     );
                   },
-                  child: const Text(
-                    'View All',
-                    style: TextStyle(color: Color(0xFF3B82F6)), // AppColors.primary
-                  ),
+                                      child: const Text(
+                      'View All',
+                      style: TextStyle(color: AppColors.primary),
+                    ),
                 ),
               ],
             ),
@@ -120,7 +121,7 @@ class RecentItemsList extends StatelessWidget {
           Text(
             'Found ${filteredItems.length} item${filteredItems.length == 1 ? '' : 's'}',
             style: const TextStyle(
-              color: Color(0xFF6B7280), // AppColors.textSecondary
+              color: AppColors.textSecondary,
               fontSize: 16,
             ),
           ),

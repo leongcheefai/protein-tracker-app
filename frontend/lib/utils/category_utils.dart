@@ -11,11 +11,11 @@ class CategoryUtils {
       case 'vegetable':
         return AppColors.success; // Green for vegetables
       case 'fruit':
-        return const Color(0xFF8B5CF6); // Purple for fruits
+        return AppColors.secondary; // Fresh green for fruits
       case 'dairy':
-        return const Color(0xFF3B82F6); // Blue for dairy
+        return AppColors.primary; // Sage green for dairy
       case 'fat':
-        return const Color(0xFFF59E0B); // Amber for fats
+        return AppColors.warning; // Warm amber for fats
       default:
         return AppColors.neutral;
     }
