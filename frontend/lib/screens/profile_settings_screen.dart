@@ -129,8 +129,8 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
           CupertinoDialogAction(
             child: const Text('OK'),
             onPressed: () {
-              Navigator.of(context).pop();
-              Navigator.of(context).pop();
+              Navigator.of(context).pop(); // Close dialog
+              Navigator.of(context).pop(true); // Return true to indicate success
             },
           ),
         ],
@@ -141,9 +141,12 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
-        middle: Text('Profile Settings'),
+      navigationBar: CupertinoNavigationBar(
+        middle: const Text('Profile Settings'),
         backgroundColor: CupertinoColors.systemBackground,
+        leading: CupertinoNavigationBarBackButton(
+          onPressed: () => Navigator.of(context).pop(false),
+        ),
       ),
       child: SafeArea(
         child: SingleChildScrollView(

@@ -421,8 +421,25 @@ class _UserHomeScreenState extends State<UserHomeScreen>
                                   icon: CupertinoIcons.slider_horizontal_3,
                                   title: 'Edit Goals',
                                   subtitle: 'Update your targets',
-                                  onTap: () {
-                                    // TODO: Navigate to goals editing screen
+                                  onTap: () async {
+                                    final result = await Navigator.pushNamed(
+                                      context,
+                                      '/profile-settings',
+                                      arguments: {
+                                        'height': widget.height,
+                                        'weight': widget.weight,
+                                        'trainingMultiplier': widget.trainingMultiplier,
+                                        'goal': widget.goal,
+                                        'dailyProteinTarget': widget.dailyProteinTarget,
+                                      },
+                                    );
+                                    
+                                    // Refresh the screen if profile was updated
+                                    if (result == true) {
+                                      setState(() {
+                                        // Trigger a rebuild to reflect any changes
+                                      });
+                                    }
                                   },
                                 ),
                               ),
@@ -566,9 +583,9 @@ class _UserHomeScreenState extends State<UserHomeScreen>
         title: const Text('Settings'),
         actions: [
           CupertinoActionSheetAction(
-            onPressed: () {
+            onPressed: () async {
               Navigator.of(context).pop();
-              Navigator.of(context).pushNamed(
+              final result = await Navigator.of(context).pushNamed(
                 '/profile-settings',
                 arguments: {
                   'height': widget.height,
@@ -578,6 +595,13 @@ class _UserHomeScreenState extends State<UserHomeScreen>
                   'dailyProteinTarget': widget.dailyProteinTarget,
                 },
               );
+              
+              // Refresh the screen if profile was updated
+              if (result == true) {
+                setState(() {
+                  // Trigger a rebuild to reflect any changes
+                });
+              }
             },
             child: const Text('Profile Settings'),
           ),
