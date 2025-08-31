@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 import '../utils/user_settings_provider.dart';
 
 class ProfileSettingsScreen extends StatefulWidget {
@@ -28,6 +30,9 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
   late double _selectedTrainingMultiplier;
   late String _selectedGoal;
   late double _dailyProteinTarget;
+  File? _profilePhoto;
+  final ImagePicker _imagePicker = ImagePicker();
+  bool _isLoadingPhoto = false;
 
   @override
   void initState() {
@@ -98,6 +103,13 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
       goal: _selectedGoal,
       dailyProteinTarget: _dailyProteinTarget,
     );
+
+    // TODO: Save profile photo to local storage or cloud storage
+    // For now, we'll just show success message
+    if (_profilePhoto != null) {
+      // In a real app, you would save the photo here
+      // For example: await _saveProfilePhoto(_profilePhoto!);
+    }
 
     // Show success and navigate back
     _showSuccessDialog();
@@ -206,7 +218,6 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
         Center(
           child: GestureDetector(
             onTap: () {
-              // TODO: Implement photo picker
               _showPhotoPickerDialog();
             },
             child: Container(
@@ -220,21 +231,41 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                   width: 2,
                 ),
               ),
-              child: const Icon(
-                CupertinoIcons.person_fill,
-                size: 50,
-                color: CupertinoColors.systemGrey,
-              ),
+                          child: _isLoadingPhoto
+                ? const CupertinoActivityIndicator()
+                : _profilePhoto != null
+                    ? ClipOval(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: CupertinoColors.activeBlue,
+                              width: 3,
+                            ),
+                            borderRadius: BorderRadius.circular(50),
+                          ),
+                          child: Image.file(
+                            _profilePhoto!,
+                            width: 100,
+                            height: 100,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      )
+                    : const Icon(
+                        CupertinoIcons.person_fill,
+                        size: 50,
+                        color: CupertinoColors.systemGrey,
+                      ),
             ),
           ),
         ),
         const SizedBox(height: 8),
-        const Center(
+        Center(
           child: Text(
-            'Tap to add photo',
+            _profilePhoto != null ? 'Tap to change photo' : 'Tap to add photo',
             style: TextStyle(
               fontSize: 14,
-              color: CupertinoColors.systemGrey,
+              color: _profilePhoto != null ? CupertinoColors.activeBlue : CupertinoColors.systemGrey,
             ),
           ),
         ),
@@ -580,19 +611,28 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
         title: const Text('Choose Photo'),
         actions: [
           CupertinoActionSheetAction(
-            onPressed: () {
+            onPressed: () async {
               Navigator.of(context).pop();
-              // TODO: Implement camera functionality
+              await _takePhoto();
             },
             child: const Text('Take Photo'),
           ),
           CupertinoActionSheetAction(
-            onPressed: () {
+            onPressed: () async {
               Navigator.of(context).pop();
-              // TODO: Implement gallery picker
+              await _pickImageFromGallery();
             },
             child: const Text('Choose from Gallery'),
           ),
+          if (_profilePhoto != null)
+            CupertinoActionSheetAction(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _removePhoto();
+              },
+              isDestructiveAction: true,
+              child: const Text('Remove Photo'),
+            ),
         ],
         cancelButton: CupertinoActionSheetAction(
           onPressed: () => Navigator.of(context).pop(),
@@ -601,4 +641,110 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
       ),
     );
   }
+
+  Future<void> _takePhoto() async {
+    setState(() {
+      _isLoadingPhoto = true;
+    });
+    
+    try {
+      final XFile? photo = await _imagePicker.pickImage(
+        source: ImageSource.camera,
+        imageQuality: 80,
+        maxWidth: 512,
+        maxHeight: 512,
+      );
+      
+      if (photo != null) {
+        final File photoFile = File(photo.path);
+        if (await _validateImageFile(photoFile)) {
+          setState(() {
+            _profilePhoto = photoFile;
+          });
+        }
+      }
+    } catch (e) {
+      String errorMessage = 'Failed to take photo';
+      if (e.toString().contains('permission')) {
+        errorMessage = 'Camera permission denied. Please enable camera access in settings.';
+      } else if (e.toString().contains('camera')) {
+        errorMessage = 'Camera not available. Please check your device camera.';
+      }
+      _showErrorDialog(errorMessage);
+    } finally {
+      setState(() {
+        _isLoadingPhoto = false;
+      });
+    }
+  }
+
+  Future<void> _pickImageFromGallery() async {
+    setState(() {
+      _isLoadingPhoto = true;
+    });
+    
+    try {
+      final XFile? image = await _imagePicker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 80,
+        maxWidth: 512,
+        maxHeight: 512,
+      );
+      
+      if (image != null) {
+        final File imageFile = File(image.path);
+        if (await _validateImageFile(imageFile)) {
+          setState(() {
+            _profilePhoto = imageFile;
+          });
+        }
+      }
+    } catch (e) {
+      String errorMessage = 'Failed to pick image';
+      if (e.toString().contains('permission')) {
+        errorMessage = 'Gallery permission denied. Please enable photo library access in settings.';
+      } else if (e.toString().contains('gallery')) {
+        errorMessage = 'Gallery not available. Please check your device photo library.';
+      }
+      _showErrorDialog(errorMessage);
+    } finally {
+      setState(() {
+        _isLoadingPhoto = false;
+      });
+    }
+  }
+
+  void _removePhoto() {
+    setState(() {
+      _profilePhoto = null;
+    });
+  }
+
+  Future<bool> _validateImageFile(File imageFile) async {
+    try {
+      // Check if file exists and is readable
+      if (!await imageFile.exists()) {
+        _showErrorDialog('Selected image file is not accessible.');
+        return false;
+      }
+
+      // Check file size (max 5MB)
+      final int fileSize = await imageFile.length();
+      if (fileSize > 5 * 1024 * 1024) {
+        _showErrorDialog('Image file is too large. Please select an image smaller than 5MB.');
+        return false;
+      }
+
+      return true;
+    } catch (e) {
+      _showErrorDialog('Failed to validate image file: ${e.toString()}');
+      return false;
+    }
+  }
+
+  // TODO: Future enhancement - Add image cropping functionality
+  // Future<void> _cropImage(File imageFile) async {
+  //   // This would integrate with an image cropping library
+  //   // For example: image_cropper package
+  // }
 }
