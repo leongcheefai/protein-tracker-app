@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import '../../main.dart';
 import '../../utils/progress_utils.dart';
 
 class ProgressVisualization extends StatelessWidget {
@@ -30,7 +31,7 @@ class ProgressVisualization extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.background,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -55,7 +56,7 @@ class ProgressVisualization extends StatelessWidget {
                   child: CircularProgressIndicator(
                     value: 1.0,
                     strokeWidth: 12,
-                    backgroundColor: const Color(0xFF9CA3AF).withValues(alpha: 0.1), // AppColors.neutral
+                    backgroundColor: AppColors.neutral.withValues(alpha: 0.1),
                     valueColor: const AlwaysStoppedAnimation<Color>(Colors.transparent),
                   ),
                 ),
@@ -91,7 +92,7 @@ class ProgressVisualization extends StatelessWidget {
                           Text(
                             '${totalProgress.toStringAsFixed(1)}g',
                             style: const TextStyle(
-                              color: Color(0xFF111827), // AppColors.textPrimary
+                              color: AppColors.textPrimary,
                               fontSize: 32,
                               fontWeight: FontWeight.bold,
                             ),
@@ -99,7 +100,7 @@ class ProgressVisualization extends StatelessWidget {
                           Text(
                             'of ${dailyProteinTarget.toStringAsFixed(1)}g',
                             style: const TextStyle(
-                              color: Color(0xFF6B7280), // AppColors.textSecondary
+                              color: AppColors.textSecondary,
                               fontSize: 16,
                             ),
                           ),
@@ -136,14 +137,14 @@ class ProgressVisualization extends StatelessWidget {
             children: [
               const Icon(
                 CupertinoIcons.heart_fill,
-                color: Color(0xFF3B82F6), // AppColors.primary
+                color: AppColors.primary,
                 size: 20,
               ),
               const SizedBox(width: 8),
               Text(
                 'Goal: $goal • ${trainingMultiplier.toStringAsFixed(1)}x training',
                 style: const TextStyle(
-                  color: Color(0xFF6B7280), // AppColors.textSecondary
+                  color: AppColors.textSecondary,
                   fontSize: 16,
                 ),
               ),

@@ -59,7 +59,7 @@ class FoodItemCard extends StatelessWidget {
       background: Container(
         margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
-          color: const Color(0xFFEF4444), // AppColors.error
+          color: AppColors.error,
           borderRadius: BorderRadius.circular(12),
         ),
         alignment: Alignment.centerRight,
@@ -73,10 +73,10 @@ class FoodItemCard extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.background,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isEditing ? const Color(0xFF3B82F6) : const Color(0xFF9CA3AF).withValues(alpha: 0.1), // AppColors.primary vs neutral
+            color: isEditing ? AppColors.primary : AppColors.neutral.withValues(alpha: 0.1),
             width: isEditing ? 2 : 1,
           ),
           boxShadow: [
@@ -121,7 +121,7 @@ class FoodItemCard extends StatelessWidget {
                         Text(
                           item['name'] as String,
                           style: const TextStyle(
-                            color: Color(0xFF111827), // AppColors.textPrimary
+                            color: AppColors.textPrimary,
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
                           ),
