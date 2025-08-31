@@ -570,7 +570,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
             style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: CupertinoColors.activeBlue,
+              color: CupertinoColors.activeGreen,
             ),
             textAlign: TextAlign.center,
           ),
