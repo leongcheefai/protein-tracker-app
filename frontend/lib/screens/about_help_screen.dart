@@ -1,4 +1,6 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import '../main.dart';
 
 class AboutHelpScreen extends StatefulWidget {
   const AboutHelpScreen({super.key});
@@ -27,7 +29,7 @@ class _AboutHelpScreenState extends State<AboutHelpScreen> {
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
         middle: Text('About & Help'),
-        backgroundColor: CupertinoColors.systemBackground,
+        backgroundColor: AppColors.background,
       ),
       child: SafeArea(
         child: SingleChildScrollView(
@@ -75,9 +77,9 @@ class _AboutHelpScreenState extends State<AboutHelpScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: CupertinoColors.systemBackground,
+        color: AppColors.secondaryBackground,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: CupertinoColors.systemGrey4),
+        border: Border.all(color: AppColors.neutral.withValues(alpha: 0.2)),
       ),
       child: Column(
         children: [
@@ -86,13 +88,13 @@ class _AboutHelpScreenState extends State<AboutHelpScreen> {
             width: 80,
             height: 80,
             decoration: BoxDecoration(
-              color: CupertinoColors.activeBlue,
+              color: AppColors.primary,
               borderRadius: BorderRadius.circular(20),
             ),
             child: const Icon(
               CupertinoIcons.heart_fill,
               size: 40,
-              color: CupertinoColors.white,
+              color: Colors.white,
             ),
           ),
           const SizedBox(height: 16),
@@ -102,7 +104,7 @@ class _AboutHelpScreenState extends State<AboutHelpScreen> {
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: CupertinoColors.black,
+              color: AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 8),
@@ -111,7 +113,7 @@ class _AboutHelpScreenState extends State<AboutHelpScreen> {
             'Version $_appVersion ($_buildNumber)',
             style: TextStyle(
               fontSize: 16,
-              color: CupertinoColors.systemGrey,
+              color: AppColors.textSecondary,
             ),
           ),
           const SizedBox(height: 8),
@@ -120,7 +122,7 @@ class _AboutHelpScreenState extends State<AboutHelpScreen> {
             'Track protein intake with just a photo',
             style: TextStyle(
               fontSize: 16,
-              color: CupertinoColors.systemGrey,
+              color: AppColors.textSecondary,
             ),
             textAlign: TextAlign.center,
           ),
@@ -130,11 +132,15 @@ class _AboutHelpScreenState extends State<AboutHelpScreen> {
             width: double.infinity,
             child: CupertinoButton(
               onPressed: () => _rateApp(),
+              color: AppColors.primary,
+              borderRadius: BorderRadius.circular(12),
+              padding: const EdgeInsets.symmetric(vertical: 16),
               child: const Text(
                 'Rate App',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
+                  color: Colors.white,
                 ),
               ),
             ),
@@ -148,9 +154,9 @@ class _AboutHelpScreenState extends State<AboutHelpScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: CupertinoColors.systemBackground,
+        color: AppColors.secondaryBackground,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: CupertinoColors.systemGrey4),
+        border: Border.all(color: AppColors.neutral.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -160,7 +166,7 @@ class _AboutHelpScreenState extends State<AboutHelpScreen> {
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: CupertinoColors.black,
+              color: AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 16),
@@ -169,7 +175,7 @@ class _AboutHelpScreenState extends State<AboutHelpScreen> {
             CupertinoIcons.camera_fill,
             'AI Photo Analysis',
             'Take a photo of your meal and get instant protein analysis',
-            CupertinoColors.activeBlue,
+            AppColors.primary,
           ),
           
           const SizedBox(height: 12),
@@ -178,7 +184,7 @@ class _AboutHelpScreenState extends State<AboutHelpScreen> {
             CupertinoIcons.chart_bar_fill,
             'Progress Tracking',
             'Monitor your daily protein intake and progress over time',
-            CupertinoColors.activeGreen,
+            AppColors.success,
           ),
           
           const SizedBox(height: 12),
@@ -187,7 +193,7 @@ class _AboutHelpScreenState extends State<AboutHelpScreen> {
             CupertinoIcons.bell_fill,
             'Smart Reminders',
             'Get notified when it\'s time to track your meals',
-            CupertinoColors.activeOrange,
+            AppColors.warning,
           ),
           
           const SizedBox(height: 12),
@@ -196,7 +202,7 @@ class _AboutHelpScreenState extends State<AboutHelpScreen> {
             CupertinoIcons.person_fill,
             'Personalized Goals',
             'Set custom protein targets based on your fitness goals',
-            CupertinoColors.systemPurple,
+            AppColors.secondary,
           ),
         ],
       ),
@@ -221,14 +227,14 @@ class _AboutHelpScreenState extends State<AboutHelpScreen> {
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: CupertinoColors.black,
+                  color: AppColors.textPrimary,
                 ),
               ),
               Text(
                 description,
                 style: TextStyle(
                   fontSize: 14,
-                  color: CupertinoColors.systemGrey,
+                  color: AppColors.textSecondary,
                 ),
               ),
             ],
@@ -242,9 +248,9 @@ class _AboutHelpScreenState extends State<AboutHelpScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: CupertinoColors.systemBackground,
+        color: AppColors.secondaryBackground,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: CupertinoColors.systemGrey4),
+        border: Border.all(color: AppColors.neutral.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -254,7 +260,7 @@ class _AboutHelpScreenState extends State<AboutHelpScreen> {
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: CupertinoColors.black,
+              color: AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 16),
@@ -301,14 +307,14 @@ class _AboutHelpScreenState extends State<AboutHelpScreen> {
           width: 24,
           height: 24,
           decoration: BoxDecoration(
-            color: CupertinoColors.activeBlue,
+            color: AppColors.primary,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Center(
             child: Text(
               step,
               style: const TextStyle(
-                color: CupertinoColors.white,
+                color: Colors.white,
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
               ),
@@ -325,14 +331,14 @@ class _AboutHelpScreenState extends State<AboutHelpScreen> {
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: CupertinoColors.black,
+                  color: AppColors.textPrimary,
                 ),
               ),
               Text(
                 description,
                 style: TextStyle(
                   fontSize: 14,
-                  color: CupertinoColors.systemGrey,
+                  color: AppColors.textSecondary,
                 ),
               ),
             ],
@@ -346,9 +352,9 @@ class _AboutHelpScreenState extends State<AboutHelpScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: CupertinoColors.systemBackground,
+        color: AppColors.secondaryBackground,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: CupertinoColors.systemGrey4),
+        border: Border.all(color: AppColors.neutral.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -358,7 +364,7 @@ class _AboutHelpScreenState extends State<AboutHelpScreen> {
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: CupertinoColors.black,
+              color: AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 16),
@@ -402,7 +408,7 @@ class _AboutHelpScreenState extends State<AboutHelpScreen> {
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color: CupertinoColors.black,
+            color: AppColors.textPrimary,
           ),
         ),
         const SizedBox(height: 4),
@@ -410,7 +416,7 @@ class _AboutHelpScreenState extends State<AboutHelpScreen> {
           answer,
           style: TextStyle(
             fontSize: 14,
-            color: CupertinoColors.systemGrey,
+            color: AppColors.textSecondary,
           ),
         ),
       ],
@@ -421,9 +427,9 @@ class _AboutHelpScreenState extends State<AboutHelpScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: CupertinoColors.systemBackground,
+        color: AppColors.secondaryBackground,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: CupertinoColors.systemGrey4),
+        border: Border.all(color: AppColors.neutral.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -433,7 +439,7 @@ class _AboutHelpScreenState extends State<AboutHelpScreen> {
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: CupertinoColors.black,
+              color: AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 8),
@@ -441,7 +447,7 @@ class _AboutHelpScreenState extends State<AboutHelpScreen> {
             'We\'re here to help you get the most out of Protein Pace',
             style: TextStyle(
               fontSize: 14,
-              color: CupertinoColors.systemGrey,
+              color: AppColors.textSecondary,
             ),
           ),
           const SizedBox(height: 16),
@@ -451,11 +457,15 @@ class _AboutHelpScreenState extends State<AboutHelpScreen> {
               Expanded(
                 child: CupertinoButton(
                   onPressed: () => _contactSupport(),
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.circular(12),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
                   child: const Text(
                     'Contact Support',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
+                      color: Colors.white,
                     ),
                   ),
                 ),
@@ -464,11 +474,15 @@ class _AboutHelpScreenState extends State<AboutHelpScreen> {
               Expanded(
                 child: CupertinoButton(
                   onPressed: () => _openHelpCenter(),
-                  child: const Text(
+                  color: AppColors.accent,
+                  borderRadius: BorderRadius.circular(12),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: Text(
                     'Help Center',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
                     ),
                   ),
                 ),
@@ -484,9 +498,9 @@ class _AboutHelpScreenState extends State<AboutHelpScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: CupertinoColors.systemBackground,
+        color: AppColors.secondaryBackground,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: CupertinoColors.systemGrey4),
+        border: Border.all(color: AppColors.neutral.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -496,7 +510,7 @@ class _AboutHelpScreenState extends State<AboutHelpScreen> {
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: CupertinoColors.black,
+              color: AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 16),
@@ -505,11 +519,15 @@ class _AboutHelpScreenState extends State<AboutHelpScreen> {
             width: double.infinity,
             child: CupertinoButton(
               onPressed: () => _openPrivacyPolicy(),
+              color: AppColors.primary,
+              borderRadius: BorderRadius.circular(12),
+              padding: const EdgeInsets.symmetric(vertical: 16),
               child: const Text(
                 'Privacy Policy',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
+                  color: Colors.white,
                 ),
               ),
             ),
@@ -521,11 +539,15 @@ class _AboutHelpScreenState extends State<AboutHelpScreen> {
             width: double.infinity,
             child: CupertinoButton(
               onPressed: () => _openTermsOfService(),
+              color: AppColors.primary,
+              borderRadius: BorderRadius.circular(12),
+              padding: const EdgeInsets.symmetric(vertical: 16),
               child: const Text(
                 'Terms of Service',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
+                  color: Colors.white,
                 ),
               ),
             ),
@@ -537,11 +559,15 @@ class _AboutHelpScreenState extends State<AboutHelpScreen> {
             width: double.infinity,
             child: CupertinoButton(
               onPressed: () => _openDataPolicy(),
+              color: AppColors.primary,
+              borderRadius: BorderRadius.circular(12),
+              padding: const EdgeInsets.symmetric(vertical: 16),
               child: const Text(
                 'Data Policy',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
+                  color: Colors.white,
                 ),
               ),
             ),
