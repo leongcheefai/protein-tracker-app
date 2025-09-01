@@ -389,7 +389,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isSelected ? CupertinoColors.activeBlue.withOpacity(0.1) : CupertinoColors.systemBackground,
+          color: isSelected ? CupertinoColors.activeBlue.withValues(alpha: 0.1) : CupertinoColors.systemBackground,
           border: Border.all(
             color: isSelected ? CupertinoColors.activeBlue : CupertinoColors.systemGrey4,
             width: isSelected ? 2 : 1,
@@ -512,7 +512,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isSelected ? CupertinoColors.activeBlue.withOpacity(0.1) : CupertinoColors.systemBackground,
+          color: isSelected ? CupertinoColors.activeBlue.withValues(alpha: 0.1) : CupertinoColors.systemBackground,
           border: Border.all(
             color: isSelected ? CupertinoColors.activeBlue : CupertinoColors.systemGrey4,
             width: isSelected ? 2 : 1,

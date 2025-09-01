@@ -106,7 +106,7 @@ class _PricingPlansScreenState extends State<PricingPlansScreen> {
         color: AppColors.background,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isCurrentPlan ? AppColors.primary : AppColors.neutral.withOpacity(0.3),
+          color: isCurrentPlan ? AppColors.primary : AppColors.neutral.withValues(alpha: 0.3),
           width: isCurrentPlan ? 2 : 1,
         ),
       ),
@@ -118,7 +118,7 @@ class _PricingPlansScreenState extends State<PricingPlansScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: AppColors.neutral.withOpacity(0.2),
+                  color: AppColors.neutral.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: const Text(
@@ -410,7 +410,7 @@ class _PricingPlansScreenState extends State<PricingPlansScreen> {
           decoration: BoxDecoration(
             color: AppColors.background,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.neutral.withOpacity(0.3)),
+            border: Border.all(color: AppColors.neutral.withValues(alpha: 0.3)),
           ),
           child: Column(
             children: [
@@ -437,7 +437,7 @@ class _PricingPlansScreenState extends State<PricingPlansScreen> {
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(
-            color: AppColors.neutral.withOpacity(0.2),
+            color: AppColors.neutral.withValues(alpha: 0.2),
             width: isHeader ? 2 : 1,
           ),
         ),

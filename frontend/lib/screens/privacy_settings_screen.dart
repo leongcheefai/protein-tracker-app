@@ -304,9 +304,9 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: CupertinoColors.systemRed.withOpacity(0.1),
+        color: CupertinoColors.systemRed.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: CupertinoColors.systemRed.withOpacity(0.3)),
+        border: Border.all(color: CupertinoColors.systemRed.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -117,7 +117,7 @@ class _PaymentProcessingScreenState extends State<PaymentProcessingScreen> {
       decoration: BoxDecoration(
         color: AppColors.accent,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -244,7 +244,7 @@ class _PaymentProcessingScreenState extends State<PaymentProcessingScreen> {
           color: isSelected ? AppColors.accent : AppColors.background,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.neutral.withOpacity(0.3),
+                          color: isSelected ? AppColors.primary : AppColors.neutral.withValues(alpha: 0.3),
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -315,7 +315,7 @@ class _PaymentProcessingScreenState extends State<PaymentProcessingScreen> {
           decoration: BoxDecoration(
             color: AppColors.background,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.neutral.withOpacity(0.3)),
+            border: Border.all(color: AppColors.neutral.withValues(alpha: 0.3)),
           ),
           padding: const EdgeInsets.all(16),
         ),
@@ -335,7 +335,7 @@ class _PaymentProcessingScreenState extends State<PaymentProcessingScreen> {
                 decoration: BoxDecoration(
                   color: AppColors.background,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.neutral.withOpacity(0.3)),
+                  border: Border.all(color: AppColors.neutral.withValues(alpha: 0.3)),
                 ),
                 padding: const EdgeInsets.all(16),
               ),
@@ -353,7 +353,7 @@ class _PaymentProcessingScreenState extends State<PaymentProcessingScreen> {
                 decoration: BoxDecoration(
                   color: AppColors.background,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.neutral.withOpacity(0.3)),
+                  border: Border.all(color: AppColors.neutral.withValues(alpha: 0.3)),
                 ),
                 padding: const EdgeInsets.all(16),
               ),
@@ -370,7 +370,7 @@ class _PaymentProcessingScreenState extends State<PaymentProcessingScreen> {
                   _savePaymentMethod = value;
                 });
               },
-              activeColor: AppColors.primary,
+              activeTrackColor: AppColors.primary,
             ),
             const SizedBox(width: 12),
             const Expanded(
@@ -407,7 +407,7 @@ class _PaymentProcessingScreenState extends State<PaymentProcessingScreen> {
           decoration: BoxDecoration(
             color: AppColors.background,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.neutral.withOpacity(0.3)),
+            border: Border.all(color: AppColors.neutral.withValues(alpha: 0.3)),
           ),
           padding: const EdgeInsets.all(16),
         ),
@@ -419,7 +419,7 @@ class _PaymentProcessingScreenState extends State<PaymentProcessingScreen> {
           decoration: BoxDecoration(
             color: AppColors.background,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.neutral.withOpacity(0.3)),
+            border: Border.all(color: AppColors.neutral.withValues(alpha: 0.3)),
           ),
           padding: const EdgeInsets.all(16),
         ),
@@ -449,7 +449,7 @@ class _PaymentProcessingScreenState extends State<PaymentProcessingScreen> {
                   _agreeToTerms = value;
                 });
               },
-              activeColor: AppColors.primary,
+              activeTrackColor: AppColors.primary,
             ),
             const SizedBox(width: 12),
             const Expanded(
@@ -473,7 +473,7 @@ class _PaymentProcessingScreenState extends State<PaymentProcessingScreen> {
                   _agreeToPrivacy = value;
                 });
               },
-              activeColor: AppColors.primary,
+              activeTrackColor: AppColors.primary,
             ),
             const SizedBox(width: 12),
             const Expanded(
