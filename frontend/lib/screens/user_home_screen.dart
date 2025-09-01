@@ -626,6 +626,13 @@ class _UserHomeScreenState extends State<UserHomeScreen>
             },
             child: const Text('About & Help'),
           ),
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.of(context).pop();
+              Navigator.of(context).pushNamed('/pricing-plans');
+            },
+            child: const Text('Upgrade to Pro'),
+          ),
         ],
         cancelButton: CupertinoActionSheetAction(
           onPressed: () => Navigator.of(context).pop(),

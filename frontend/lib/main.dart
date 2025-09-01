@@ -21,6 +21,9 @@ import 'screens/network_error_screen.dart';
 import 'screens/empty_states_screen.dart';
 import 'screens/loading_states_screen.dart';
 import 'screens/error_demo_screen.dart';
+import 'screens/pricing_plans_screen.dart';
+import 'screens/payment_processing_screen.dart';
+import 'screens/payment_success_screen.dart';
 import 'utils/user_settings_provider.dart';
 
 void main() {
@@ -181,6 +184,30 @@ class ProteinPaceApp extends StatelessWidget {
               progressValue: args['progressValue'] as double?,
               onCancel: args['onCancel'] as VoidCallback?,
               cancellable: args['cancellable'] as bool? ?? false,
+            );
+          },
+          '/pricing-plans': (context) {
+            final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
+            return PricingPlansScreen(
+              currentPlan: args?['currentPlan'] as SubscriptionPlan? ?? SubscriptionPlan.free,
+              isTrialUser: args?['isTrialUser'] as bool? ?? false,
+              onClose: args?['onClose'] as VoidCallback?,
+            );
+          },
+          '/payment-processing': (context) {
+            final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+            return PaymentProcessingScreen(
+              plan: args['plan'] as SubscriptionPlan,
+              period: args['period'] as SubscriptionPeriod,
+              price: args['price'] as double,
+            );
+          },
+          '/payment-success': (context) {
+            final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+            return PaymentSuccessScreen(
+              plan: args['plan'] as SubscriptionPlan,
+              period: args['period'] as SubscriptionPeriod,
+              price: args['price'] as double,
             );
           },
         },
