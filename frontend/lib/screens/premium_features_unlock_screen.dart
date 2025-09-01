@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'pricing_plans_screen.dart';
 
 enum UnlockTrigger {
@@ -95,11 +94,11 @@ class _PremiumFeaturesUnlockScreenState extends State<PremiumFeaturesUnlockScree
     return CupertinoPageScaffold(
       backgroundColor: AppColors.background,
       child: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
           child: Column(
             children: [
-              const Spacer(),
+              const SizedBox(height: 40),
               _buildHeroSection(),
               const SizedBox(height: 40),
               _buildTriggerMessage(),
@@ -107,7 +106,7 @@ class _PremiumFeaturesUnlockScreenState extends State<PremiumFeaturesUnlockScree
               _buildFeatureHighlights(),
               const SizedBox(height: 40),
               _buildActionButtons(),
-              const Spacer(),
+              const SizedBox(height: 40),
             ],
           ),
         ),
@@ -335,6 +334,7 @@ class _PremiumFeaturesUnlockScreenState extends State<PremiumFeaturesUnlockScree
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
+                        color: CupertinoColors.white,
                       ),
                     ),
                   ),
@@ -390,8 +390,6 @@ class _PremiumFeaturesUnlockScreenState extends State<PremiumFeaturesUnlockScree
         return 'Meal planning and scheduling are Pro features. Plan your nutrition for optimal results.';
       case UnlockTrigger.generalUpgrade:
         return 'Unlock the full potential of Protein Pace with premium features designed for serious fitness enthusiasts.';
-      default:
-        return 'Unlock the full potential of Protein Pace with premium features designed for serious fitness enthusiasts.';
     }
   }
 
@@ -408,8 +406,6 @@ class _PremiumFeaturesUnlockScreenState extends State<PremiumFeaturesUnlockScree
       case UnlockTrigger.mealPlanningLimit:
         return CupertinoIcons.calendar;
       case UnlockTrigger.generalUpgrade:
-        return CupertinoIcons.star_fill;
-      default:
         return CupertinoIcons.star_fill;
     }
   }
