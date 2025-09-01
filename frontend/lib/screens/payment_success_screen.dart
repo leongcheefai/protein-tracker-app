@@ -332,22 +332,16 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
   }
 
   void _manageSubscription() {
-    // Navigate to subscription management
-    // For now, we'll show a dialog
-    showCupertinoDialog(
-      context: context,
-      builder: (context) => CupertinoAlertDialog(
-        title: const Text('Subscription Management'),
-        content: const Text(
-          'You can manage your subscription, view billing history, and update payment methods in the app settings.',
-        ),
-        actions: [
-          CupertinoDialogAction(
-            child: const Text('OK'),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-        ],
-      ),
+    // Navigate to subscription management screen
+    Navigator.of(context).pushNamed(
+      '/subscription-management',
+      arguments: {
+        'currentPlan': widget.plan,
+        'currentPeriod': widget.period,
+        'currentPrice': widget.price,
+        'nextBillingDate': DateTime.now().add(const Duration(days: 7)), // Trial end date
+        'isTrialActive': true,
+      },
     );
   }
 }

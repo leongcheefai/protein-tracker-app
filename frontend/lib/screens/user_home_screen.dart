@@ -8,6 +8,7 @@ import '../widgets/user_home/recent_items_list.dart';
 import '../widgets/user_home/camera_modal.dart';
 import 'history_screen.dart';
 import 'quick_add_screen.dart';
+import 'pricing_plans_screen.dart' as pricing;
 
 class UserHomeScreen extends StatefulWidget {
   final double height;
@@ -632,6 +633,23 @@ class _UserHomeScreenState extends State<UserHomeScreen>
               Navigator.of(context).pushNamed('/pricing-plans');
             },
             child: const Text('Upgrade to Pro'),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.of(context).pop();
+              // Navigate to subscription management with mock data
+              Navigator.of(context).pushNamed(
+                '/subscription-management',
+                arguments: {
+                  'currentPlan': pricing.SubscriptionPlan.pro,
+                  'currentPeriod': pricing.SubscriptionPeriod.annual,
+                  'currentPrice': 39.99,
+                  'nextBillingDate': DateTime.now().add(const Duration(days: 15)),
+                  'isTrialActive': false,
+                },
+              );
+            },
+            child: const Text('Manage Subscription'),
           ),
         ],
         cancelButton: CupertinoActionSheetAction(

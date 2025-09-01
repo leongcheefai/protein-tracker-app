@@ -24,6 +24,7 @@ import 'screens/error_demo_screen.dart';
 import 'screens/pricing_plans_screen.dart';
 import 'screens/payment_processing_screen.dart';
 import 'screens/payment_success_screen.dart';
+import 'screens/subscription_management_screen.dart';
 import 'utils/user_settings_provider.dart';
 
 void main() {
@@ -208,6 +209,16 @@ class ProteinPaceApp extends StatelessWidget {
               plan: args['plan'] as SubscriptionPlan,
               period: args['period'] as SubscriptionPeriod,
               price: args['price'] as double,
+            );
+          },
+          '/subscription-management': (context) {
+            final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+            return SubscriptionManagementScreen(
+              currentPlan: args['currentPlan'] as SubscriptionPlan,
+              currentPeriod: args['currentPeriod'] as SubscriptionPeriod,
+              currentPrice: args['currentPrice'] as double,
+              nextBillingDate: args['nextBillingDate'] as DateTime,
+              isTrialActive: args['isTrialActive'] as bool? ?? false,
             );
           },
         },
