@@ -384,6 +384,97 @@ This document breaks down the UI development phases and individual screens for t
 
 ---
 
+### **Phase 7: Monetization & Premium Features (Week 8-9)**
+*Milestone: M8 – Premium Features & Monetization*
+
+#### 7.1 Pricing Plans Screen
+- **Purpose:** Display subscription options and premium features
+- **Elements:**
+  - **Header:** "Choose Your Plan" with close button
+  - **Free Plan Card:**
+    - "Free" badge
+    - Basic features list (5 items max, photo tracking, basic history)
+    - "Current Plan" indicator (if user is on free)
+    - "Continue with Free" button
+  - **Pro Plan Card (Featured):**
+    - "Pro" badge with "Most Popular" tag
+    - Monthly price (e.g., "$4.99/month")
+    - Annual price with savings (e.g., "$39.99/year - Save 33%")
+    - Premium features list (unlimited history, advanced analytics, export data, custom goals)
+    - "Start Free Trial" button (7-day trial)
+  - **Feature Comparison Table:**
+    - Side-by-side comparison of Free vs Pro features
+    - Clear checkmarks and X marks
+  - **Terms & Privacy links** (bottom)
+- **States:** Free user, trial user, paid user
+- **Navigation:** → Payment Processing, Back to previous screen
+
+#### 7.2 Payment Processing Screen
+- **Purpose:** Handle subscription payment and trial activation
+- **Elements:**
+  - **Plan Summary:** Selected plan details and pricing
+  - **Payment Method Section:**
+    - Credit card input fields (number, expiry, CVV)
+    - Apple Pay/Google Pay buttons (platform-specific)
+    - "Save payment method" toggle
+  - **Billing Information:**
+    - Name, email, address fields
+    - Auto-filled from app profile if available
+  - **Terms & Conditions:**
+    - Subscription terms checkbox
+    - Privacy policy checkbox
+    - Auto-renewal disclosure
+  - **Action Buttons:**
+    - "Start Free Trial" (primary)
+    - "Cancel" (secondary)
+  - **Security badges:** SSL, PCI compliance indicators
+- **States:** Payment processing, validation errors, success
+- **Navigation:** → Payment Success, Back to Pricing
+
+#### 7.3 Payment Success Screen
+- **Purpose:** Confirm successful subscription and guide next steps
+- **Elements:**
+  - **Success Animation:** Checkmark with celebration
+  - **Welcome Message:** "Welcome to Protein Pace Pro!"
+  - **Trial Information:** "7-day free trial started" with end date
+  - **Next Steps:**
+    - "Explore Premium Features" button
+    - "Continue to App" button
+  - **Account Management:** Link to manage subscription
+- **Navigation:** → User Home (with premium features unlocked)
+
+#### 7.4 Subscription Management Screen
+- **Purpose:** Manage existing subscription and billing
+- **Elements:**
+  - **Current Plan Display:**
+    - Plan name and status
+    - Next billing date
+    - Current period progress
+  - **Billing History:** List of past payments
+  - **Payment Method:** Current payment method with edit option
+  - **Plan Actions:**
+    - "Change Plan" button
+    - "Cancel Subscription" button (with confirmation)
+    - "Restore Purchases" button (for app store)
+  - **Support Section:** Contact support for billing issues
+- **Navigation:** → Pricing Plans, Back to Settings
+
+#### 7.5 Premium Features Unlock Screen
+- **Purpose:** Showcase premium features when user upgrades
+- **Elements:**
+  - **Congratulations Message:** "Unlock Premium Features!"
+  - **Feature Highlights:**
+    - Advanced analytics and insights
+    - Unlimited history and data export
+    - Custom protein goals and meal planning
+    - Priority support
+  - **Upgrade Button:** "Upgrade to Pro" (primary)
+  - **Skip Option:** "Maybe Later" (secondary)
+- **Triggers:** When user hits free plan limits
+- **Navigation:** → Pricing Plans, Back to previous screen
+
+---
+
 ## Navigation Structure
 
 ### **Bottom Tab Bar (Main App)**
@@ -394,6 +485,7 @@ This document breaks down the UI development phases and individual screens for t
 
 ### **Modal Overlays**
 - **Camera Settings Modal:** Photo upload method selection (bottom sheet)
+- **Pricing Plans Modal:** Subscription options and payment processing
 - Food detection results
 - Portion selection
 - Meal assignment
@@ -403,6 +495,7 @@ This document breaks down the UI development phases and individual screens for t
 ```
 Setup Flow: Splash → Welcome → Height/Weight → Training → Goals → Meals → User Home
 Main App: User Home (with camera modal) → Photo Flow → Back to User Home
+Premium Flow: Premium Unlock → Pricing Plans → Payment → Success → Enhanced User Home
 ```
 
 ---
