@@ -9,6 +9,7 @@ import '../widgets/user_home/camera_modal.dart';
 import 'history_screen.dart';
 import 'quick_add_screen.dart';
 import 'pricing_plans_screen.dart' as pricing;
+import 'premium_features_unlock_screen.dart' as premium;
 
 class UserHomeScreen extends StatefulWidget {
   final double height;
@@ -650,6 +651,20 @@ class _UserHomeScreenState extends State<UserHomeScreen>
               );
             },
             child: const Text('Manage Subscription'),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.of(context).pop();
+              // Navigate to premium features unlock screen
+              Navigator.of(context).pushNamed(
+                '/premium-features-unlock',
+                arguments: {
+                  'trigger': premium.UnlockTrigger.historyLimit,
+                  'customMessage': 'You\'ve reached the 7-day history limit. Upgrade to Pro for unlimited access!',
+                },
+              );
+            },
+            child: const Text('Demo: Premium Unlock'),
           ),
         ],
         cancelButton: CupertinoActionSheetAction(

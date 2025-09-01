@@ -25,6 +25,7 @@ import 'screens/pricing_plans_screen.dart';
 import 'screens/payment_processing_screen.dart';
 import 'screens/payment_success_screen.dart';
 import 'screens/subscription_management_screen.dart';
+import 'screens/premium_features_unlock_screen.dart';
 import 'utils/user_settings_provider.dart';
 
 void main() {
@@ -219,6 +220,14 @@ class ProteinPaceApp extends StatelessWidget {
               currentPrice: args['currentPrice'] as double,
               nextBillingDate: args['nextBillingDate'] as DateTime,
               isTrialActive: args['isTrialActive'] as bool? ?? false,
+            );
+          },
+          '/premium-features-unlock': (context) {
+            final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+            return PremiumFeaturesUnlockScreen(
+              trigger: args['trigger'] as UnlockTrigger,
+              customMessage: args['customMessage'] as String?,
+              onSkip: args['onSkip'] as VoidCallback?,
             );
           },
         },

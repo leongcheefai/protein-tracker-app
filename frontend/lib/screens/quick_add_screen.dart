@@ -337,6 +337,14 @@ class _QuickAddScreenState extends State<QuickAddScreen>
                 child: CupertinoTextField(
                   controller: _foodNameController,
                   placeholder: 'e.g., Chicken Breast, Greek Yogurt',
+                  style: const TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 16,
+                  ),
+                  placeholderStyle: const TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 16,
+                  ),
                   decoration: const BoxDecoration(
                     border: null,
                     color: Colors.transparent,
@@ -453,11 +461,19 @@ class _QuickAddScreenState extends State<QuickAddScreen>
                     controller: _customPortionController,
                     keyboardType: TextInputType.number,
                     placeholder: 'Enter portion size',
+                    style: const TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 16,
+                    ),
+                    placeholderStyle: const TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 16,
+                    ),
                     decoration: const BoxDecoration(
                       border: null,
                       color: Colors.transparent,
                     ),
-                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 0),
                     onChanged: _updateCustomPortion,
                   ),
                 ),
@@ -514,6 +530,14 @@ class _QuickAddScreenState extends State<QuickAddScreen>
                   controller: _proteinController,
                   keyboardType: TextInputType.number,
                   placeholder: '25.0',
+                  style: const TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 16,
+                  ),
+                  placeholderStyle: const TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 16,
+                  ),
                   decoration: const BoxDecoration(
                     border: null,
                     color: Colors.transparent,
