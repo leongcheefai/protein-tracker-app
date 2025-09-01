@@ -1,4 +1,6 @@
 import 'package:flutter/cupertino.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 import '../main.dart';
 import '../widgets/user_home/enhanced_header.dart';
 import '../widgets/user_home/progress_visualization.dart';
@@ -39,6 +41,10 @@ class _UserHomeScreenState extends State<UserHomeScreen>
   late AnimationController _pulseController;
   late Animation<double> _ringAnimation;
   late Animation<double> _pulseAnimation;
+  
+  // Image picker instance
+  final ImagePicker _imagePicker = ImagePicker();
+  bool _isLoadingImage = false;
 
   // Mock data for demonstration - in real app this would come from a database
   final Map<String, double> _mealProgress = {
@@ -277,12 +283,134 @@ class _UserHomeScreenState extends State<UserHomeScreen>
         return CameraModal(
           onTakePhoto: () {
             Navigator.pop(context);
-            // TODO: Navigate to camera screen
+            _takePhoto();
           },
           onChooseFromGallery: () {
             Navigator.pop(context);
-            // TODO: Navigate to gallery picker
+            _pickImageFromGallery();
           },
+        );
+      },
+    );
+  }
+
+  Future<void> _takePhoto() async {
+    setState(() {
+      _isLoadingImage = true;
+    });
+    
+    try {
+      final XFile? photo = await _imagePicker.pickImage(
+        source: ImageSource.camera,
+        imageQuality: 80,
+        maxWidth: 512,
+        maxHeight: 512,
+      );
+      
+      if (photo != null) {
+        final File photoFile = File(photo.path);
+        if (await _validateImageFile(photoFile)) {
+          // Navigate to processing screen with the captured image
+          if (mounted) {
+            Navigator.pushNamed(
+              context,
+              '/processing',
+              arguments: photo.path,
+            );
+          }
+        }
+      }
+    } catch (e) {
+      String errorMessage = 'Failed to take photo';
+      if (e.toString().contains('permission')) {
+        errorMessage = 'Camera permission denied. Please enable camera access in settings.';
+      } else if (e.toString().contains('camera')) {
+        errorMessage = 'Camera not available. Please check your device camera.';
+      }
+      _showErrorDialog(errorMessage);
+    } finally {
+      setState(() {
+        _isLoadingImage = false;
+      });
+    }
+  }
+
+  Future<void> _pickImageFromGallery() async {
+    setState(() {
+      _isLoadingImage = true;
+    });
+    
+    try {
+      final XFile? image = await _imagePicker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 80,
+        maxWidth: 512,
+        maxHeight: 512,
+      );
+      
+      if (image != null) {
+        final File imageFile = File(image.path);
+        if (await _validateImageFile(imageFile)) {
+          // Navigate to processing screen with the selected image
+          if (mounted) {
+            Navigator.pushNamed(
+              context,
+              '/processing',
+              arguments: image.path,
+            );
+          }
+        }
+      }
+    } catch (e) {
+      String errorMessage = 'Failed to pick image';
+      if (e.toString().contains('permission')) {
+        errorMessage = 'Gallery permission denied. Please enable photo library access in settings.';
+      } else if (e.toString().contains('gallery')) {
+        errorMessage = 'Gallery not available. Please check your device photo library.';
+      }
+      _showErrorDialog(errorMessage);
+    } finally {
+      setState(() {
+        _isLoadingImage = false;
+      });
+    }
+  }
+
+  Future<bool> _validateImageFile(File imageFile) async {
+    try {
+      // Check if file exists and is readable
+      if (!await imageFile.exists()) {
+        _showErrorDialog('Selected image file is not accessible.');
+        return false;
+      }
+
+      // Check file size (max 5MB)
+      final int fileSize = await imageFile.length();
+      if (fileSize > 5 * 1024 * 1024) {
+        _showErrorDialog('Image file is too large. Please select an image smaller than 5MB.');
+        return false;
+      }
+
+      return true;
+    } catch (e) {
+      _showErrorDialog('Failed to validate image file: ${e.toString()}');
+      return false;
+    }
+  }
+
+  void _showErrorDialog(String message) {
+    showCupertinoDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return CupertinoAlertDialog(
+          title: const Text('Error'),
+          content: Text(message),
+          actions: [
+            CupertinoDialogAction(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('OK'),
+            ),
+          ],
         );
       },
     );
@@ -389,8 +517,8 @@ class _UserHomeScreenState extends State<UserHomeScreen>
                               Expanded(
                                 child: _buildQuickActionCard(
                                   icon: CupertinoIcons.camera,
-                                  title: 'Upload Photo',
-                                  subtitle: 'Take a photo of your meal',
+                                  title: _isLoadingImage ? 'Loading...' : 'Upload Photo',
+                                  subtitle: _isLoadingImage ? 'Processing image...' : 'Take a photo of your meal',
                                   onTap: () => _showCameraSettingsModal(context),
                                 ),
                               ),
@@ -533,31 +661,39 @@ class _UserHomeScreenState extends State<UserHomeScreen>
     required String subtitle,
     required VoidCallback onTap,
   }) {
+    final bool isLoading = title == 'Loading...';
+    
     return GestureDetector(
-      onTap: onTap,
+      onTap: isLoading ? null : onTap,
       child: Container(
         padding: const EdgeInsets.all(16.0),
         decoration: BoxDecoration(
-          color: AppColors.background,
+          color: isLoading ? AppColors.background.withValues(alpha: 0.5) : AppColors.background,
           borderRadius: BorderRadius.circular(12.0),
           border: Border.all(
-            color: AppColors.background,
+            color: isLoading ? AppColors.neutral.withValues(alpha: 0.3) : AppColors.background,
             width: 1,
           ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(
-              icon,
-              color: AppColors.primary,
-              size: 24,
-            ),
+            if (isLoading)
+              const CupertinoActivityIndicator(
+                color: AppColors.primary,
+                radius: 12,
+              )
+            else
+              Icon(
+                icon,
+                color: AppColors.primary,
+                size: 24,
+              ),
             const SizedBox(height: 8),
             Text(
               title,
-              style: const TextStyle(
-                color: AppColors.textPrimary,
+              style: TextStyle(
+                color: isLoading ? AppColors.textSecondary : AppColors.textPrimary,
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
               ),
@@ -565,8 +701,8 @@ class _UserHomeScreenState extends State<UserHomeScreen>
             const SizedBox(height: 8),
             Text(
               subtitle,
-              style: const TextStyle(
-                color: AppColors.textSecondary,
+              style: TextStyle(
+                color: isLoading ? AppColors.textSecondary.withValues(alpha: 0.7) : AppColors.textSecondary,
                 fontSize: 12,
               ),
               maxLines: 2,
