@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../../main.dart';
 import '../../utils/category_utils.dart';
-import '../../utils/meal_utils.dart';
 
 class FoodItemCard extends StatelessWidget {
   final Map<String, dynamic> item;
