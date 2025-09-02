@@ -295,43 +295,9 @@ class _UserHomeScreenState extends State<UserHomeScreen>
   }
 
   Future<void> _takePhoto() async {
-    setState(() {
-      _isLoadingImage = true;
-    });
-    
-    try {
-      final XFile? photo = await _imagePicker.pickImage(
-        source: ImageSource.camera,
-        imageQuality: 80,
-        maxWidth: 512,
-        maxHeight: 512,
-      );
-      
-      if (photo != null) {
-        final File photoFile = File(photo.path);
-        if (await _validateImageFile(photoFile)) {
-          // Navigate to processing screen with the captured image
-          if (mounted) {
-            Navigator.pushNamed(
-              context,
-              '/processing',
-              arguments: photo.path,
-            );
-          }
-        }
-      }
-    } catch (e) {
-      String errorMessage = 'Failed to take photo';
-      if (e.toString().contains('permission')) {
-        errorMessage = 'Camera permission denied. Please enable camera access in settings.';
-      } else if (e.toString().contains('camera')) {
-        errorMessage = 'Camera not available. Please check your device camera.';
-      }
-      _showErrorDialog(errorMessage);
-    } finally {
-      setState(() {
-        _isLoadingImage = false;
-      });
+    // Navigate to the dedicated camera launch screen
+    if (mounted) {
+      Navigator.pushNamed(context, '/camera-launch');
     }
   }
 

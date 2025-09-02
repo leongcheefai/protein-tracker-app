@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:camera/camera.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 class CameraLaunchScreen extends StatefulWidget {
   const CameraLaunchScreen({super.key});
@@ -16,14 +16,14 @@ class _CameraLaunchScreenState extends State<CameraLaunchScreen>
   int _selectedCameraIndex = 0;
   bool _isInitialized = false;
   bool _isFlashOn = false;
-  bool _hasPermission = false;
+
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _checkPermissions();
+    _initializeCamera();
   }
 
   @override
@@ -45,88 +45,51 @@ class _CameraLaunchScreenState extends State<CameraLaunchScreen>
     }
   }
 
-  Future<void> _checkPermissions() async {
-    print('Checking camera permissions...');
-    
-    // First check current status
-    final currentStatus = await Permission.camera.status;
-    print('Current camera permission status: $currentStatus');
-    
-    if (currentStatus.isGranted) {
-      print('Camera permission already granted');
-      setState(() {
-        _hasPermission = true;
-        _isLoading = false;
-      });
-      await _initializeCamera();
-      return;
-    }
-    
-    if (currentStatus.isDenied) {
-      print('Camera permission denied, requesting...');
-      final status = await Permission.camera.request();
-      print('Permission request result: $status');
-      
-      setState(() {
-        _hasPermission = status.isGranted;
-        _isLoading = false;
-      });
-      
-      if (_hasPermission) {
-        await _initializeCamera();
-      }
-    } else if (currentStatus.isPermanentlyDenied) {
-      print('Camera permission permanently denied');
-      setState(() {
-        _hasPermission = false;
-        _isLoading = false;
-      });
-    } else {
-      print('Unknown permission status: $currentStatus');
-      setState(() {
-        _hasPermission = false;
-        _isLoading = false;
-      });
-    }
-  }
+  // Removed permission_handler logic - camera plugin handles permissions natively
 
-  Future<void> _openSettings() async {
-    await openAppSettings();
-  }
 
-  Future<void> _retryPermission() async {
+
+  Future<void> _retryCameraInitialization() async {
     setState(() {
       _isLoading = true;
     });
     
-    final status = await Permission.camera.request();
-    setState(() {
-      _hasPermission = status.isGranted;
-      _isLoading = false;
-    });
+    // Dispose existing controller
+    await _controller?.dispose();
+    _controller = null;
+    _isInitialized = false;
     
-    if (_hasPermission) {
-      await _initializeCamera();
-    }
+    // Retry initialization
+    await _initializeCamera();
   }
 
   Future<void> _initializeCamera() async {
     try {
+      // Check if camera is available
       _cameras = await availableCameras();
       if (_cameras.isEmpty) {
         setState(() {
           _isLoading = false;
         });
+        _showErrorDialog('No cameras found on this device. Please check your device camera.');
         return;
       }
 
+      // Create camera controller
       _controller = CameraController(
         _cameras[_selectedCameraIndex],
         ResolutionPreset.high,
         enableAudio: false,
+        imageFormatGroup: ImageFormatGroup.jpeg,
       );
 
-      await _controller!.initialize();
+      // Initialize camera with timeout
+      await _controller!.initialize().timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw Exception('Camera initialization timeout. Please try again.');
+        },
+      );
       
       if (mounted) {
         setState(() {
@@ -139,7 +102,21 @@ class _CameraLaunchScreenState extends State<CameraLaunchScreen>
         setState(() {
           _isLoading = false;
         });
-        _showErrorDialog('Camera initialization failed: $e');
+        
+        // Handle permission-related errors with native iOS dialog
+        if (e.toString().contains('permission') || e.toString().contains('denied')) {
+          _showPermissionDialog();
+        } else {
+          String errorMessage = 'Camera initialization failed';
+          if (e.toString().contains('CameraException')) {
+            errorMessage = 'Camera is currently unavailable. Please close other camera apps and try again.';
+          } else if (e.toString().contains('timeout')) {
+            errorMessage = 'Camera initialization timeout. Please try again.';
+          } else {
+            errorMessage = 'Camera initialization failed: ${e.toString()}';
+          }
+          _showErrorDialog(errorMessage);
+        }
       }
     }
   }
@@ -200,16 +177,47 @@ class _CameraLaunchScreenState extends State<CameraLaunchScreen>
     }
   }
 
-  void _showErrorDialog(String message) {
-    showDialog(
+  void _showPermissionDialog() {
+    showCupertinoDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Error'),
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('Camera Access Required'),
+        content: const Text('Fuelie needs access to your camera to take photos of your meals for AI analysis.'),
+        actions: [
+          CupertinoDialogAction(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            onPressed: () {
+              Navigator.pop(context);
+              _retryCameraInitialization();
+            },
+            child: const Text('Allow'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showErrorDialog(String message) {
+    showCupertinoDialog(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('Camera Error'),
         content: Text(message),
         actions: [
-          TextButton(
+          CupertinoDialogAction(
             onPressed: () => Navigator.pop(context),
             child: const Text('OK'),
+          ),
+          CupertinoDialogAction(
+            onPressed: () {
+              Navigator.pop(context);
+              _retryCameraInitialization();
+            },
+            child: const Text('Retry'),
           ),
         ],
       ),
@@ -233,7 +241,7 @@ class _CameraLaunchScreenState extends State<CameraLaunchScreen>
                 ),
               )
             else
-              _buildPermissionDeniedView(),
+              _buildCameraUnavailableView(),
 
             // Camera Controls Overlay
             if (_isInitialized && _controller != null)
@@ -345,7 +353,7 @@ class _CameraLaunchScreenState extends State<CameraLaunchScreen>
     );
   }
 
-  Widget _buildPermissionDeniedView() {
+  Widget _buildCameraUnavailableView() {
     return Container(
       color: Colors.black,
       child: Center(
@@ -359,7 +367,7 @@ class _CameraLaunchScreenState extends State<CameraLaunchScreen>
             ),
             const SizedBox(height: 24),
             const Text(
-              'Camera Permission Required',
+              'Camera Unavailable',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 24,
@@ -369,77 +377,26 @@ class _CameraLaunchScreenState extends State<CameraLaunchScreen>
             ),
             const SizedBox(height: 16),
             const Text(
-              'Fuelie needs camera access to analyze your meals and track protein intake.',
+              'Unable to access camera. Please try again.',
               style: TextStyle(
                 color: Colors.white70,
                 fontSize: 16,
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 24),
-            const Text(
-              'To enable camera access:\n1. Tap "Open Settings"\n2. Find "Fuelie" in the list\n3. Tap "Camera" and select "Allow"',
-              style: TextStyle(
-                color: Colors.white60,
-                fontSize: 14,
-              ),
-              textAlign: TextAlign.center,
-            ),
             const SizedBox(height: 32),
-            ElevatedButton(
-              onPressed: _openSettings,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: Colors.black,
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-              ),
-              child: const Text(
-                'Open Settings',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-              ),
-            ),
-            const SizedBox(height: 16),
-            OutlinedButton(
-              onPressed: _retryPermission,
-              style: OutlinedButton.styleFrom(
-                foregroundColor: Colors.white,
-                side: const BorderSide(color: Colors.white),
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-              ),
+            CupertinoButton.filled(
+              onPressed: _retryCameraInitialization,
               child: const Text(
                 'Try Again',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
             ),
             const SizedBox(height: 16),
-            OutlinedButton(
-              onPressed: () async {
-                print('Testing camera permission request...');
-                final status = await Permission.camera.request();
-                print('Test permission result: $status');
-                if (status.isGranted) {
-                  print('Permission granted!');
-                  setState(() {
-                    _hasPermission = true;
-                  });
-                  await _initializeCamera();
-                }
-              },
-              style: OutlinedButton.styleFrom(
-                foregroundColor: Colors.orange,
-                side: const BorderSide(color: Colors.orange),
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-              ),
-              child: const Text(
-                'Test Permission',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextButton(
+            CupertinoButton(
               onPressed: () => Navigator.pop(context),
               child: const Text(
-                'Maybe Later',
+                'Cancel',
                 style: TextStyle(color: Colors.white70, fontSize: 16),
               ),
             ),
