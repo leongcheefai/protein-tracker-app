@@ -1,7 +1,7 @@
-# Protein Pace — UI Screens Breakdown
+# Fuelie — UI Screens Breakdown
 
 ## Overview
-This document breaks down the UI development phases and individual screens for the Protein Pace app, organized by development milestones from the masterplan.
+This document breaks down the UI development phases and individual screens for the Fuelie app, organized by development milestones from the masterplan.
 
 ---
 
@@ -13,7 +13,7 @@ This document breaks down the UI development phases and individual screens for t
 #### 1.1 Splash Screen
 - **Purpose:** App launch, branding, loading state
 - **Elements:**
-  - App logo (Protein Pace)
+  - App logo (Fuelie)
   - Loading spinner
   - Version number (bottom)
 - **Navigation:** Auto-advance to Welcome after 2-3 seconds
@@ -86,7 +86,7 @@ This document breaks down the UI development phases and individual screens for t
 #### 2.1 User Home Screen
 - **Purpose:** Main app dashboard after user setup, central hub for all functionality
 - **Elements:**
-  - **Header:** App title "Protein Pace" with settings icon
+  - **Header:** App title "Fuelie" with settings icon
   - **Welcome Section:** Personalized greeting with user avatar and motivational message
   - **Daily Progress Card:** 
     - Current vs. target protein (e.g., "89g / 144g")
@@ -435,7 +435,7 @@ This document breaks down the UI development phases and individual screens for t
 - **Purpose:** Confirm successful subscription and guide next steps
 - **Elements:**
   - **Success Animation:** Checkmark with celebration
-  - **Welcome Message:** "Welcome to Protein Pace Pro!"
+  - **Welcome Message:** "Welcome to Fuelie Pro!"
   - **Trial Information:** "7-day free trial started" with end date
   - **Next Steps:**
     - "Explore Premium Features" button

@@ -100,7 +100,7 @@ class _AboutHelpScreenState extends State<AboutHelpScreen> {
           const SizedBox(height: 16),
           
           const Text(
-            'Protein Pace',
+            'Fuelie',
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
@@ -444,7 +444,7 @@ class _AboutHelpScreenState extends State<AboutHelpScreen> {
           ),
           const SizedBox(height: 8),
           const Text(
-            'We\'re here to help you get the most out of Protein Pace',
+            'We\'re here to help you get the most out of Fuelie',
             style: TextStyle(
               fontSize: 14,
               color: AppColors.textSecondary,
@@ -582,8 +582,8 @@ class _AboutHelpScreenState extends State<AboutHelpScreen> {
     showCupertinoDialog(
       context: context,
       builder: (context) => CupertinoAlertDialog(
-        title: const Text('Rate Protein Pace'),
-        content: const Text('Thank you for using Protein Pace! Please rate us on the App Store to help other users discover our app.'),
+        title: const Text('Rate Fuelie'),
+        content: const Text('Thank you for using Fuelie! Please rate us on the App Store to help other users discover our app.'),
         actions: [
           CupertinoDialogAction(
             child: const Text('Maybe Later'),

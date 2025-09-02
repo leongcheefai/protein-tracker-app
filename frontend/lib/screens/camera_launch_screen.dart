@@ -369,7 +369,7 @@ class _CameraLaunchScreenState extends State<CameraLaunchScreen>
             ),
             const SizedBox(height: 16),
             const Text(
-              'Protein Pace needs camera access to analyze your meals and track protein intake.',
+              'Fuelie needs camera access to analyze your meals and track protein intake.',
               style: TextStyle(
                 color: Colors.white70,
                 fontSize: 16,
@@ -378,7 +378,7 @@ class _CameraLaunchScreenState extends State<CameraLaunchScreen>
             ),
             const SizedBox(height: 24),
             const Text(
-              'To enable camera access:\n1. Tap "Open Settings"\n2. Find "Protein Pace" in the list\n3. Tap "Camera" and select "Allow"',
+              'To enable camera access:\n1. Tap "Open Settings"\n2. Find "Fuelie" in the list\n3. Tap "Camera" and select "Allow"',
               style: TextStyle(
                 color: Colors.white60,
                 fontSize: 14,

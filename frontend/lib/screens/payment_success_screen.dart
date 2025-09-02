@@ -164,7 +164,7 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
     return Column(
       children: [
         const Text(
-          'Welcome to Protein Pace Pro!',
+          'Welcome to Fuelie Pro!',
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,

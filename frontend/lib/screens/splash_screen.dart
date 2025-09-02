@@ -112,7 +112,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                   return FadeTransition(
                     opacity: _fadeAnimation,
                     child: Text(
-                      'Protein Pace',
+                      'Fuelie',
                       style: TextStyle(
                         fontSize: 32,
                         fontWeight: FontWeight.w600,

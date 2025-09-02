@@ -424,7 +424,7 @@ class _UserHomeScreenState extends State<UserHomeScreen>
         backgroundColor: AppColors.background,
         border: null,
         middle: const Text(
-          'Protein Pace',
+          'Fuelie',
           style: TextStyle(
             color: AppColors.textPrimary,
             fontSize: 20,

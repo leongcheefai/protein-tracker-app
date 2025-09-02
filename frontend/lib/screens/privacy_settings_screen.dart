@@ -201,7 +201,7 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
           ),
           const SizedBox(height: 8),
           const Text(
-            'Review the terms and conditions for using Protein Pace',
+            'Review the terms and conditions for using Fuelie',
             style: TextStyle(
               fontSize: 14,
               color: CupertinoColors.systemGrey,
@@ -517,7 +517,7 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
       context: context,
       builder: (context) => CupertinoAlertDialog(
         title: const Text('Account Deleted'),
-        content: const Text('Your account has been successfully deleted. Thank you for using Protein Pace.'),
+        content: const Text('Your account has been successfully deleted. Thank you for using Fuelie.'),
         actions: [
           CupertinoDialogAction(
             child: const Text('OK'),

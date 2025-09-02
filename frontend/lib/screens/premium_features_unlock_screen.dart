@@ -389,7 +389,7 @@ class _PremiumFeaturesUnlockScreenState extends State<PremiumFeaturesUnlockScree
       case UnlockTrigger.mealPlanningLimit:
         return 'Meal planning and scheduling are Pro features. Plan your nutrition for optimal results.';
       case UnlockTrigger.generalUpgrade:
-        return 'Unlock the full potential of Protein Pace with premium features designed for serious fitness enthusiasts.';
+        return 'Unlock the full potential of Fuelie with premium features designed for serious fitness enthusiasts.';
     }
   }
 
@@ -433,7 +433,7 @@ class _PremiumFeaturesUnlockScreenState extends State<PremiumFeaturesUnlockScree
     showCupertinoDialog(
       context: context,
       builder: (context) => CupertinoAlertDialog(
-        title: const Text('About Protein Pace Pro'),
+        title: const Text('About Fuelie Pro'),
         content: const Text(
           'Pro features include:\n\n'
           '• Unlimited history & data export\n'

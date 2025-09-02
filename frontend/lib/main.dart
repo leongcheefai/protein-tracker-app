@@ -40,7 +40,7 @@ class ProteinPaceApp extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (context) => UserSettingsProvider(),
       child: CupertinoApp(
-        title: 'Protein Pace',
+        title: 'Fuelie',
         debugShowCheckedModeBanner: false,
         theme: const CupertinoThemeData(
           primaryColor: AppColors.primary,

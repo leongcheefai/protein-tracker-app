@@ -36,7 +36,7 @@ class EmptyStatesScreen extends StatelessWidget {
     
     switch (emptyStateType) {
       case EmptyStateType.firstTime:
-        return 'Welcome to Protein Pace!';
+        return 'Welcome to Fuelie!';
       case EmptyStateType.noData:
         return 'No Data Available';
       case EmptyStateType.noResults:

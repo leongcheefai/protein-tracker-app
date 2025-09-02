@@ -1,6 +1,6 @@
 # Phase 6: Error & Edge Cases Implementation
 
-This document describes the implementation of Phase 6 error handling screens for the Protein Pace app.
+This document describes the implementation of Phase 6 error handling screens for the Fuelie app.
 
 ## Overview
 
@@ -247,6 +247,6 @@ All error screens are integrated into the main app routing system in `main.dart`
 
 ## Conclusion
 
-Phase 6 provides a robust foundation for error handling in the Protein Pace app. The screens follow iOS design guidelines while providing comprehensive user support for common app issues. The implementation is flexible, testable, and ready for production use.
+Phase 6 provides a robust foundation for error handling in the Fuelie app. The screens follow iOS design guidelines while providing comprehensive user support for common app issues. The implementation is flexible, testable, and ready for production use.
 
 For questions or issues, refer to the main project documentation or contact the development team.

@@ -2,7 +2,7 @@
 
 ## 1) App Overview & Objectives
 
-**Working title:** Protein Pace (iOS)
+**Working title:** Fuelie (iOS)
 
 **Elevator pitch:** A camera-first, AI-assisted protein intake tracker for people who exercise but under-eat protein. Snap a meal → instant protein estimate → quick chip tweaks → per‑meal targets that roll up to a daily goal.
 
