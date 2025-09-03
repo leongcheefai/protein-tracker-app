@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import '../main.dart';
 
 class PortionSelectionScreen extends StatefulWidget {
@@ -89,27 +88,78 @@ class _PortionSelectionScreenState extends State<PortionSelectionScreen> {
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       backgroundColor: CupertinoColors.systemBackground,
-      navigationBar: CupertinoNavigationBar(
-        backgroundColor: Colors.transparent,
-        border: null,
-        leading: CupertinoNavigationBarBackButton(
-          onPressed: () => Navigator.pop(context),
-          color: Colors.black,
-        ),
-        middle: const Text(
-          'Portion Size',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-      child: Column(
-        children: [
-          // Food Summary
-          Container(
-            margin: const EdgeInsets.all(16),
+      child: SafeArea(
+        child: Column(
+          children: [
+            // Custom Navigation Header
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: CupertinoColors.systemBackground,
+                border: Border(
+                  bottom: BorderSide(
+                    color: CupertinoColors.systemGrey4,
+                    width: 0.5,
+                  ),
+                ),
+              ),
+              child: Row(
+                children: [
+                  CupertinoButton(
+                    onPressed: () => Navigator.pop(context),
+                    padding: EdgeInsets.zero,
+                    child: const Icon(
+                      CupertinoIcons.back,
+                      color: CupertinoColors.black,
+                      size: 24,
+                    ),
+                  ),
+                  const Expanded(
+                    child: Text(
+                      'Portion Size',
+                      style: TextStyle(
+                        color: CupertinoColors.black,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  const SizedBox(width: 44), // Balance the back button
+                ],
+              ),
+            ),
+            
+            // Main Content
+            Expanded(
+              child: Column(
+                children: [
+            // Debug: Show if we have data
+            if (widget.detectedFoods.isEmpty || widget.selectedFoodIndex >= widget.detectedFoods.length)
+              Container(
+                margin: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: CupertinoColors.systemRed.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: CupertinoColors.systemRed,
+                    width: 2,
+                  ),
+                ),
+                child: const Text(
+                  'ERROR: No food data available',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: CupertinoColors.systemRed,
+                  ),
+                ),
+              ),
+            
+            // Food Summary
+            Container(
+              margin: const EdgeInsets.all(16),
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               color: AppColors.primary.withValues(alpha: 0.05),
@@ -146,7 +196,7 @@ class _PortionSelectionScreenState extends State<PortionSelectionScreen> {
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
-                          color: Colors.black,
+                          color: CupertinoColors.black,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -175,7 +225,7 @@ class _PortionSelectionScreenState extends State<PortionSelectionScreen> {
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: Colors.black,
+                    color: CupertinoColors.black,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -203,7 +253,7 @@ class _PortionSelectionScreenState extends State<PortionSelectionScreen> {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
-                            color: isSelected ? Colors.white : Colors.black,
+                            color: isSelected ? CupertinoColors.white : CupertinoColors.black,
                           ),
                         ),
                       ),
@@ -317,7 +367,7 @@ class _PortionSelectionScreenState extends State<PortionSelectionScreen> {
                       '${_selectedPortion.toInt()}g × ${proteinPer100g.toStringAsFixed(1)}g/100g',
                       style: const TextStyle(
                         fontSize: 16,
-                        color: Colors.black87,
+                        color: CupertinoColors.black,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -361,7 +411,11 @@ class _PortionSelectionScreenState extends State<PortionSelectionScreen> {
               ),
             ),
           ),
-        ],
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
