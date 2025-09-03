@@ -88,7 +88,7 @@ class _PortionSelectionScreenState extends State<PortionSelectionScreen> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: CupertinoColors.systemBackground,
       navigationBar: CupertinoNavigationBar(
         backgroundColor: Colors.transparent,
         border: null,
@@ -154,7 +154,7 @@ class _PortionSelectionScreenState extends State<PortionSelectionScreen> {
                         '${proteinPer100g.toStringAsFixed(1)}g protein per 100g',
                         style: TextStyle(
                           fontSize: 14,
-                          color: Colors.grey[600],
+                          color: CupertinoColors.systemGrey,
                         ),
                       ),
                     ],
@@ -191,10 +191,10 @@ class _PortionSelectionScreenState extends State<PortionSelectionScreen> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                         decoration: BoxDecoration(
-                          color: isSelected ? AppColors.primary : Colors.grey[100],
+                          color: isSelected ? AppColors.primary : CupertinoColors.systemGrey6,
                           borderRadius: BorderRadius.circular(25),
                           border: Border.all(
-                            color: isSelected ? AppColors.primary : Colors.grey[300]!,
+                            color: isSelected ? AppColors.primary : CupertinoColors.systemGrey4,
                             width: 1,
                           ),
                         ),
@@ -219,10 +219,10 @@ class _PortionSelectionScreenState extends State<PortionSelectionScreen> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                     decoration: BoxDecoration(
-                      color: _isCustomPortion ? AppColors.primary : Colors.grey[100],
+                      color: _isCustomPortion ? AppColors.primary : CupertinoColors.systemGrey6,
                       borderRadius: BorderRadius.circular(25),
                       border: Border.all(
-                        color: _isCustomPortion ? AppColors.primary : Colors.grey[300]!,
+                        color: _isCustomPortion ? AppColors.primary : CupertinoColors.systemGrey4,
                         width: 1,
                       ),
                     ),
@@ -232,7 +232,7 @@ class _PortionSelectionScreenState extends State<PortionSelectionScreen> {
                         Icon(
                           CupertinoIcons.pencil,
                           size: 20,
-                          color: _isCustomPortion ? Colors.white : Colors.grey[600],
+                          color: _isCustomPortion ? CupertinoColors.white : CupertinoColors.systemGrey,
                         ),
                         const SizedBox(width: 8),
                         Text(
@@ -240,7 +240,7 @@ class _PortionSelectionScreenState extends State<PortionSelectionScreen> {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
-                            color: _isCustomPortion ? Colors.white : Colors.black,
+                            color: _isCustomPortion ? CupertinoColors.white : CupertinoColors.black,
                           ),
                         ),
                       ],
@@ -300,10 +300,10 @@ class _PortionSelectionScreenState extends State<PortionSelectionScreen> {
             margin: const EdgeInsets.all(16),
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.green.withValues(alpha: 0.05),
+              color: CupertinoColors.systemGreen.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: Colors.green.withValues(alpha: 0.2),
+                color: CupertinoColors.systemGreen.withValues(alpha: 0.2),
                 width: 1,
               ),
             ),
@@ -326,7 +326,7 @@ class _PortionSelectionScreenState extends State<PortionSelectionScreen> {
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: Colors.green[700],
+                        color: CupertinoColors.systemGreen,
                       ),
                     ),
                   ],
@@ -334,7 +334,7 @@ class _PortionSelectionScreenState extends State<PortionSelectionScreen> {
                 Icon(
                   CupertinoIcons.heart_fill,
                   size: 40,
-                  color: Colors.green[600],
+                  color: CupertinoColors.systemGreen,
                 ),
               ],
             ),
@@ -353,7 +353,7 @@ class _PortionSelectionScreenState extends State<PortionSelectionScreen> {
                 child: const Text(
                   'Next',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: CupertinoColors.white,
                     fontSize: 17,
                     fontWeight: FontWeight.w600,
                   ),

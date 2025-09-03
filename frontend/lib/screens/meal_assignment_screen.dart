@@ -1,4 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import '../main.dart';
 
 class MealAssignmentScreen extends StatefulWidget {
   final String imagePath;
@@ -84,36 +86,35 @@ class _MealAssignmentScreenState extends State<MealAssignmentScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
+    return CupertinoPageScaffold(
+      backgroundColor: CupertinoColors.systemBackground,
+      navigationBar: CupertinoNavigationBar(
+        backgroundColor: CupertinoColors.transparent,
+        border: null,
+        leading: CupertinoNavigationBarBackButton(
           onPressed: () => Navigator.pop(context),
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          color: CupertinoColors.black,
         ),
-        title: const Text(
+        middle: const Text(
           'Assign to Meal',
           style: TextStyle(
-            color: Colors.black,
+            color: CupertinoColors.black,
             fontSize: 18,
             fontWeight: FontWeight.w600,
           ),
         ),
-        centerTitle: true,
       ),
-      body: Column(
+      child: Column(
         children: [
           // Food Summary
           Container(
             margin: const EdgeInsets.all(16),
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.green.withValues(alpha: 0.05),
+              color: CupertinoColors.systemGreen.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: Colors.green.withValues(alpha: 0.2),
+                color: CupertinoColors.systemGreen.withValues(alpha: 0.2),
                 width: 1,
               ),
             ),
@@ -124,12 +125,12 @@ class _MealAssignmentScreenState extends State<MealAssignmentScreen> {
                   width: 60,
                   height: 60,
                   decoration: BoxDecoration(
-                    color: Colors.green.withValues(alpha: 0.1),
+                    color: CupertinoColors.systemGreen.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
                     _getFoodIcon(selectedFood['category'] as String),
-                    color: Colors.green[600],
+                    color: CupertinoColors.systemGreen,
                     size: 30,
                   ),
                 ),
@@ -144,7 +145,7 @@ class _MealAssignmentScreenState extends State<MealAssignmentScreen> {
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
-                          color: Colors.black,
+                          color: CupertinoColors.black,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -152,7 +153,7 @@ class _MealAssignmentScreenState extends State<MealAssignmentScreen> {
                         '${widget.portion.toInt()}g • ${widget.protein.toStringAsFixed(1)}g protein',
                         style: TextStyle(
                           fontSize: 14,
-                          color: Colors.grey[600],
+                          color: CupertinoColors.systemGrey,
                         ),
                       ),
                     ],
@@ -173,7 +174,7 @@ class _MealAssignmentScreenState extends State<MealAssignmentScreen> {
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: Colors.black,
+                    color: CupertinoColors.black,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -192,10 +193,10 @@ class _MealAssignmentScreenState extends State<MealAssignmentScreen> {
                       child: Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: isSelected ? Colors.blue.withValues(alpha: 0.1) : Colors.grey[50],
+                          color: isSelected ? AppColors.primary.withValues(alpha: 0.1) : CupertinoColors.systemGrey6,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: isSelected ? Colors.blue[600]! : Colors.grey[300]!,
+                            color: isSelected ? AppColors.primary : CupertinoColors.systemGrey4,
                             width: isSelected ? 2 : 1,
                           ),
                         ),
@@ -206,12 +207,12 @@ class _MealAssignmentScreenState extends State<MealAssignmentScreen> {
                               width: 40,
                               height: 40,
                               decoration: BoxDecoration(
-                                color: isSelected ? Colors.blue[600] : Colors.grey[400],
+                                color: isSelected ? AppColors.primary : CupertinoColors.systemGrey3,
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Icon(
                                 _getMealIcon(meal),
-                                color: Colors.white,
+                                color: CupertinoColors.white,
                                 size: 20,
                               ),
                             ),
@@ -229,7 +230,7 @@ class _MealAssignmentScreenState extends State<MealAssignmentScreen> {
                                         style: TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.w600,
-                                          color: isSelected ? Colors.blue[600] : Colors.black,
+                                          color: isSelected ? AppColors.primary : CupertinoColors.black,
                                         ),
                                       ),
                                       if (isSelected) ...[
@@ -237,13 +238,13 @@ class _MealAssignmentScreenState extends State<MealAssignmentScreen> {
                                         Container(
                                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                           decoration: BoxDecoration(
-                                            color: Colors.blue[600],
+                                            color: AppColors.primary,
                                             borderRadius: BorderRadius.circular(12),
                                           ),
                                           child: const Text(
                                             'Suggested',
                                             style: TextStyle(
-                                              color: Colors.white,
+                                              color: CupertinoColors.white,
                                               fontSize: 10,
                                               fontWeight: FontWeight.w600,
                                             ),
@@ -257,7 +258,7 @@ class _MealAssignmentScreenState extends State<MealAssignmentScreen> {
                                     '${progress.toStringAsFixed(1)}g / ${target.toStringAsFixed(1)}g protein',
                                     style: TextStyle(
                                       fontSize: 14,
-                                      color: Colors.grey[600],
+                                      color: CupertinoColors.systemGrey,
                                     ),
                                   ),
                                 ],
@@ -270,13 +271,9 @@ class _MealAssignmentScreenState extends State<MealAssignmentScreen> {
                               height: 40,
                               child: Stack(
                                 children: [
-                                  CircularProgressIndicator(
-                                    value: progressPercentage.clamp(0.0, 1.0),
-                                    strokeWidth: 4,
-                                    backgroundColor: Colors.grey[300],
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      _getProgressColor(progressPercentage),
-                                    ),
+                                  CupertinoActivityIndicator(
+                                    radius: 20,
+                                    color: _getProgressColor(progressPercentage),
                                   ),
                                   Center(
                                     child: Text(
@@ -305,23 +302,19 @@ class _MealAssignmentScreenState extends State<MealAssignmentScreen> {
 
           // Save Button
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
             child: SizedBox(
               width: double.infinity,
-              child: ElevatedButton(
+              child: CupertinoButton(
                 onPressed: _save,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue[600],
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
+                color: AppColors.primary,
+                borderRadius: BorderRadius.circular(12),
+                padding: const EdgeInsets.symmetric(vertical: 18),
                 child: const Text(
                   'Save',
                   style: TextStyle(
-                    fontSize: 16,
+                    color: CupertinoColors.white,
+                    fontSize: 17,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -336,32 +329,32 @@ class _MealAssignmentScreenState extends State<MealAssignmentScreen> {
   IconData _getFoodIcon(String category) {
     switch (category.toLowerCase()) {
       case 'protein':
-        return Icons.fitness_center;
+        return CupertinoIcons.heart_fill;
       case 'carbohydrate':
-        return Icons.grain;
+        return CupertinoIcons.circle;
       case 'vegetable':
-        return Icons.eco;
+        return CupertinoIcons.leaf_arrow_circlepath;
       case 'fruit':
-        return Icons.apple;
+        return CupertinoIcons.circle_fill;
       case 'dairy':
-        return Icons.local_drink;
+        return CupertinoIcons.drop;
       default:
-        return Icons.restaurant;
+        return CupertinoIcons.house;
     }
   }
 
   IconData _getMealIcon(String meal) {
     switch (meal) {
       case 'breakfast':
-        return Icons.wb_sunny;
+        return CupertinoIcons.sun_max;
       case 'lunch':
-        return Icons.restaurant;
+        return CupertinoIcons.house;
       case 'dinner':
-        return Icons.nights_stay;
+        return CupertinoIcons.moon;
       case 'snack':
-        return Icons.coffee;
+        return CupertinoIcons.circle;
       default:
-        return Icons.restaurant;
+        return CupertinoIcons.house;
     }
   }
 
@@ -381,9 +374,9 @@ class _MealAssignmentScreenState extends State<MealAssignmentScreen> {
   }
 
   Color _getProgressColor(double percentage) {
-    if (percentage >= 1.0) return Colors.green;
-    if (percentage >= 0.8) return Colors.orange;
-    if (percentage >= 0.6) return Colors.blue;
-    return Colors.grey;
+    if (percentage >= 1.0) return CupertinoColors.systemGreen;
+    if (percentage >= 0.8) return CupertinoColors.systemOrange;
+    if (percentage >= 0.6) return AppColors.primary;
+    return CupertinoColors.systemGrey;
   }
 }
