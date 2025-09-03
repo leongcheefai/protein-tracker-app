@@ -206,10 +206,10 @@ class FoodDetectionResultsScreen extends StatelessWidget {
                   width: double.infinity,
                   child: CupertinoButton(
                     onPressed: () {
-                      // Navigate back to camera
-                      Navigator.popUntil(
+                      // Navigate to camera launch screen
+                      Navigator.pushNamed(
                         context,
-                        (route) => route.isFirst,
+                        '/camera-launch',
                       );
                     },
                     color: Colors.transparent,
