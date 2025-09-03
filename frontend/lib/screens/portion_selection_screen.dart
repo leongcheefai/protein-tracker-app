@@ -184,6 +184,11 @@ class _PortionSelectionScreenState extends State<PortionSelectionScreen> {
             Expanded(
               child: Column(
                 children: [
+                  // Scrollable content
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: [
             // Debug: Show if we have data
             if (widget.detectedFoods.isEmpty || widget.selectedFoodIndex >= widget.detectedFoods.length)
               Container(
@@ -364,7 +369,7 @@ class _PortionSelectionScreenState extends State<PortionSelectionScreen> {
                     color: CupertinoColors.black,
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
 
                 // Standard Portion Chips
                 Wrap(
@@ -397,7 +402,7 @@ class _PortionSelectionScreenState extends State<PortionSelectionScreen> {
                   }).toList(),
                 ),
 
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
 
                 // Custom Portion
                 GestureDetector(
@@ -436,7 +441,7 @@ class _PortionSelectionScreenState extends State<PortionSelectionScreen> {
 
                 // Custom Input Field
                 if (_isCustomPortion) ...[
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                   Container(
                     decoration: BoxDecoration(
                       color: CupertinoColors.systemGrey6,
@@ -479,23 +484,21 @@ class _PortionSelectionScreenState extends State<PortionSelectionScreen> {
             ),
           ),
 
-          const Spacer(),
-
-          // Enhanced Protein Calculation Display
-          Container(
-            margin: const EdgeInsets.fromLTRB(16, 16, 16, 8), // Reduced bottom margin
-            padding: const EdgeInsets.all(16), // Reduced padding
-            decoration: BoxDecoration(
-              color: CupertinoColors.systemGreen.withValues(alpha: 0.05),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: CupertinoColors.systemGreen.withValues(alpha: 0.2),
-                width: 1,
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+                          // Enhanced Protein Calculation Display
+                          Container(
+                            margin: const EdgeInsets.fromLTRB(16, 16, 16, 8), // Reduced bottom margin
+                            padding: const EdgeInsets.all(16), // Reduced padding
+                            decoration: BoxDecoration(
+                              color: CupertinoColors.systemGreen.withValues(alpha: 0.05),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: CupertinoColors.systemGreen.withValues(alpha: 0.2),
+                                width: 1,
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
                 // Show total and individual details if multiple foods
                 if (widget.detectedFoods.length > 1) ...[
                   // Accordion-style Total Protein with Breakdown
@@ -632,32 +635,36 @@ class _PortionSelectionScreenState extends State<PortionSelectionScreen> {
                           )
                         : const SizedBox.shrink(),
                   ),
-                ],
-              ],
-            ),
-          ),
-
-          // Next Button
-          Container(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16), // Reduced padding
-            child: SizedBox(
-              width: double.infinity,
-              child: CupertinoButton(
-                onPressed: _next,
-                color: AppColors.primary,
-                borderRadius: BorderRadius.circular(12),
-                padding: const EdgeInsets.symmetric(vertical: 18),
-                child: const Text(
-                  'Next',
-                  style: TextStyle(
-                    color: CupertinoColors.white,
-                    fontSize: 17,
-                    fontWeight: FontWeight.w600,
+                                ],
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
-              ),
-            ),
-          ),
+                  
+                  // Fixed Next Button at bottom
+                  Container(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: CupertinoButton(
+                        onPressed: _next,
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.circular(12),
+                        padding: const EdgeInsets.symmetric(vertical: 18),
+                        child: const Text(
+                          'Next',
+                          style: TextStyle(
+                            color: CupertinoColors.white,
+                            fontSize: 17,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
