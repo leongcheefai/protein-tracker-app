@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import '../main.dart';
 
 class PortionSelectionScreen extends StatefulWidget {
   final String imagePath;
@@ -111,10 +112,10 @@ class _PortionSelectionScreenState extends State<PortionSelectionScreen> {
             margin: const EdgeInsets.all(16),
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.blue.withValues(alpha: 0.05),
+              color: AppColors.primary.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: Colors.blue.withValues(alpha: 0.2),
+                color: AppColors.primary.withValues(alpha: 0.2),
                 width: 1,
               ),
             ),
@@ -125,12 +126,12 @@ class _PortionSelectionScreenState extends State<PortionSelectionScreen> {
                   width: 60,
                   height: 60,
                   decoration: BoxDecoration(
-                    color: Colors.blue.withValues(alpha: 0.1),
+                    color: AppColors.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
                     _getFoodIcon(selectedFood['category'] as String),
-                    color: Colors.blue[600],
+                    color: AppColors.primary,
                     size: 30,
                   ),
                 ),
@@ -190,10 +191,10 @@ class _PortionSelectionScreenState extends State<PortionSelectionScreen> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                         decoration: BoxDecoration(
-                          color: isSelected ? Colors.blue[600] : Colors.grey[100],
+                          color: isSelected ? AppColors.primary : Colors.grey[100],
                           borderRadius: BorderRadius.circular(25),
                           border: Border.all(
-                            color: isSelected ? Colors.blue[600]! : Colors.grey[300]!,
+                            color: isSelected ? AppColors.primary : Colors.grey[300]!,
                             width: 1,
                           ),
                         ),
@@ -218,10 +219,10 @@ class _PortionSelectionScreenState extends State<PortionSelectionScreen> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                     decoration: BoxDecoration(
-                      color: _isCustomPortion ? Colors.blue[600] : Colors.grey[100],
+                      color: _isCustomPortion ? AppColors.primary : Colors.grey[100],
                       borderRadius: BorderRadius.circular(25),
                       border: Border.all(
-                        color: _isCustomPortion ? Colors.blue[600]! : Colors.grey[300]!,
+                        color: _isCustomPortion ? AppColors.primary : Colors.grey[300]!,
                         width: 1,
                       ),
                     ),
@@ -250,23 +251,42 @@ class _PortionSelectionScreenState extends State<PortionSelectionScreen> {
                 // Custom Input Field
                 if (_isCustomPortion) ...[
                   const SizedBox(height: 16),
-                  CupertinoTextField(
-                    controller: _customPortionController,
-                    keyboardType: TextInputType.number,
-                    placeholder: 'Enter portion size',
-                    suffix: const Text(
-                      'g',
-                      style: TextStyle(
-                        color: Colors.grey,
-                        fontSize: 14,
-                        fontWeight: FontWeight.normal,
+                  Container(
+                    decoration: BoxDecoration(
+                      color: CupertinoColors.systemGrey6,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: AppColors.primary.withValues(alpha: 0.3),
+                        width: 1,
                       ),
                     ),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
-                      borderRadius: BorderRadius.circular(8),
+                    child: CupertinoTextField(
+                      controller: _customPortionController,
+                      keyboardType: TextInputType.number,
+                      placeholder: 'Enter portion size',
+                      placeholderStyle: TextStyle(
+                        color: CupertinoColors.systemGrey,
+                        fontSize: 16,
+                      ),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: CupertinoColors.black,
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      decoration: const BoxDecoration(),
+                      suffix: Container(
+                        padding: const EdgeInsets.only(right: 16),
+                        child: Text(
+                          'g',
+                          style: TextStyle(
+                            color: AppColors.primary,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      onChanged: _updateCustomPortion,
                     ),
-                    onChanged: _updateCustomPortion,
                   ),
                 ],
               ],
@@ -322,19 +342,19 @@ class _PortionSelectionScreenState extends State<PortionSelectionScreen> {
 
           // Next Button
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
             child: SizedBox(
               width: double.infinity,
               child: CupertinoButton(
                 onPressed: _next,
-                color: Colors.blue[600],
-                borderRadius: BorderRadius.circular(8),
-                padding: const EdgeInsets.symmetric(vertical: 16),
+                color: AppColors.primary,
+                borderRadius: BorderRadius.circular(12),
+                padding: const EdgeInsets.symmetric(vertical: 18),
                 child: const Text(
                   'Next',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 16,
+                    fontSize: 17,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
