@@ -23,6 +23,7 @@ class _PortionSelectionScreenState extends State<PortionSelectionScreen> {
   final TextEditingController _customPortionController = TextEditingController();
   final List<double> _standardPortions = [100, 150, 200, 250];
   int _currentFoodIndex = 0; // Track which food we're currently configuring
+  bool _isBreakdownExpanded = false; // Track accordion expansion state
 
   @override
   void initState() {
@@ -44,6 +45,37 @@ class _PortionSelectionScreenState extends State<PortionSelectionScreen> {
   double get proteinPer100g => currentFood['estimatedProtein'] as double;
 
   double get calculatedProtein => (_selectedPortion / 100) * proteinPer100g;
+
+  // Calculate total protein from all foods (assuming 150g default portion for non-selected foods)
+  double get totalProteinFromAllFoods {
+    double total = 0;
+    for (int i = 0; i < widget.detectedFoods.length; i++) {
+      final food = widget.detectedFoods[i];
+      final portion = (i == _currentFoodIndex) ? _selectedPortion : 150.0; // Use selected portion for current food, default for others
+      final proteinPer100g = food['estimatedProtein'] as double;
+      total += (portion / 100) * proteinPer100g;
+    }
+    return total;
+  }
+
+  // Get individual food details for display
+  List<Map<String, dynamic>> get individualFoodDetails {
+    return widget.detectedFoods.asMap().entries.map((entry) {
+      final index = entry.key;
+      final food = entry.value;
+      final portion = (index == _currentFoodIndex) ? _selectedPortion : 150.0;
+      final proteinPer100g = food['estimatedProtein'] as double;
+      final protein = (portion / 100) * proteinPer100g;
+      
+      return {
+        'name': food['name'] as String,
+        'portion': portion,
+        'proteinPer100g': proteinPer100g,
+        'calculatedProtein': protein,
+        'isCurrent': index == _currentFoodIndex,
+      };
+    }).toList();
+  }
 
   void _selectPortion(double portion) {
     setState(() {
@@ -79,6 +111,12 @@ class _PortionSelectionScreenState extends State<PortionSelectionScreen> {
       _selectedPortion = _standardPortions[1]; // Reset to default portion
       _isCustomPortion = false;
       _customPortionController.text = _selectedPortion.toString();
+    });
+  }
+
+  void _toggleBreakdown() {
+    setState(() {
+      _isBreakdownExpanded = !_isBreakdownExpanded;
     });
   }
 
@@ -443,10 +481,10 @@ class _PortionSelectionScreenState extends State<PortionSelectionScreen> {
 
           const Spacer(),
 
-          // Protein Calculation Display
+          // Enhanced Protein Calculation Display
           Container(
-            margin: const EdgeInsets.all(16),
-            padding: const EdgeInsets.all(20),
+            margin: const EdgeInsets.fromLTRB(16, 16, 16, 8), // Reduced bottom margin
+            padding: const EdgeInsets.all(16), // Reduced padding
             decoration: BoxDecoration(
               color: CupertinoColors.systemGreen.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(16),
@@ -455,53 +493,129 @@ class _PortionSelectionScreenState extends State<PortionSelectionScreen> {
                 width: 1,
               ),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '${_selectedPortion.toInt()}g × ${proteinPer100g.toStringAsFixed(1)}g/100g',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        color: CupertinoColors.black,
+                // Show total and individual details if multiple foods
+                if (widget.detectedFoods.length > 1) ...[
+                  // Accordion-style Total Protein with Breakdown
+                  GestureDetector(
+                    onTap: _toggleBreakdown,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Total Protein (${widget.detectedFoods.length} foods)',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: CupertinoColors.black,
+                            ),
+                          ),
+                          Row(
+                            children: [
+                              Text(
+                                '${totalProteinFromAllFoods.toStringAsFixed(1)}g',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Icon(
+                                _isBreakdownExpanded 
+                                  ? CupertinoIcons.chevron_up 
+                                  : CupertinoIcons.chevron_down,
+                                size: 16,
+                                color: CupertinoColors.systemGrey,
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '≈ ${calculatedProtein.toStringAsFixed(1)}g protein',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: CupertinoColors.systemGreen,
-                      ),
-                    ),
-                    if (widget.detectedFoods.length > 1) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        'for ${currentFood['name']}',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: CupertinoColors.systemGrey,
-                          fontStyle: FontStyle.italic,
+                  ),
+                  
+                  // Expandable Breakdown Section
+                  if (_isBreakdownExpanded) ...[
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: CupertinoColors.systemGrey6.withValues(alpha: 0.5),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: CupertinoColors.systemGrey4,
+                          width: 1,
                         ),
                       ),
-                    ],
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Individual Breakdown:',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: CupertinoColors.systemGrey,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          
+                          // Individual Food Details
+                          ...individualFoodDetails.map((food) => Container(
+                            margin: const EdgeInsets.only(bottom: 6),
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: food['isCurrent'] 
+                                ? AppColors.primary.withValues(alpha: 0.1)
+                                : CupertinoColors.systemBackground,
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(
+                                color: food['isCurrent'] 
+                                  ? AppColors.primary.withValues(alpha: 0.3)
+                                  : CupertinoColors.systemGrey4,
+                                width: 1,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    food['name'],
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: food['isCurrent'] ? FontWeight.w600 : FontWeight.w500,
+                                      color: food['isCurrent'] ? AppColors.primary : CupertinoColors.black,
+                                    ),
+                                  ),
+                                ),
+                                Text(
+                                  '${food['portion'].toInt()}g → ${food['calculatedProtein'].toStringAsFixed(1)}g',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: CupertinoColors.systemGrey,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )).toList(),
+                        ],
+                      ),
+                    ),
                   ],
-                ),
-                Icon(
-                  CupertinoIcons.heart_fill,
-                  size: 40,
-                  color: CupertinoColors.systemGreen,
-                ),
+                ],
               ],
             ),
           ),
 
           // Next Button
           Container(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16), // Reduced padding
             child: SizedBox(
               width: double.infinity,
               child: CupertinoButton(
