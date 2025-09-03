@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'dart:math' as math;
 import '../main.dart';
 
 class MealAssignmentScreen extends StatefulWidget {
@@ -271,10 +272,31 @@ class _MealAssignmentScreenState extends State<MealAssignmentScreen> {
                               height: 40,
                               child: Stack(
                                 children: [
-                                  CupertinoActivityIndicator(
-                                    radius: 20,
-                                    color: _getProgressColor(progressPercentage),
+                                  // Background circle
+                                  Container(
+                                    width: 40,
+                                    height: 40,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: CupertinoColors.systemGrey4,
+                                        width: 3,
+                                      ),
+                                    ),
                                   ),
+                                  // Progress arc
+                                  SizedBox(
+                                    width: 40,
+                                    height: 40,
+                                    child: CustomPaint(
+                                      painter: ProgressPainter(
+                                        progress: progressPercentage,
+                                        color: _getProgressColor(progressPercentage),
+                                        strokeWidth: 3,
+                                      ),
+                                    ),
+                                  ),
+                                  // Percentage text
                                   Center(
                                     child: Text(
                                       '${(progressPercentage * 100).toInt()}%',
@@ -378,5 +400,46 @@ class _MealAssignmentScreenState extends State<MealAssignmentScreen> {
     if (percentage >= 0.8) return CupertinoColors.systemOrange;
     if (percentage >= 0.6) return AppColors.primary;
     return CupertinoColors.systemGrey;
+  }
+}
+
+class ProgressPainter extends CustomPainter {
+  final double progress;
+  final Color color;
+  final double strokeWidth;
+
+  ProgressPainter({
+    required this.progress,
+    required this.color,
+    required this.strokeWidth,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = (size.width - strokeWidth) / 2;
+    
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = strokeWidth
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+
+    // Start from top (-π/2) and draw clockwise
+    final startAngle = -math.pi / 2;
+    final sweepAngle = 2 * math.pi * progress;
+
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius),
+      startAngle,
+      sweepAngle,
+      false,
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(ProgressPainter oldDelegate) {
+    return oldDelegate.progress != progress || oldDelegate.color != color;
   }
 }
