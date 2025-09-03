@@ -525,12 +525,15 @@ class _PortionSelectionScreenState extends State<PortionSelectionScreen> {
                                 ),
                               ),
                               const SizedBox(width: 8),
-                              Icon(
-                                _isBreakdownExpanded 
-                                  ? CupertinoIcons.chevron_up 
-                                  : CupertinoIcons.chevron_down,
-                                size: 16,
-                                color: CupertinoColors.systemGrey,
+                              AnimatedRotation(
+                                turns: _isBreakdownExpanded ? 0.5 : 0.0,
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.easeInOut,
+                                child: Icon(
+                                  CupertinoIcons.chevron_down,
+                                  size: 16,
+                                  color: CupertinoColors.systemGrey,
+                                ),
                               ),
                             ],
                           ),
@@ -539,75 +542,96 @@ class _PortionSelectionScreenState extends State<PortionSelectionScreen> {
                     ),
                   ),
                   
-                  // Expandable Breakdown Section
-                  if (_isBreakdownExpanded) ...[
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: CupertinoColors.systemGrey6.withValues(alpha: 0.5),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: CupertinoColors.systemGrey4,
-                          width: 1,
-                        ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Individual Breakdown:',
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: CupertinoColors.systemGrey,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          
-                          // Individual Food Details
-                          ...individualFoodDetails.map((food) => Container(
-                            margin: const EdgeInsets.only(bottom: 6),
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  // Animated Expandable Breakdown Section
+                  AnimatedSize(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                    child: _isBreakdownExpanded
+                        ? Container(
+                            margin: const EdgeInsets.only(top: 8),
+                            padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: food['isCurrent'] 
-                                ? AppColors.primary.withValues(alpha: 0.1)
-                                : CupertinoColors.systemBackground,
-                              borderRadius: BorderRadius.circular(6),
+                              color: CupertinoColors.systemGrey6.withValues(alpha: 0.5),
+                              borderRadius: BorderRadius.circular(8),
                               border: Border.all(
-                                color: food['isCurrent'] 
-                                  ? AppColors.primary.withValues(alpha: 0.3)
-                                  : CupertinoColors.systemGrey4,
+                                color: CupertinoColors.systemGrey4,
                                 width: 1,
                               ),
                             ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Expanded(
-                                  child: Text(
-                                    food['name'],
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: food['isCurrent'] ? FontWeight.w600 : FontWeight.w500,
-                                      color: food['isCurrent'] ? AppColors.primary : CupertinoColors.black,
-                                    ),
-                                  ),
-                                ),
                                 Text(
-                                  '${food['portion'].toInt()}g → ${food['calculatedProtein'].toStringAsFixed(1)}g',
+                                  'Individual Breakdown:',
                                   style: TextStyle(
-                                    fontSize: 12,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
                                     color: CupertinoColors.systemGrey,
                                   ),
                                 ),
+                                const SizedBox(height: 8),
+                                
+                                // Individual Food Details with staggered animation
+                                ...individualFoodDetails.asMap().entries.map((entry) {
+                                  final index = entry.key;
+                                  final food = entry.value;
+                                  return TweenAnimationBuilder<double>(
+                                    tween: Tween(begin: 0.0, end: 1.0),
+                                    duration: Duration(milliseconds: 200 + (index * 100)),
+                                    curve: Curves.easeOut,
+                                    builder: (context, value, child) {
+                                      return Transform.translate(
+                                        offset: Offset(0, 20 * (1 - value)),
+                                        child: Opacity(
+                                          opacity: value,
+                                          child: Container(
+                                            margin: const EdgeInsets.only(bottom: 6),
+                                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                            decoration: BoxDecoration(
+                                              color: food['isCurrent'] 
+                                                ? AppColors.primary.withValues(alpha: 0.1)
+                                                : CupertinoColors.systemBackground,
+                                              borderRadius: BorderRadius.circular(6),
+                                              border: Border.all(
+                                                color: food['isCurrent'] 
+                                                  ? AppColors.primary.withValues(alpha: 0.3)
+                                                  : CupertinoColors.systemGrey4,
+                                                width: 1,
+                                              ),
+                                            ),
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              children: [
+                                                Expanded(
+                                                  child: Text(
+                                                    food['name'],
+                                                    style: TextStyle(
+                                                      fontSize: 13,
+                                                      fontWeight: food['isCurrent'] ? FontWeight.w600 : FontWeight.w500,
+                                                      color: food['isCurrent'] ? AppColors.primary : CupertinoColors.black,
+                                                    ),
+                                                  ),
+                                                ),
+                                                Text(
+                                                  '${food['portion'].toInt()}g → ${food['calculatedProtein'].toStringAsFixed(1)}g',
+                                                  style: TextStyle(
+                                                    fontSize: 12,
+                                                    color: CupertinoColors.systemGrey,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  );
+                                }).toList(),
                               ],
                             ),
-                          )).toList(),
-                        ],
-                      ),
-                    ),
-                  ],
+                          )
+                        : const SizedBox.shrink(),
+                  ),
                 ],
               ],
             ),
