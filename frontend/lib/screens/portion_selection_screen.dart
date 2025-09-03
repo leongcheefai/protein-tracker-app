@@ -22,10 +22,12 @@ class _PortionSelectionScreenState extends State<PortionSelectionScreen> {
   bool _isCustomPortion = false;
   final TextEditingController _customPortionController = TextEditingController();
   final List<double> _standardPortions = [100, 150, 200, 250];
+  int _currentFoodIndex = 0; // Track which food we're currently configuring
 
   @override
   void initState() {
     super.initState();
+    _currentFoodIndex = widget.selectedFoodIndex; // Start with the initially selected food
     _selectedPortion = _standardPortions[1]; // Default to 150g
     _customPortionController.text = _selectedPortion.toString();
   }
@@ -36,9 +38,10 @@ class _PortionSelectionScreenState extends State<PortionSelectionScreen> {
     super.dispose();
   }
 
-  Map<String, dynamic> get selectedFood => widget.detectedFoods[widget.selectedFoodIndex];
+  Map<String, dynamic> get selectedFood => widget.detectedFoods[_currentFoodIndex];
+  Map<String, dynamic> get currentFood => widget.detectedFoods[_currentFoodIndex];
 
-  double get proteinPer100g => selectedFood['estimatedProtein'] as double;
+  double get proteinPer100g => currentFood['estimatedProtein'] as double;
 
   double get calculatedProtein => (_selectedPortion / 100) * proteinPer100g;
 
@@ -70,6 +73,15 @@ class _PortionSelectionScreenState extends State<PortionSelectionScreen> {
     }
   }
 
+  void _selectFood(int index) {
+    setState(() {
+      _currentFoodIndex = index;
+      _selectedPortion = _standardPortions[1]; // Reset to default portion
+      _isCustomPortion = false;
+      _customPortionController.text = _selectedPortion.toString();
+    });
+  }
+
   void _next() {
     Navigator.pushNamed(
       context,
@@ -77,7 +89,7 @@ class _PortionSelectionScreenState extends State<PortionSelectionScreen> {
       arguments: {
         'imagePath': widget.imagePath,
         'detectedFoods': widget.detectedFoods,
-        'selectedFoodIndex': widget.selectedFoodIndex,
+        'selectedFoodIndex': _currentFoodIndex, // Use current food index
         'portion': _selectedPortion,
         'protein': calculatedProtein,
       },
@@ -157,62 +169,148 @@ class _PortionSelectionScreenState extends State<PortionSelectionScreen> {
                 ),
               ),
             
+            // Food Selection (if multiple foods)
+            if (widget.detectedFoods.length > 1) ...[
+              Container(
+                margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Select Food to Configure',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: CupertinoColors.black,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      height: 90, // Increased height to prevent overflow
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: widget.detectedFoods.length,
+                        itemBuilder: (context, index) {
+                          final food = widget.detectedFoods[index];
+                          final isSelected = _currentFoodIndex == index;
+                          return GestureDetector(
+                            onTap: () => _selectFood(index),
+                            child: Container(
+                              width: 120,
+                              margin: EdgeInsets.only(
+                                right: index < widget.detectedFoods.length - 1 ? 12 : 0,
+                              ),
+                              padding: const EdgeInsets.all(8), // Reduced padding
+                              decoration: BoxDecoration(
+                                color: isSelected ? AppColors.primary.withValues(alpha: 0.1) : CupertinoColors.systemGrey6,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: isSelected ? AppColors.primary : CupertinoColors.systemGrey4,
+                                  width: isSelected ? 2 : 1,
+                                ),
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                mainAxisSize: MainAxisSize.min, // Prevent overflow
+                                children: [
+                                  Icon(
+                                    _getFoodIcon(food['category'] as String),
+                                    color: isSelected ? AppColors.primary : CupertinoColors.systemGrey,
+                                    size: 20, // Slightly smaller icon
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Flexible( // Use Flexible to prevent overflow
+                                    child: Text(
+                                      food['name'] as String,
+                                      style: TextStyle(
+                                        fontSize: 11, // Slightly smaller font
+                                        fontWeight: FontWeight.w600,
+                                        color: isSelected ? AppColors.primary : CupertinoColors.black,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+
             // Food Summary
             Container(
               margin: const EdgeInsets.all(16),
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.05),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: AppColors.primary.withValues(alpha: 0.2),
-                width: 1,
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: AppColors.primary.withValues(alpha: 0.2),
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                children: [
+                  // Food Icon
+                  Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      _getFoodIcon(currentFood['category'] as String),
+                      color: AppColors.primary,
+                      size: 30,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  // Food Details
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          currentFood['name'] as String,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: CupertinoColors.black,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${proteinPer100g.toStringAsFixed(1)}g protein per 100g',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: CupertinoColors.systemGrey,
+                          ),
+                        ),
+                        if (widget.detectedFoods.length > 1) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            'Food ${_currentFoodIndex + 1} of ${widget.detectedFoods.length}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
-            child: Row(
-              children: [
-                // Food Icon
-                Container(
-                  width: 60,
-                  height: 60,
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    _getFoodIcon(selectedFood['category'] as String),
-                    color: AppColors.primary,
-                    size: 30,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                // Food Details
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        selectedFood['name'] as String,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: CupertinoColors.black,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${proteinPer100g.toStringAsFixed(1)}g protein per 100g',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: CupertinoColors.systemGrey,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
 
           // Portion Selection
           Padding(
@@ -379,6 +477,17 @@ class _PortionSelectionScreenState extends State<PortionSelectionScreen> {
                         color: CupertinoColors.systemGreen,
                       ),
                     ),
+                    if (widget.detectedFoods.length > 1) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        'for ${currentFood['name']}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: CupertinoColors.systemGrey,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
                 Icon(
