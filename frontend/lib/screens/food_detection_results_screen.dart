@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
+import '../main.dart';
 
 class FoodDetectionResultsScreen extends StatelessWidget {
   final String imagePath;
@@ -37,23 +38,17 @@ class FoodDetectionResultsScreen extends StatelessWidget {
           // Photo Thumbnail
           Container(
             width: double.infinity,
-            height: 200,
-            margin: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.1),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
+            margin: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+            padding: const EdgeInsets.all(12),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: Image.file(
-                File(imagePath),
-                fit: BoxFit.cover,
+              borderRadius: BorderRadius.circular(12),
+              child: AspectRatio(
+                aspectRatio: 4 / 3,
+                child: Image.file(
+                  File(imagePath),
+                  fit: BoxFit.contain,
+                  alignment: Alignment.center,
+                ),
               ),
             ),
           ),
@@ -203,7 +198,7 @@ class FoodDetectionResultsScreen extends StatelessWidget {
 
           // Action Buttons
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
             child: Column(
               children: [
                 // Add More Foods Button
@@ -225,14 +220,14 @@ class FoodDetectionResultsScreen extends StatelessWidget {
                       children: [
                         Icon(
                           CupertinoIcons.camera,
-                          color: Colors.blue[600],
+                          color: AppColors.primary,
                           size: 20,
                         ),
                         const SizedBox(width: 8),
                         Text(
                           'Add More Foods',
                           style: TextStyle(
-                            color: Colors.blue[600],
+                            color: AppColors.primary,
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                           ),
@@ -242,11 +237,12 @@ class FoodDetectionResultsScreen extends StatelessWidget {
                   ),
                 ),
 
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
 
                 // Continue Button
-                SizedBox(
+                Container(
                   width: double.infinity,
+                  margin: const EdgeInsets.symmetric(horizontal: 0),
                   child: CupertinoButton(
                     onPressed: () {
                       // Navigate to portion selection for the first food
@@ -262,25 +258,25 @@ class FoodDetectionResultsScreen extends StatelessWidget {
                         );
                       }
                     },
-                    color: Colors.blue[600],
-                    borderRadius: BorderRadius.circular(8),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    color: AppColors.primary,
+                    borderRadius: BorderRadius.circular(12),
+                    padding: const EdgeInsets.symmetric(vertical: 18),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
-                          CupertinoIcons.arrow_right,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
                         const Text(
                           'Continue',
                           style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
+                            color: CupertinoColors.white,
+                            fontSize: 17,
                             fontWeight: FontWeight.w600,
                           ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Icon(
+                          CupertinoIcons.arrow_right,
+                          color: CupertinoColors.white,
+                          size: 20,
                         ),
                       ],
                     ),
