@@ -1,5 +1,7 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
+import '../main.dart';
 
 class ConfirmationScreen extends StatefulWidget {
   final String imagePath;
@@ -9,6 +11,13 @@ class ConfirmationScreen extends StatefulWidget {
   final String meal;
   final Map<String, double> mealProgress;
   final Map<String, double> mealTargets;
+  // User settings for navigation back to user home
+  final double? height;
+  final double? weight;
+  final double? trainingMultiplier;
+  final String? goal;
+  final double? dailyProteinTarget;
+  final Map<String, bool>? meals;
 
   const ConfirmationScreen({
     super.key,
@@ -19,6 +28,12 @@ class ConfirmationScreen extends StatefulWidget {
     required this.meal,
     required this.mealProgress,
     required this.mealTargets,
+    this.height,
+    this.weight,
+    this.trainingMultiplier,
+    this.goal,
+    this.dailyProteinTarget,
+    this.meals,
   });
 
   @override
@@ -78,16 +93,26 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
   }
 
   void _logAnotherFood() {
-    Navigator.popUntil(
+    // Navigate to camera launch screen
+    Navigator.pushNamed(
       context,
-      (route) => route.isFirst,
+      '/camera-launch',
     );
   }
 
   void _done() {
+    // Navigate back to the user home screen by popping until we find it
+    // or go back to the first route if user home is not in the stack
     Navigator.popUntil(
       context,
-      (route) => route.isFirst,
+      (route) {
+        // Check if this is the user home route
+        if (route.settings.name == '/user-home') {
+          return true;
+        }
+        // If we reach the first route and it's not user home, stop there
+        return route.isFirst;
+      },
     );
   }
 
@@ -107,10 +132,10 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
   }
 
   Color _getProgressColor(double percentage) {
-    if (percentage >= 1.0) return Colors.green;
-    if (percentage >= 0.8) return Colors.orange;
-    if (percentage >= 0.6) return Colors.blue;
-    return Colors.grey;
+    if (percentage >= 1.0) return CupertinoColors.systemGreen;
+    if (percentage >= 0.8) return CupertinoColors.systemOrange;
+    if (percentage >= 0.6) return AppColors.primary;
+    return CupertinoColors.systemGrey;
   }
 
   @override
@@ -120,9 +145,9 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
     
     final progressPercentage = updatedProgress[widget.meal]! / widget.mealTargets[widget.meal]!;
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
+    return CupertinoPageScaffold(
+      backgroundColor: CupertinoColors.systemBackground,
+      child: SafeArea(
         child: Column(
           children: [
             const Spacer(flex: 2),
@@ -137,7 +162,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
                     width: 120,
                     height: 120,
                     decoration: BoxDecoration(
-                      color: Colors.green.withValues(alpha: 0.1),
+                      color: CupertinoColors.systemGreen.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
                     child: Center(
@@ -147,8 +172,8 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
                           return Transform.scale(
                             scale: _checkmarkAnimation.value,
                             child: Icon(
-                              Icons.check,
-                              color: Colors.green[600],
+                              CupertinoIcons.check_mark,
+                              color: CupertinoColors.systemGreen,
                               size: 60,
                             ),
                           );
@@ -168,7 +193,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: Colors.green[700],
+                color: CupertinoColors.systemGreen,
               ),
             ),
 
@@ -179,7 +204,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
               'Added ${widget.protein.toStringAsFixed(1)}g protein to ${_getMealDisplayName(widget.meal)}',
               style: const TextStyle(
                 fontSize: 18,
-                color: Colors.black87,
+                color: CupertinoColors.black,
               ),
               textAlign: TextAlign.center,
             ),
@@ -191,12 +216,12 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
               margin: const EdgeInsets.symmetric(horizontal: 16),
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.blue.withValues(alpha: 0.05),
+                color: AppColors.primary.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(
-                    color: Colors.blue.withValues(alpha: 0.2),
-                    width: 1,
-                  ),
+                border: Border.all(
+                  color: AppColors.primary.withValues(alpha: 0.2),
+                  width: 1,
+                ),
               ),
               child: Row(
                 children: [
@@ -206,7 +231,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
                     height: 60,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.grey[300]!),
+                      border: Border.all(color: CupertinoColors.systemGrey4),
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(11),
@@ -227,7 +252,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
-                            color: Colors.black,
+                            color: CupertinoColors.black,
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -235,7 +260,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
                           '${widget.portion.toInt()}g • ${widget.protein.toStringAsFixed(1)}g protein',
                           style: TextStyle(
                             fontSize: 14,
-                            color: Colors.grey[600],
+                            color: CupertinoColors.systemGrey,
                           ),
                         ),
                       ],
@@ -252,12 +277,12 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
               margin: const EdgeInsets.symmetric(horizontal: 16),
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.green.withValues(alpha: 0.05),
+                color: CupertinoColors.systemGreen.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(
-                    color: Colors.green.withValues(alpha: 0.2),
-                    width: 1,
-                  ),
+                border: Border.all(
+                  color: CupertinoColors.systemGreen.withValues(alpha: 0.2),
+                  width: 1,
+                ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -267,7 +292,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: Colors.black,
+                      color: CupertinoColors.black,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -276,13 +301,11 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
                   Row(
                     children: [
                       Expanded(
-                        child: LinearProgressIndicator(
+                        child: CupertinoSlider(
                           value: progressPercentage.clamp(0.0, 1.0),
-                          backgroundColor: Colors.grey[300],
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            _getProgressColor(progressPercentage),
-                          ),
-                          minHeight: 8,
+                          onChanged: null, // Read-only
+                          activeColor: _getProgressColor(progressPercentage),
+                          thumbColor: _getProgressColor(progressPercentage),
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -303,7 +326,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
                     '${updatedProgress[widget.meal]!.toStringAsFixed(1)}g / ${widget.mealTargets[widget.meal]!.toStringAsFixed(1)}g protein',
                     style: TextStyle(
                       fontSize: 14,
-                      color: Colors.grey[600],
+                      color: CupertinoColors.systemGrey,
                     ),
                   ),
                 ],
@@ -314,46 +337,54 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
 
             // Action Buttons
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
               child: Column(
                 children: [
                   // Log Another Food Button
                   SizedBox(
                     width: double.infinity,
-                    child: OutlinedButton.icon(
+                    child: CupertinoButton(
                       onPressed: _logAnotherFood,
-                      icon: const Icon(Icons.add_a_photo),
-                      label: const Text('Log Another Food'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.blue[600],
-                        side: BorderSide(color: Colors.blue[600]!),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
+                      color: CupertinoColors.transparent,
+                      borderRadius: BorderRadius.circular(8),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            CupertinoIcons.camera,
+                            color: AppColors.primary,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Log Another Food',
+                            style: TextStyle(
+                              color: AppColors.primary,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
 
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
 
                   // Done Button
                   SizedBox(
                     width: double.infinity,
-                    child: ElevatedButton(
+                    child: CupertinoButton(
                       onPressed: _done,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green[600],
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
+                      color: CupertinoColors.systemGreen,
+                      borderRadius: BorderRadius.circular(12),
+                      padding: const EdgeInsets.symmetric(vertical: 18),
                       child: const Text(
                         'Done',
                         style: TextStyle(
-                          fontSize: 16,
+                          color: CupertinoColors.white,
+                          fontSize: 17,
                           fontWeight: FontWeight.w600,
                         ),
                       ),

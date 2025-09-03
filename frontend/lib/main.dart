@@ -98,6 +98,13 @@ class ProteinPaceApp extends StatelessWidget {
               meal: args['meal'] as String,
               mealProgress: args['mealProgress'] as Map<String, double>,
               mealTargets: args['mealTargets'] as Map<String, double>,
+              // Pass user settings if available
+              height: args['height'] as double?,
+              weight: args['weight'] as double?,
+              trainingMultiplier: args['trainingMultiplier'] as double?,
+              goal: args['goal'] as String?,
+              dailyProteinTarget: args['dailyProteinTarget'] as double?,
+              meals: args['meals'] as Map<String, bool>?,
             );
           },
           '/user-home': (context) {
