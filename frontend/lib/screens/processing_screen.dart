@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'dart:io';
 
 class ProcessingScreen extends StatefulWidget {
@@ -119,9 +119,9 @@ class _ProcessingScreenState extends State<ProcessingScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: SafeArea(
+    return CupertinoPageScaffold(
+      backgroundColor: CupertinoColors.black,
+      child: SafeArea(
         child: Column(
           children: [
             // Top Bar
@@ -129,23 +129,28 @@ class _ProcessingScreenState extends State<ProcessingScreen>
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  IconButton(
+                  CupertinoButton(
                     onPressed: _cancelProcessing,
-                    icon: const Icon(
-                      Icons.close,
-                      color: Colors.white,
-                      size: 28,
-                    ),
-                    style: IconButton.styleFrom(
-                      backgroundColor: Colors.black.withValues(alpha: 0.5),
-                      shape: const CircleBorder(),
+                    padding: EdgeInsets.zero,
+                    child: Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: CupertinoColors.black.withValues(alpha: 0.5),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        CupertinoIcons.xmark,
+                        color: CupertinoColors.white,
+                        size: 20,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 16),
                   const Text(
                     'Analyzing Your Meal',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: CupertinoColors.white,
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
                     ),
@@ -162,7 +167,7 @@ class _ProcessingScreenState extends State<ProcessingScreen>
               height: 120,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.white, width: 2),
+                border: Border.all(color: CupertinoColors.white, width: 2),
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(14),
@@ -187,14 +192,14 @@ class _ProcessingScreenState extends State<ProcessingScreen>
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.3),
+                        color: CupertinoColors.white.withValues(alpha: 0.3),
                         width: 3,
                       ),
                     ),
                     child: const Center(
                       child: Icon(
-                        Icons.camera_alt,
-                        color: Colors.white,
+                        CupertinoIcons.camera,
+                        color: CupertinoColors.white,
                         size: 40,
                       ),
                     ),
@@ -214,7 +219,7 @@ class _ProcessingScreenState extends State<ProcessingScreen>
                   child: Text(
                     _processingSteps[_currentStep],
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: CupertinoColors.white,
                       fontSize: 18,
                       fontWeight: FontWeight.w500,
                     ),
@@ -231,14 +236,14 @@ class _ProcessingScreenState extends State<ProcessingScreen>
               width: 200,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
+                color: CupertinoColors.white.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(2),
               ),
-              child: LinearProgressIndicator(
+              child: CupertinoSlider(
                 value: (_currentStep + 1) / _processingSteps.length,
-                backgroundColor: Colors.transparent,
-                valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
-                borderRadius: BorderRadius.circular(2),
+                activeColor: CupertinoColors.white,
+                thumbColor: CupertinoColors.white,
+                onChanged: null, // Read-only progress indicator
               ),
             ),
 
@@ -248,7 +253,7 @@ class _ProcessingScreenState extends State<ProcessingScreen>
             Text(
               '${_currentStep + 1} of ${_processingSteps.length}',
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.7),
+                color: CupertinoColors.white.withValues(alpha: 0.7),
                 fontSize: 14,
               ),
             ),
@@ -258,12 +263,12 @@ class _ProcessingScreenState extends State<ProcessingScreen>
             // Cancel Button
             Padding(
               padding: const EdgeInsets.all(32),
-              child: TextButton(
+              child: CupertinoButton(
                 onPressed: _cancelProcessing,
                 child: const Text(
                   'Cancel',
                   style: TextStyle(
-                    color: Colors.white70,
+                    color: CupertinoColors.white,
                     fontSize: 16,
                   ),
                 ),

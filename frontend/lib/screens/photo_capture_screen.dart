@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'dart:io';
+import 'package:flutter/cupertino.dart';
 
 class PhotoCaptureScreen extends StatefulWidget {
   final String imagePath;
@@ -13,197 +13,28 @@ class PhotoCaptureScreen extends StatefulWidget {
   State<PhotoCaptureScreen> createState() => _PhotoCaptureScreenState();
 }
 
-class _PhotoCaptureScreenState extends State<PhotoCaptureScreen>
-    with TickerProviderStateMixin {
-  late AnimationController _pulseController;
-  late Animation<double> _pulseAnimation;
+class _PhotoCaptureScreenState extends State<PhotoCaptureScreen> {
   bool _isProcessing = false;
 
   @override
-  void initState() {
-    super.initState();
-    _pulseController = AnimationController(
-      duration: const Duration(milliseconds: 1500),
-      vsync: this,
-    );
-    _pulseAnimation = Tween<double>(
-      begin: 1.0,
-      end: 1.2,
-    ).animate(CurvedAnimation(
-      parent: _pulseController,
-      curve: Curves.easeInOut,
-    ));
-    _pulseController.repeat(reverse: true);
-  }
-
-  @override
-  void dispose() {
-    _pulseController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _retakePhoto() async {
-    Navigator.pop(context);
-  }
-
-  Future<void> _usePhoto() async {
-    setState(() {
-      _isProcessing = true;
-    });
-
-    // Simulate processing delay
-    await Future.delayed(const Duration(milliseconds: 500));
-
-    if (mounted) {
-      setState(() {
-        _isProcessing = false;
-      });
-      
-      // Navigate to processing screen
-      Navigator.pushReplacementNamed(
-        context,
-        '/processing',
-        arguments: widget.imagePath,
-      );
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: SafeArea(
+    return CupertinoPageScaffold(
+      backgroundColor: CupertinoColors.black,
+      child: SafeArea(
         child: Stack(
           children: [
-            // Captured Photo Display
+            // Full Screen Image
             Positioned.fill(
               child: Image.file(
                 File(widget.imagePath),
                 fit: BoxFit.cover,
-              ),
-            ),
-
-            // Top Bar
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    IconButton(
-                      onPressed: _retakePhoto,
-                      icon: const Icon(
-                        Icons.close,
-                        color: Colors.white,
-                        size: 28,
-                      ),
-                      style: IconButton.styleFrom(
-                        backgroundColor: Colors.black.withValues(alpha: 0.5),
-                        shape: const CircleBorder(),
-                      ),
-                    ),
-                    const Text(
-                      'Review Photo',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(width: 48), // Balance the layout
-                  ],
-                ),
-              ),
-            ),
-
-            // Bottom Controls
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: Container(
-                padding: const EdgeInsets.all(32),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.transparent,
-                      Colors.black.withValues(alpha: 0.8),
-                    ],
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    // Retake Button
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: _isProcessing ? null : _retakePhoto,
-                        icon: const Icon(Icons.refresh),
-                        label: const Text('Retake'),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          side: const BorderSide(color: Colors.white),
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                      ),
-                    ),
-                    
-                    const SizedBox(width: 16),
-                    
-                    // Use Photo Button
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: _isProcessing ? null : _usePhoto,
-                        icon: _isProcessing
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                ),
-                              )
-                            : const Icon(Icons.check),
-                        label: Text(_isProcessing ? 'Processing...' : 'Use Photo'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.black,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            // Focus Indicator (Center)
-            Center(
-              child: AnimatedBuilder(
-                animation: _pulseAnimation,
-                builder: (context, child) {
-                  return Transform.scale(
-                    scale: _pulseAnimation.value,
-                    child: Container(
-                      width: 200,
-                      height: 200,
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.3),
-                          width: 2,
-                        ),
-                        borderRadius: BorderRadius.circular(16),
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    color: CupertinoColors.systemGrey,
+                    child: const Center(
+                      child: Text(
+                        'Failed to load image',
+                        style: TextStyle(color: CupertinoColors.white),
                       ),
                     ),
                   );
@@ -211,10 +42,141 @@ class _PhotoCaptureScreenState extends State<PhotoCaptureScreen>
               ),
             ),
 
-            // Grid Overlay (Optional)
-            Positioned.fill(
-              child: CustomPaint(
-                painter: GridPainter(),
+            // Top Controls
+            Positioned(
+              top: 16,
+              left: 16,
+              right: 16,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Close Button
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pop(context);
+                    },
+                    child: Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: CupertinoColors.black.withValues(alpha: 0.5),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        CupertinoIcons.xmark,
+                        color: CupertinoColors.white,
+                        size: 24,
+                      ),
+                    ),
+                  ),
+                  
+                  // Spacer to balance layout
+                  const SizedBox(width: 48), // Balance the layout
+                ],
+              ),
+            ),
+
+            // Focus Indicator (Center) - Static version
+            Center(
+              child: Container(
+                width: 200,
+                height: 200,
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: CupertinoColors.white.withValues(alpha: 0.3),
+                    width: 2,
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+            ),
+
+            // Bottom Controls
+            Positioned(
+              bottom: 50,
+              left: 20,
+              right: 20,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  // Retake Button
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: _isProcessing ? null : _retakePhoto,
+                      child: Container(
+                        height: 60,
+                        margin: const EdgeInsets.symmetric(horizontal: 10),
+                        decoration: BoxDecoration(
+                          color: CupertinoColors.systemRed.withValues(alpha: 0.8),
+                          borderRadius: BorderRadius.circular(30),
+                          border: Border.all(color: CupertinoColors.white, width: 2),
+                        ),
+                        child: const Center(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                CupertinoIcons.refresh,
+                                color: CupertinoColors.white,
+                                size: 20,
+                              ),
+                              SizedBox(width: 8),
+                              Text(
+                                'Retake',
+                                style: TextStyle(
+                                  color: CupertinoColors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  
+                  // Use Photo Button
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: _isProcessing ? null : _usePhoto,
+                      child: Container(
+                        height: 60,
+                        margin: const EdgeInsets.symmetric(horizontal: 10),
+                        decoration: BoxDecoration(
+                          color: CupertinoColors.systemGreen.withValues(alpha: 0.8),
+                          borderRadius: BorderRadius.circular(30),
+                          border: Border.all(color: CupertinoColors.white, width: 2),
+                        ),
+                        child: Center(
+                          child: _isProcessing
+                              ? const CupertinoActivityIndicator(
+                                  color: CupertinoColors.white,
+                                )
+                              : const Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      CupertinoIcons.check_mark,
+                                      color: CupertinoColors.white,
+                                      size: 20,
+                                    ),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      'Use Photo',
+                                      style: TextStyle(
+                                        color: CupertinoColors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -222,28 +184,61 @@ class _PhotoCaptureScreenState extends State<PhotoCaptureScreen>
       ),
     );
   }
-}
 
-class GridPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.2)
-      ..strokeWidth = 0.5;
-
-    // Vertical lines
-    for (int i = 1; i < 3; i++) {
-      final x = size.width * i / 3;
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
-    }
-
-    // Horizontal lines
-    for (int i = 1; i < 3; i++) {
-      final y = size.height * i / 3;
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+  Future<void> _retakePhoto() async {
+    if (_isProcessing) return;
+    
+    try {
+      Navigator.pop(context);
+    } catch (e) {
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
     }
   }
 
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  Future<void> _usePhoto() async {
+    if (_isProcessing) return;
+    
+    try {
+      setState(() {
+        _isProcessing = true;
+      });
+      
+      // Simulate processing time
+      await Future.delayed(const Duration(milliseconds: 500));
+      
+      if (mounted) {
+        setState(() {
+          _isProcessing = false;
+        });
+        
+        Navigator.pushReplacementNamed(
+          context,
+          '/processing',
+          arguments: widget.imagePath,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isProcessing = false;
+        });
+        
+        showCupertinoDialog(
+          context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: const Text('Navigation Error'),
+            content: Text('Failed to proceed: $e'),
+            actions: [
+              CupertinoDialogAction(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+      }
+    }
+  }
 }

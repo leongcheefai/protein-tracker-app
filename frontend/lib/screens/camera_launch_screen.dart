@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:camera/camera.dart';
 
@@ -226,9 +225,9 @@ class _CameraLaunchScreenState extends State<CameraLaunchScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: SafeArea(
+    return CupertinoPageScaffold(
+      backgroundColor: CupertinoColors.black,
+      child: SafeArea(
         child: Stack(
           children: [
             // Camera Preview
@@ -236,8 +235,8 @@ class _CameraLaunchScreenState extends State<CameraLaunchScreen>
               CameraPreview(_controller!)
             else if (_isLoading)
               const Center(
-                child: CircularProgressIndicator(
-                  color: Colors.white,
+                child: CupertinoActivityIndicator(
+                  color: CupertinoColors.white,
                 ),
               )
             else
@@ -257,22 +256,27 @@ class _CameraLaunchScreenState extends State<CameraLaunchScreen>
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    IconButton(
+                    CupertinoButton(
                       onPressed: () => Navigator.pop(context),
-                      icon: const Icon(
-                        Icons.arrow_back,
-                        color: Colors.white,
-                        size: 28,
-                      ),
-                      style: IconButton.styleFrom(
-                        backgroundColor: Colors.black.withValues(alpha: 0.5),
-                        shape: const CircleBorder(),
+                      padding: EdgeInsets.zero,
+                      child: Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: CupertinoColors.black.withValues(alpha: 0.5),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          CupertinoIcons.back,
+                          color: CupertinoColors.white,
+                          size: 20,
+                        ),
                       ),
                     ),
                     const Text(
                       'Take Photo',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: CupertinoColors.white,
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
                       ),
@@ -299,16 +303,21 @@ class _CameraLaunchScreenState extends State<CameraLaunchScreen>
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             // Flash Toggle
-            IconButton(
+            CupertinoButton(
               onPressed: _toggleFlash,
-              icon: Icon(
-                _isFlashOn ? Icons.flash_on : Icons.flash_off,
-                color: Colors.white,
-                size: 28,
-              ),
-              style: IconButton.styleFrom(
-                backgroundColor: Colors.black.withValues(alpha: 0.5),
-                shape: const CircleBorder(),
+              padding: EdgeInsets.zero,
+              child: Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  color: CupertinoColors.black.withValues(alpha: 0.5),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  _isFlashOn ? CupertinoIcons.bolt_fill : CupertinoIcons.bolt,
+                  color: CupertinoColors.white,
+                  size: 24,
+                ),
               ),
             ),
 
@@ -320,12 +329,12 @@ class _CameraLaunchScreenState extends State<CameraLaunchScreen>
                 height: 80,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 4),
-                  color: Colors.white.withValues(alpha: 0.2),
+                  border: Border.all(color: CupertinoColors.white, width: 4),
+                  color: CupertinoColors.white.withValues(alpha: 0.2),
                 ),
                 child: const Icon(
-                  Icons.camera,
-                  color: Colors.white,
+                  CupertinoIcons.camera,
+                  color: CupertinoColors.white,
                   size: 40,
                 ),
               ),
@@ -333,16 +342,21 @@ class _CameraLaunchScreenState extends State<CameraLaunchScreen>
 
             // Camera Flip Button
             if (_cameras.length > 1)
-              IconButton(
+              CupertinoButton(
                 onPressed: _switchCamera,
-                icon: const Icon(
-                  Icons.flip_camera_ios,
-                  color: Colors.white,
-                  size: 28,
-                ),
-                style: IconButton.styleFrom(
-                  backgroundColor: Colors.black.withValues(alpha: 0.5),
-                  shape: const CircleBorder(),
+                padding: EdgeInsets.zero,
+                child: Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: CupertinoColors.black.withValues(alpha: 0.5),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    CupertinoIcons.camera_rotate,
+                    color: CupertinoColors.white,
+                    size: 24,
+                  ),
                 ),
               )
             else
@@ -355,21 +369,21 @@ class _CameraLaunchScreenState extends State<CameraLaunchScreen>
 
   Widget _buildCameraUnavailableView() {
     return Container(
-      color: Colors.black,
+      color: CupertinoColors.black,
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Icon(
-              Icons.camera_alt_outlined,
-              color: Colors.white,
+              CupertinoIcons.camera,
+              color: CupertinoColors.white,
               size: 80,
             ),
             const SizedBox(height: 24),
             const Text(
               'Camera Unavailable',
               style: TextStyle(
-                color: Colors.white,
+                color: CupertinoColors.white,
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
               ),
@@ -379,7 +393,7 @@ class _CameraLaunchScreenState extends State<CameraLaunchScreen>
             const Text(
               'Unable to access camera. Please try again.',
               style: TextStyle(
-                color: Colors.white70,
+                color: CupertinoColors.white,
                 fontSize: 16,
               ),
               textAlign: TextAlign.center,
@@ -397,7 +411,7 @@ class _CameraLaunchScreenState extends State<CameraLaunchScreen>
               onPressed: () => Navigator.pop(context),
               child: const Text(
                 'Cancel',
-                style: TextStyle(color: Colors.white70, fontSize: 16),
+                style: TextStyle(color: CupertinoColors.white, fontSize: 16),
               ),
             ),
           ],
