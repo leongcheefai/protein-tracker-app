@@ -475,6 +475,117 @@ This document breaks down the UI development phases and individual screens for t
 
 ---
 
+### **Phase 8: Authentication & User Management (Week 9-10)**
+*Milestone: M9 – User Authentication & Account Management*
+
+#### 8.1 Authentication Welcome Screen
+- **Purpose:** Entry point for new and returning users, authentication method selection
+- **Elements:**
+  - App logo (Fuelie) with tagline
+  - "Welcome to Fuelie" title
+  - "Track protein intake with just a photo" subtitle
+  - **Authentication Options:**
+    - "Continue with Google" button (primary, with Google logo)
+    - "Continue with Apple" button (iOS only, with Apple logo)
+    - "Sign up with Email" button (secondary)
+  - "Already have an account? Sign in" link
+  - Privacy note: "Your data is secure and private"
+- **States:** Loading, error, success
+- **Navigation:** → Third-party auth flow or Email Signup/Login
+
+#### 8.2 Email Signup Screen
+- **Purpose:** Create new account with email and password
+- **Elements:**
+  - "Create Account" title
+  - **Form Fields:**
+    - Full name input (CupertinoTextField)
+    - Email input with validation
+    - Password input with strength indicator
+    - Confirm password input
+  - **Terms & Privacy:**
+    - "I agree to Terms of Service and Privacy Policy" checkbox
+    - Links to full terms and privacy policy
+  - "Create Account" button (enabled when form valid)
+  - "Back" button
+  - "Already have an account? Sign in" link
+- **Validation:** Email format, password strength (8+ chars, mixed case, numbers)
+- **States:** Form validation, loading, error, success
+- **Navigation:** → Email Verification or User Home (if auto-verified)
+
+#### 8.3 Email Login Screen
+- **Purpose:** Sign in existing users with email and password
+- **Elements:**
+  - "Welcome Back" title
+  - **Form Fields:**
+    - Email input (pre-filled if remembered)
+    - Password input
+    - "Remember me" toggle
+  - "Sign In" button (enabled when both fields filled)
+  - "Forgot Password?" link
+  - "Back" button
+  - "Don't have an account? Sign up" link
+- **States:** Loading, error (invalid credentials), success
+- **Navigation:** → User Home or Password Reset
+
+#### 8.4 Password Reset Screen
+- **Purpose:** Reset forgotten password via email
+- **Elements:**
+  - "Reset Password" title
+  - Email input field
+  - "Send Reset Link" button
+  - "Back to Sign In" link
+  - Success message: "Reset link sent to your email"
+- **States:** Loading, error, success
+- **Navigation:** → Email Login
+
+#### 8.5 Email Verification Screen
+- **Purpose:** Verify email address after signup
+- **Elements:**
+  - "Verify Your Email" title
+  - Email address display (masked)
+  - "We've sent a verification link to your email" message
+  - "Resend Email" button
+  - "Change Email" link
+  - "Back to Sign In" link
+- **States:** Pending verification, email sent, verification failed
+- **Navigation:** → User Home (after verification) or Email Signup
+
+#### 8.6 Third-Party Authentication Loading
+- **Purpose:** Show progress during OAuth authentication
+- **Elements:**
+  - Provider logo (Google/Apple)
+  - "Signing you in..." message
+  - Loading spinner
+  - "Cancel" button
+- **States:** Loading, error, success
+- **Navigation:** → User Home (success) or Authentication Welcome (error/cancel)
+
+#### 8.7 Account Linking Screen
+- **Purpose:** Link third-party account with existing email account
+- **Elements:**
+  - "Link Your Account" title
+  - "We found an existing account with this email" message
+  - Email address display
+  - **Options:**
+    - "Link with Google/Apple" button (primary)
+    - "Sign in with password instead" button (secondary)
+    - "Create new account" button (tertiary)
+- **Navigation:** → User Home (linked) or Email Login or Email Signup
+
+#### 8.8 Profile Setup Screen (Post-Auth)
+- **Purpose:** Complete user profile after authentication
+- **Elements:**
+  - "Complete Your Profile" title
+  - Profile photo upload (optional)
+  - **Basic Info:**
+    - Name (pre-filled from auth provider)
+    - Email (read-only, from auth provider)
+  - "Continue" button
+  - "Skip for now" link
+- **Navigation:** → Height/Weight Input (onboarding) or User Home (if returning user)
+
+---
+
 ## Navigation Structure
 
 ### **Bottom Tab Bar (Main App)**
@@ -493,7 +604,9 @@ This document breaks down the UI development phases and individual screens for t
 
 ### **Navigation Flow**
 ```
-Setup Flow: Splash → Welcome → Height/Weight → Training → Goals → Meals → User Home
+Authentication Flow: Splash → Auth Welcome → [Third-party Auth OR Email Signup/Login] → Profile Setup → Onboarding
+Returning User Flow: Splash → Auth Welcome → [Third-party Auth OR Email Login] → User Home
+Setup Flow: Profile Setup → Height/Weight → Training → Goals → Meals → User Home
 Main App: User Home (with camera modal) → Photo Flow → Back to User Home
 Premium Flow: Premium Unlock → Pricing Plans → Payment → Success → Enhanced User Home
 ```
@@ -519,3 +632,28 @@ Premium Flow: Premium Unlock → Pricing Plans → Payment → Success → Enhan
 - **Camera Modal:** Bottom sheet modal with photo upload options
 - **Navigation Flow:** Updated routing to support new screen structure
 - **State Management:** Proper parameter passing between screens
+
+---
+
+## Phase 8 Implementation Summary
+
+### **Key Features**
+- **Third-Party Authentication:** Google Sign-In and Apple Sign-In integration
+- **Email Authentication:** Traditional email/password signup and login
+- **Account Linking:** Seamless linking of third-party accounts with existing email accounts
+- **Profile Completion:** Post-authentication profile setup for new users
+- **Security:** Password strength validation, email verification, secure token management
+
+### **Technical Implementation**
+- **Authentication Provider:** Firebase Auth or similar service
+- **Third-Party Integration:** Google Sign-In SDK, Apple Sign-In SDK
+- **State Management:** Authentication state provider for app-wide auth status
+- **Navigation Guards:** Route protection based on authentication status
+- **Data Persistence:** Secure token storage and user session management
+
+### **User Experience Benefits**
+1. **Frictionless Onboarding:** Quick signup with Google/Apple reduces barriers
+2. **Account Security:** Email verification and strong password requirements
+3. **Flexible Options:** Multiple authentication methods for user preference
+4. **Seamless Linking:** Smart account linking prevents duplicate accounts
+5. **Progressive Profile:** Gradual profile completion doesn't block app usage
