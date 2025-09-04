@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'welcome_screen.dart';
+import 'authentication_welcome_screen.dart';
 import '../main.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -46,12 +46,12 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
     _fadeController.forward();
     _scaleController.forward();
     
-    // Auto-navigate to Welcome screen after 2.5 seconds
+    // Auto-navigate to Authentication Welcome screen after 2.5 seconds
     await Future.delayed(const Duration(milliseconds: 2000));
     if (mounted) {
       Navigator.of(context).pushReplacement(
         CupertinoPageRoute(
-          builder: (context) => const WelcomeScreen(),
+          builder: (context) => const AuthenticationWelcomeScreen(),
         ),
       );
     }

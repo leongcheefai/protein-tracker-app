@@ -1,6 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import 'screens/splash_screen.dart';
+import 'screens/authentication_welcome_screen.dart';
+import 'screens/email_signup_screen.dart';
+import 'screens/email_login_screen.dart';
 import 'screens/camera_launch_screen.dart';
 import 'screens/photo_capture_screen.dart';
 import 'screens/processing_screen.dart';
@@ -54,6 +57,9 @@ class ProteinPaceApp extends StatelessWidget {
         initialRoute: '/',
         routes: {
           '/': (context) => const SplashScreen(),
+          '/auth-welcome': (context) => const AuthenticationWelcomeScreen(),
+          '/email-signup': (context) => const EmailSignupScreen(),
+          '/email-login': (context) => const EmailLoginScreen(),
           '/camera-launch': (context) => const CameraLaunchScreen(),
           '/photo-capture': (context) {
             final args = ModalRoute.of(context)!.settings.arguments as String;
