@@ -23,7 +23,8 @@ class MealAssignmentScreen extends StatefulWidget {
 }
 
 class _MealAssignmentScreenState extends State<MealAssignmentScreen> {
-  String _selectedMeal = 'lunch'; // Default meal
+  String _selectedMeal = 'lunch'; // User's selected meal
+  String _suggestedMeal = 'lunch'; // Time-based suggested meal (fixed)
   final Map<String, double> _mealProgress = {
     'breakfast': 25.0, // Mock data - replace with actual progress
     'lunch': 45.0,
@@ -41,22 +42,25 @@ class _MealAssignmentScreenState extends State<MealAssignmentScreen> {
   @override
   void initState() {
     super.initState();
-    _suggestMeal();
+    _determineSuggestedMeal();
   }
 
-  void _suggestMeal() {
+  void _determineSuggestedMeal() {
     final now = DateTime.now();
     final hour = now.hour;
     
     if (hour >= 6 && hour < 11) {
-      _selectedMeal = 'breakfast';
+      _suggestedMeal = 'breakfast';
     } else if (hour >= 11 && hour < 16) {
-      _selectedMeal = 'lunch';
+      _suggestedMeal = 'lunch';
     } else if (hour >= 16 && hour < 21) {
-      _selectedMeal = 'dinner';
+      _suggestedMeal = 'dinner';
     } else {
-      _selectedMeal = 'snack';
+      _suggestedMeal = 'snack';
     }
+    
+    // Set the selected meal to the suggested meal initially
+    _selectedMeal = _suggestedMeal;
     setState(() {});
   }
 
@@ -128,6 +132,7 @@ class _MealAssignmentScreenState extends State<MealAssignmentScreen> {
                       // Meal Selection Chips
                       ...['breakfast', 'lunch', 'dinner', 'snack'].map((meal) {
                         final isSelected = _selectedMeal == meal;
+                        final isSuggested = _suggestedMeal == meal;
                         final progress = _mealProgress[meal] ?? 0.0;
                         final target = _mealTargets[meal] ?? 0.0;
                         final progressPercentage = target > 0 ? (progress / target) : 0.0;
@@ -179,7 +184,7 @@ class _MealAssignmentScreenState extends State<MealAssignmentScreen> {
                                                 color: isSelected ? AppColors.primary : CupertinoColors.black,
                                               ),
                                             ),
-                                            if (isSelected) ...[
+                                            if (isSuggested) ...[
                                               const SizedBox(width: 8),
                                               Container(
                                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
