@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import '../main.dart';
 
@@ -105,265 +104,196 @@ class _MealAssignmentScreenState extends State<MealAssignmentScreen> {
           ),
         ),
       ),
-      child: Column(
-        children: [
-          // Food Summary
-          Container(
-            margin: const EdgeInsets.all(16),
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: CupertinoColors.systemGreen.withValues(alpha: 0.05),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: CupertinoColors.systemGreen.withValues(alpha: 0.2),
-                width: 1,
-              ),
-            ),
-            child: Row(
-              children: [
-                // Food Icon
-                Container(
-                  width: 60,
-                  height: 60,
-                  decoration: BoxDecoration(
-                    color: CupertinoColors.systemGreen.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    _getFoodIcon(selectedFood['category'] as String),
-                    color: CupertinoColors.systemGreen,
-                    size: 30,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                // Food Details
-                Expanded(
+      child: SafeArea(
+        child: Column(
+          children: [
+            // Meal Selection
+            Expanded(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        selectedFood['name'] as String,
-                        style: const TextStyle(
-                          fontSize: 18,
+                      const Text(
+                        'Which meal is this?',
+                        style: TextStyle(
+                          fontSize: 16,
                           fontWeight: FontWeight.w600,
                           color: CupertinoColors.black,
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${widget.portion.toInt()}g • ${widget.protein.toStringAsFixed(1)}g protein',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: CupertinoColors.systemGrey,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
+                      const SizedBox(height: 16),
 
-          // Meal Selection
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Which meal is this?',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: CupertinoColors.black,
-                  ),
-                ),
-                const SizedBox(height: 16),
+                      // Meal Selection Chips
+                      ...['breakfast', 'lunch', 'dinner', 'snack'].map((meal) {
+                        final isSelected = _selectedMeal == meal;
+                        final progress = _mealProgress[meal] ?? 0.0;
+                        final target = _mealTargets[meal] ?? 0.0;
+                        final progressPercentage = target > 0 ? (progress / target) : 0.0;
 
-                // Meal Selection Chips
-                ...['breakfast', 'lunch', 'dinner', 'snack'].map((meal) {
-                  final isSelected = _selectedMeal == meal;
-                  final progress = _mealProgress[meal] ?? 0.0;
-                  final target = _mealTargets[meal] ?? 0.0;
-                  final progressPercentage = target > 0 ? (progress / target) : 0.0;
-
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    child: GestureDetector(
-                      onTap: () => _selectMeal(meal),
-                      child: Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: isSelected ? AppColors.primary.withValues(alpha: 0.1) : CupertinoColors.systemGrey6,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: isSelected ? AppColors.primary : CupertinoColors.systemGrey4,
-                            width: isSelected ? 2 : 1,
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            // Meal Icon
-                            Container(
-                              width: 40,
-                              height: 40,
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          child: GestureDetector(
+                            onTap: () => _selectMeal(meal),
+                            child: Container(
+                              padding: const EdgeInsets.all(16),
                               decoration: BoxDecoration(
-                                color: isSelected ? AppColors.primary : CupertinoColors.systemGrey3,
-                                borderRadius: BorderRadius.circular(8),
+                                color: isSelected ? AppColors.primary.withValues(alpha: 0.1) : CupertinoColors.systemGrey6,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: isSelected ? AppColors.primary : CupertinoColors.systemGrey4,
+                                  width: isSelected ? 2 : 1,
+                                ),
                               ),
-                              child: Icon(
-                                _getMealIcon(meal),
-                                color: CupertinoColors.white,
-                                size: 20,
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            
-                            // Meal Info
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                              child: Row(
                                 children: [
-                                  Row(
-                                    children: [
-                                      Text(
-                                        _getMealDisplayName(meal),
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600,
-                                          color: isSelected ? AppColors.primary : CupertinoColors.black,
-                                        ),
-                                      ),
-                                      if (isSelected) ...[
-                                        const SizedBox(width: 8),
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                          decoration: BoxDecoration(
-                                            color: AppColors.primary,
-                                            borderRadius: BorderRadius.circular(12),
-                                          ),
-                                          child: const Text(
-                                            'Suggested',
-                                            style: TextStyle(
-                                              color: CupertinoColors.white,
-                                              fontSize: 10,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ],
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    '${progress.toStringAsFixed(1)}g / ${target.toStringAsFixed(1)}g protein',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: CupertinoColors.systemGrey,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            
-                            // Progress Ring
-                            SizedBox(
-                              width: 40,
-                              height: 40,
-                              child: Stack(
-                                children: [
-                                  // Background circle
+                                  // Meal Icon
                                   Container(
                                     width: 40,
                                     height: 40,
                                     decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                        color: CupertinoColors.systemGrey4,
-                                        width: 3,
-                                      ),
+                                      color: isSelected ? AppColors.primary : CupertinoColors.systemGrey3,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Icon(
+                                      _getMealIcon(meal),
+                                      color: CupertinoColors.white,
+                                      size: 20,
                                     ),
                                   ),
-                                  // Progress arc
+                                  const SizedBox(width: 16),
+                                  
+                                  // Meal Info
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Text(
+                                              _getMealDisplayName(meal),
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w600,
+                                                color: isSelected ? AppColors.primary : CupertinoColors.black,
+                                              ),
+                                            ),
+                                            if (isSelected) ...[
+                                              const SizedBox(width: 8),
+                                              Container(
+                                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                                decoration: BoxDecoration(
+                                                  color: AppColors.primary,
+                                                  borderRadius: BorderRadius.circular(12),
+                                                ),
+                                                child: const Text(
+                                                  'Suggested',
+                                                  style: TextStyle(
+                                                    color: CupertinoColors.white,
+                                                    fontSize: 10,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ],
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          '${progress.toStringAsFixed(1)}g / ${target.toStringAsFixed(1)}g protein',
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            color: CupertinoColors.systemGrey,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  
+                                  // Progress Ring
                                   SizedBox(
                                     width: 40,
                                     height: 40,
-                                    child: CustomPaint(
-                                      painter: ProgressPainter(
-                                        progress: progressPercentage,
-                                        color: _getProgressColor(progressPercentage),
-                                        strokeWidth: 3,
-                                      ),
-                                    ),
-                                  ),
-                                  // Percentage text
-                                  Center(
-                                    child: Text(
-                                      '${(progressPercentage * 100).toInt()}%',
-                                      style: TextStyle(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w600,
-                                        color: _getProgressColor(progressPercentage),
-                                      ),
+                                    child: Stack(
+                                      children: [
+                                        // Background circle
+                                        Container(
+                                          width: 40,
+                                          height: 40,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            border: Border.all(
+                                              color: CupertinoColors.systemGrey4,
+                                              width: 3,
+                                            ),
+                                          ),
+                                        ),
+                                        // Progress arc
+                                        SizedBox(
+                                          width: 40,
+                                          height: 40,
+                                          child: CustomPaint(
+                                            painter: ProgressPainter(
+                                              progress: progressPercentage,
+                                              color: _getProgressColor(progressPercentage),
+                                              strokeWidth: 3,
+                                            ),
+                                          ),
+                                        ),
+                                        // Percentage text
+                                        Center(
+                                          child: Text(
+                                            '${(progressPercentage * 100).toInt()}%',
+                                            style: TextStyle(
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.w600,
+                                              color: _getProgressColor(progressPercentage),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                }),
-              ],
-            ),
-          ),
-
-          const Spacer(),
-
-          // Save Button
-          Container(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-            child: SizedBox(
-              width: double.infinity,
-              child: CupertinoButton(
-                onPressed: _save,
-                color: AppColors.primary,
-                borderRadius: BorderRadius.circular(12),
-                padding: const EdgeInsets.symmetric(vertical: 18),
-                child: const Text(
-                  'Save',
-                  style: TextStyle(
-                    color: CupertinoColors.white,
-                    fontSize: 17,
-                    fontWeight: FontWeight.w600,
+                          ),
+                        );
+                      }),
+                    ],
                   ),
                 ),
               ),
             ),
-          ),
-        ],
+
+            // Save Button
+            Container(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+              child: SizedBox(
+                width: double.infinity,
+                child: CupertinoButton(
+                  onPressed: _save,
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.circular(12),
+                  padding: const EdgeInsets.symmetric(vertical: 18),
+                  child: const Text(
+                    'Save',
+                    style: TextStyle(
+                      color: CupertinoColors.white,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  IconData _getFoodIcon(String category) {
-    switch (category.toLowerCase()) {
-      case 'protein':
-        return CupertinoIcons.heart_fill;
-      case 'carbohydrate':
-        return CupertinoIcons.circle;
-      case 'vegetable':
-        return CupertinoIcons.leaf_arrow_circlepath;
-      case 'fruit':
-        return CupertinoIcons.circle_fill;
-      case 'dairy':
-        return CupertinoIcons.drop;
-      default:
-        return CupertinoIcons.house;
-    }
-  }
 
   IconData _getMealIcon(String meal) {
     switch (meal) {
