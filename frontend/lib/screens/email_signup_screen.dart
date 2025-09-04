@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'email_login_screen.dart';
 import '../main.dart';
 
 class EmailSignupScreen extends StatefulWidget {
