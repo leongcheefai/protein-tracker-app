@@ -10,6 +10,10 @@ class ProfileSettingsScreen extends StatefulWidget {
   final double trainingMultiplier;
   final String goal;
   final double dailyProteinTarget;
+  final String? userEmail;
+  final String? userName;
+  final String? authProvider; // 'email', 'google', 'apple'
+  final String? profileImageUrl;
 
   const ProfileSettingsScreen({
     super.key,
@@ -18,6 +22,10 @@ class ProfileSettingsScreen extends StatefulWidget {
     required this.trainingMultiplier,
     required this.goal,
     required this.dailyProteinTarget,
+    this.userEmail,
+    this.userName,
+    this.authProvider,
+    this.profileImageUrl,
   });
 
   @override
@@ -27,6 +35,8 @@ class ProfileSettingsScreen extends StatefulWidget {
 class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
   late TextEditingController _heightController;
   late TextEditingController _weightController;
+  late TextEditingController _nameController;
+  late TextEditingController _emailController;
   late double _selectedTrainingMultiplier;
   late String _selectedGoal;
   late double _dailyProteinTarget;
@@ -37,8 +47,13 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
   @override
   void initState() {
     super.initState();
+    // Initialize controllers first
     _heightController = TextEditingController(text: widget.height.toString());
     _weightController = TextEditingController(text: widget.weight.toString());
+    _nameController = TextEditingController(text: widget.userName ?? '');
+    _emailController = TextEditingController(text: widget.userEmail ?? '');
+    
+    // Initialize other state variables
     _selectedTrainingMultiplier = widget.trainingMultiplier;
     _selectedGoal = widget.goal;
     _dailyProteinTarget = widget.dailyProteinTarget;
@@ -48,6 +63,8 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
   void dispose() {
     _heightController.dispose();
     _weightController.dispose();
+    _nameController.dispose();
+    _emailController.dispose();
     super.dispose();
   }
 
@@ -171,6 +188,11 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
               
               const SizedBox(height: 24),
               
+              // Login Details Section
+              _buildLoginDetailsSection(),
+              
+              const SizedBox(height: 24),
+              
               // Height & Weight Section
               _buildHeightWeightSection(),
               
@@ -270,6 +292,270 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildLoginDetailsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Account Information',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: CupertinoColors.black,
+          ),
+        ),
+        const SizedBox(height: 16),
+        
+        // Name Field
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Full Name',
+              style: TextStyle(
+                fontSize: 16,
+                color: CupertinoColors.black,
+              ),
+            ),
+            const SizedBox(height: 8),
+            CupertinoTextField(
+              controller: _nameController,
+              placeholder: 'Enter your full name',
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              style: const TextStyle(
+                fontSize: 16,
+                color: CupertinoColors.black,
+              ),
+            ),
+          ],
+        ),
+        
+        const SizedBox(height: 16),
+        
+        // Email Field
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Email Address',
+              style: TextStyle(
+                fontSize: 16,
+                color: CupertinoColors.black,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: CupertinoColors.systemGrey6,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: CupertinoColors.systemGrey4),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      widget.userEmail?.isNotEmpty == true ? widget.userEmail! : 'No email set',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: CupertinoColors.systemGrey,
+                      ),
+                    ),
+                  ),
+                  const Icon(
+                    CupertinoIcons.lock_fill,
+                    color: CupertinoColors.systemGrey,
+                    size: 16,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              'Email cannot be changed here',
+              style: TextStyle(
+                fontSize: 12,
+                color: CupertinoColors.systemGrey,
+              ),
+            ),
+          ],
+        ),
+        
+        const SizedBox(height: 16),
+        
+        // Authentication Method
+        _buildAuthMethodSection(),
+        
+        const SizedBox(height: 16),
+        
+        // Account Actions
+        _buildAccountActionsSection(),
+      ],
+    );
+  }
+
+  Widget _buildAuthMethodSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Sign-in Method',
+          style: TextStyle(
+            fontSize: 16,
+            color: CupertinoColors.black,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: CupertinoColors.systemGrey6,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: CupertinoColors.systemGrey4),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                _getAuthProviderIcon(),
+                color: _getAuthProviderColor(),
+                size: 20,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _getAuthProviderName(),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: CupertinoColors.black,
+                      ),
+                    ),
+                    Text(
+                      _getAuthProviderDescription(),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: CupertinoColors.systemGrey,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAccountActionsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Account Actions',
+          style: TextStyle(
+            fontSize: 16,
+            color: CupertinoColors.black,
+          ),
+        ),
+        const SizedBox(height: 8),
+        
+        // Password Change (only for email users)
+        if (widget.authProvider == 'email') ...[
+          _buildActionButton(
+            icon: CupertinoIcons.lock_rotation,
+            title: 'Change Password',
+            subtitle: 'Update your account password',
+            onTap: _handleChangePassword,
+          ),
+          const SizedBox(height: 8),
+        ],
+        
+        // Link/Unlink Account
+        _buildActionButton(
+          icon: widget.authProvider == 'email' ? CupertinoIcons.link : CupertinoIcons.minus_circle,
+          title: widget.authProvider == 'email' ? 'Link Social Account' : 'Unlink Account',
+          subtitle: widget.authProvider == 'email' 
+              ? 'Connect Google or Apple for easier sign-in'
+              : 'Remove social account connection',
+          onTap: widget.authProvider == 'email' ? _handleLinkAccount : _handleUnlinkAccount,
+        ),
+        
+        const SizedBox(height: 8),
+        
+        // Account Security
+        _buildActionButton(
+          icon: CupertinoIcons.shield,
+          title: 'Account Security',
+          subtitle: 'Manage your account security settings',
+          onTap: _handleAccountSecurity,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActionButton({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: CupertinoColors.systemBackground,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: CupertinoColors.systemGrey4),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              color: CupertinoColors.activeBlue,
+              size: 20,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: CupertinoColors.black,
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: CupertinoColors.systemGrey,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(
+              CupertinoIcons.chevron_right,
+              color: CupertinoColors.systemGrey,
+              size: 16,
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -747,4 +1033,185 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
   //   // This would integrate with an image cropping library
   //   // For example: image_cropper package
   // }
+
+  // Authentication Provider Helper Methods
+  IconData _getAuthProviderIcon() {
+    switch (widget.authProvider) {
+      case 'google':
+        return CupertinoIcons.globe;
+      case 'apple':
+        return CupertinoIcons.app_badge;
+      case 'email':
+      default:
+        return CupertinoIcons.mail;
+    }
+  }
+
+  Color _getAuthProviderColor() {
+    switch (widget.authProvider) {
+      case 'google':
+        return const Color(0xFF4285F4); // Google Blue
+      case 'apple':
+        return CupertinoColors.black;
+      case 'email':
+      default:
+        return CupertinoColors.activeBlue;
+    }
+  }
+
+  String _getAuthProviderName() {
+    switch (widget.authProvider) {
+      case 'google':
+        return 'Google';
+      case 'apple':
+        return 'Apple ID';
+      case 'email':
+      default:
+        return 'Email & Password';
+    }
+  }
+
+  String _getAuthProviderDescription() {
+    switch (widget.authProvider) {
+      case 'google':
+        return 'Signed in with Google account';
+      case 'apple':
+        return 'Signed in with Apple ID';
+      case 'email':
+      default:
+        return 'Signed in with email and password';
+    }
+  }
+
+  // Action Handlers
+  void _handleChangePassword() {
+    showCupertinoDialog(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('Change Password'),
+        content: const Text('This feature will be available soon. You can change your password through the email reset link.'),
+        actions: [
+          CupertinoDialogAction(
+            child: const Text('OK'),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _handleLinkAccount() {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (context) => CupertinoActionSheet(
+        title: const Text('Link Social Account'),
+        message: const Text('Choose a social account to link for easier sign-in'),
+        actions: [
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.pop(context);
+              _linkGoogleAccount();
+            },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(CupertinoIcons.globe, size: 20),
+                const SizedBox(width: 8),
+                const Text('Link Google Account'),
+              ],
+            ),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.pop(context);
+              _linkAppleAccount();
+            },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(CupertinoIcons.app_badge, size: 20),
+                const SizedBox(width: 8),
+                const Text('Link Apple ID'),
+              ],
+            ),
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+      ),
+    );
+  }
+
+  void _handleUnlinkAccount() {
+    showCupertinoDialog(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('Unlink Account'),
+        content: Text('Are you sure you want to unlink your ${_getAuthProviderName()} account? You will need to sign in with email and password.'),
+        actions: [
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            child: const Text('Unlink'),
+            onPressed: () {
+              Navigator.of(context).pop();
+              _unlinkAccount();
+            },
+          ),
+          CupertinoDialogAction(
+            child: const Text('Cancel'),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _handleAccountSecurity() {
+    showCupertinoDialog(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('Account Security'),
+        content: const Text('Advanced security features will be available soon, including two-factor authentication and login notifications.'),
+        actions: [
+          CupertinoDialogAction(
+            child: const Text('OK'),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _linkGoogleAccount() {
+    // TODO: Implement Google account linking
+    _showAccountActionDialog('Google account linking will be implemented soon.');
+  }
+
+  void _linkAppleAccount() {
+    // TODO: Implement Apple account linking
+    _showAccountActionDialog('Apple ID linking will be implemented soon.');
+  }
+
+  void _unlinkAccount() {
+    // TODO: Implement account unlinking
+    _showAccountActionDialog('Account unlinking will be implemented soon.');
+  }
+
+  void _showAccountActionDialog(String message) {
+    showCupertinoDialog(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('Success'),
+        content: Text(message),
+        actions: [
+          CupertinoDialogAction(
+            child: const Text('OK'),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ],
+      ),
+    );
+  }
 }

@@ -182,6 +182,10 @@ class ProteinPaceApp extends StatelessWidget {
               trainingMultiplier: args['trainingMultiplier'] as double,
               goal: args['goal'] as String,
               dailyProteinTarget: args['dailyProteinTarget'] as double,
+              userEmail: args['userEmail'] as String?,
+              userName: args['userName'] as String?,
+              authProvider: args['authProvider'] as String?,
+              profileImageUrl: args['profileImageUrl'] as String?,
             );
           },
           '/notification-settings': (context) => const NotificationSettingsScreen(),
