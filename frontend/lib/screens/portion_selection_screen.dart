@@ -629,7 +629,7 @@ class _PortionSelectionScreenState extends State<PortionSelectionScreen> {
                                       );
                                     },
                                   );
-                                }).toList(),
+                                }),
                               ],
                             ),
                           )
