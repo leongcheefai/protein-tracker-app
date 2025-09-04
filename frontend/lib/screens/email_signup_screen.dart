@@ -449,10 +449,12 @@ class _EmailSignupScreenState extends State<EmailSignupScreen> {
       // For now, simulate loading
       await Future.delayed(const Duration(seconds: 2));
       
-      // Simulate success - navigate to profile setup or onboarding
+      // Simulate success - navigate to email verification
       if (mounted) {
-        // TODO: Navigate to profile setup or onboarding flow
-        Navigator.of(context).pop();
+        Navigator.of(context).pushReplacementNamed(
+          '/email-verification',
+          arguments: {'email': _emailController.text},
+        );
       }
     } catch (e) {
       setState(() {

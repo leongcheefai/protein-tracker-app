@@ -339,20 +339,7 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
   }
 
   void _handleForgotPassword() {
-    // TODO: Implement forgot password flow
-    showCupertinoDialog(
-      context: context,
-      builder: (context) => CupertinoAlertDialog(
-        title: const Text('Forgot Password'),
-        content: const Text('Password reset functionality will be implemented in the next phase.'),
-        actions: [
-          CupertinoDialogAction(
-            child: const Text('OK'),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-        ],
-      ),
-    );
+    Navigator.of(context).pushNamed('/password-reset');
   }
 
   void _navigateToEmailSignup() {

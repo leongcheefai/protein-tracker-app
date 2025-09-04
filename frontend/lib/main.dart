@@ -4,6 +4,8 @@ import 'screens/splash_screen.dart';
 import 'screens/authentication_welcome_screen.dart';
 import 'screens/email_signup_screen.dart';
 import 'screens/email_login_screen.dart';
+import 'screens/password_reset_screen.dart';
+import 'screens/email_verification_screen.dart';
 import 'screens/camera_launch_screen.dart';
 import 'screens/photo_capture_screen.dart';
 import 'screens/processing_screen.dart';
@@ -60,6 +62,13 @@ class ProteinPaceApp extends StatelessWidget {
           '/auth-welcome': (context) => const AuthenticationWelcomeScreen(),
           '/email-signup': (context) => const EmailSignupScreen(),
           '/email-login': (context) => const EmailLoginScreen(),
+          '/password-reset': (context) => const PasswordResetScreen(),
+          '/email-verification': (context) {
+            final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+            return EmailVerificationScreen(
+              email: args['email'] as String,
+            );
+          },
           '/camera-launch': (context) => const CameraLaunchScreen(),
           '/photo-capture': (context) {
             final args = ModalRoute.of(context)!.settings.arguments as String;
