@@ -4,8 +4,11 @@ import 'screens/splash_screen.dart';
 import 'screens/authentication_welcome_screen.dart';
 import 'screens/email_signup_screen.dart';
 import 'screens/email_login_screen.dart';
+import 'screens/welcome_screen.dart';
 import 'screens/password_reset_screen.dart';
 import 'screens/email_verification_screen.dart';
+import 'screens/third_party_auth_loading_screen.dart' as auth_loading;
+import 'screens/account_linking_screen.dart' as account_linking;
 import 'screens/camera_launch_screen.dart';
 import 'screens/photo_capture_screen.dart';
 import 'screens/processing_screen.dart';
@@ -60,12 +63,27 @@ class ProteinPaceApp extends StatelessWidget {
         routes: {
           '/': (context) => const SplashScreen(),
           '/auth-welcome': (context) => const AuthenticationWelcomeScreen(),
+          '/welcome': (context) => const WelcomeScreen(),
           '/email-signup': (context) => const EmailSignupScreen(),
           '/email-login': (context) => const EmailLoginScreen(),
           '/password-reset': (context) => const PasswordResetScreen(),
           '/email-verification': (context) {
             final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
             return EmailVerificationScreen(
+              email: args['email'] as String,
+            );
+          },
+          '/third-party-auth-loading': (context) {
+            final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+            return auth_loading.ThirdPartyAuthLoadingScreen(
+              provider: args['provider'] as auth_loading.AuthProvider,
+              onCancel: args['onCancel'] as VoidCallback?,
+            );
+          },
+          '/account-linking': (context) {
+            final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+            return account_linking.AccountLinkingScreen(
+              provider: args['provider'] as account_linking.AuthProvider,
               email: args['email'] as String,
             );
           },

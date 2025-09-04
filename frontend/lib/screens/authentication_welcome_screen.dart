@@ -1,8 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
-import 'email_signup_screen.dart';
-import 'email_login_screen.dart';
+import 'third_party_auth_loading_screen.dart';
 import '../main.dart';
 
 class AuthenticationWelcomeScreen extends StatefulWidget {
@@ -21,12 +20,13 @@ class _AuthenticationWelcomeScreenState extends State<AuthenticationWelcomeScree
     return CupertinoPageScaffold(
       backgroundColor: AppColors.background,
       child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            children: [
-              const Spacer(),
-              
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
               // App Logo
               Container(
                 width: 120,
@@ -178,7 +178,7 @@ class _AuthenticationWelcomeScreenState extends State<AuthenticationWelcomeScree
                 ],
               ),
               
-              const Spacer(),
+              const SizedBox(height: 32),
               
               // Privacy Note
               Container(
@@ -213,6 +213,7 @@ class _AuthenticationWelcomeScreenState extends State<AuthenticationWelcomeScree
             ],
           ),
         ),
+      ),
       ),
     );
   }
@@ -262,11 +263,7 @@ class _AuthenticationWelcomeScreenState extends State<AuthenticationWelcomeScree
                 ),
               )
             else if (showAppleIcon)
-              const Icon(
-                CupertinoIcons.app_badge,
-                color: Colors.white,
-                size: 24,
-              )
+              _buildAppleLogo(size: 24)
             else
               Icon(
                 icon,
@@ -324,51 +321,23 @@ class _AuthenticationWelcomeScreenState extends State<AuthenticationWelcomeScree
   }
 
   void _handleGoogleSignIn() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    try {
-      // TODO: Implement Google Sign-In
-      // For now, simulate loading
-      await Future.delayed(const Duration(seconds: 2));
-      
-      // Simulate error for demo
-      setState(() {
-        _errorMessage = 'Google Sign-In not yet implemented';
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _errorMessage = 'Failed to sign in with Google. Please try again.';
-        _isLoading = false;
-      });
-    }
+    Navigator.of(context).pushNamed(
+      '/third-party-auth-loading',
+      arguments: {
+        'provider': AuthProvider.google,
+        'onCancel': () => Navigator.of(context).pop(),
+      },
+    );
   }
 
   void _handleAppleSignIn() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    try {
-      // TODO: Implement Apple Sign-In
-      // For now, simulate loading
-      await Future.delayed(const Duration(seconds: 2));
-      
-      // Simulate error for demo
-      setState(() {
-        _errorMessage = 'Apple Sign-In not yet implemented';
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _errorMessage = 'Failed to sign in with Apple. Please try again.';
-        _isLoading = false;
-      });
-    }
+    Navigator.of(context).pushNamed(
+      '/third-party-auth-loading',
+      arguments: {
+        'provider': AuthProvider.apple,
+        'onCancel': () => Navigator.of(context).pop(),
+      },
+    );
   }
 
   void _navigateToEmailSignup() {
@@ -378,4 +347,62 @@ class _AuthenticationWelcomeScreenState extends State<AuthenticationWelcomeScree
   void _navigateToEmailLogin() {
     Navigator.of(context).pushNamed('/email-login');
   }
+
+  Widget _buildAppleLogo({double size = 24}) {
+    return CustomPaint(
+      size: Size(size, size),
+      painter: AppleLogoPainter(),
+    );
+  }
+}
+
+class AppleLogoPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.fill;
+
+    final path = Path();
+    
+    // Apple logo path - simplified version
+    // This creates the classic Apple logo shape
+    path.moveTo(size.width * 0.5, size.height * 0.1);
+    path.cubicTo(
+      size.width * 0.3, size.height * 0.1,
+      size.width * 0.1, size.height * 0.3,
+      size.width * 0.1, size.height * 0.5,
+    );
+    path.cubicTo(
+      size.width * 0.1, size.height * 0.7,
+      size.width * 0.3, size.height * 0.9,
+      size.width * 0.5, size.height * 0.9,
+    );
+    path.cubicTo(
+      size.width * 0.7, size.height * 0.9,
+      size.width * 0.9, size.height * 0.7,
+      size.width * 0.9, size.height * 0.5,
+    );
+    path.cubicTo(
+      size.width * 0.9, size.height * 0.3,
+      size.width * 0.7, size.height * 0.1,
+      size.width * 0.5, size.height * 0.1,
+    );
+    
+    // Add the leaf
+    path.moveTo(size.width * 0.5, size.height * 0.1);
+    path.quadraticBezierTo(
+      size.width * 0.6, size.height * 0.05,
+      size.width * 0.65, size.height * 0.15,
+    );
+    path.quadraticBezierTo(
+      size.width * 0.6, size.height * 0.1,
+      size.width * 0.5, size.height * 0.1,
+    );
+    
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
