@@ -307,10 +307,11 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
       // For now, simulate loading
       await Future.delayed(const Duration(seconds: 2));
       
-      // Simulate success - navigate to user home
+      // Simulate success - navigate to user home for returning users
       if (mounted) {
-        // TODO: Navigate to user home or onboarding based on user state
-        Navigator.of(context).pop();
+        // TODO: Navigate to user home with actual user data
+        // For now, navigate to welcome screen which will handle the flow
+        Navigator.of(context).pushReplacementNamed('/welcome');
       }
     } catch (e) {
       setState(() {

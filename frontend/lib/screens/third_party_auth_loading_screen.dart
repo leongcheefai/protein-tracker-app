@@ -97,11 +97,19 @@ class _ThirdPartyAuthLoadingScreenState extends State<ThirdPartyAuthLoadingScree
       _statusMessage = 'Welcome to Fuelie!';
     });
     
-    // Navigate to onboarding after a brief success display
+    // Navigate to profile setup after a brief success display
     Future.delayed(const Duration(milliseconds: 1500), () {
       if (mounted) {
-        // Navigate to onboarding flow for new authenticated users
-        Navigator.of(context).pushReplacementNamed('/welcome');
+        // Navigate to profile setup for new authenticated users
+        Navigator.of(context).pushReplacementNamed(
+          '/profile-setup',
+          arguments: {
+            'name': _getMockUserName(), // TODO: Get from actual auth provider
+            'email': _getMockUserEmail(), // TODO: Get from actual auth provider
+            'profileImageUrl': _getMockUserImageUrl(), // TODO: Get from actual auth provider
+            'isReturningUser': false,
+          },
+        );
       }
     });
   }
@@ -326,6 +334,34 @@ class _ThirdPartyAuthLoadingScreenState extends State<ThirdPartyAuthLoadingScree
       widget.onCancel!();
     } else {
       Navigator.of(context).pop();
+    }
+  }
+
+  // Mock user data methods - TODO: Replace with actual auth provider data
+  String _getMockUserName() {
+    switch (widget.provider) {
+      case AuthProvider.google:
+        return 'John Doe'; // TODO: Get from Google Sign-In
+      case AuthProvider.apple:
+        return 'Jane Smith'; // TODO: Get from Apple Sign-In
+    }
+  }
+
+  String _getMockUserEmail() {
+    switch (widget.provider) {
+      case AuthProvider.google:
+        return 'john.doe@gmail.com'; // TODO: Get from Google Sign-In
+      case AuthProvider.apple:
+        return 'jane.smith@icloud.com'; // TODO: Get from Apple Sign-In
+    }
+  }
+
+  String? _getMockUserImageUrl() {
+    switch (widget.provider) {
+      case AuthProvider.google:
+        return 'https://via.placeholder.com/150/4285F4/FFFFFF?text=JD'; // TODO: Get from Google Sign-In
+      case AuthProvider.apple:
+        return null; // Apple Sign-In typically doesn't provide profile images
     }
   }
 

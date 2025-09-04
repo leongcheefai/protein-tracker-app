@@ -448,11 +448,16 @@ class _EmailSignupScreenState extends State<EmailSignupScreen> {
       // For now, simulate loading
       await Future.delayed(const Duration(seconds: 2));
       
-      // Simulate success - navigate to email verification
+      // Simulate success - navigate to profile setup
       if (mounted) {
         Navigator.of(context).pushReplacementNamed(
-          '/email-verification',
-          arguments: {'email': _emailController.text},
+          '/profile-setup',
+          arguments: {
+            'name': _nameController.text,
+            'email': _emailController.text,
+            'profileImageUrl': null,
+            'isReturningUser': false,
+          },
         );
       }
     } catch (e) {
