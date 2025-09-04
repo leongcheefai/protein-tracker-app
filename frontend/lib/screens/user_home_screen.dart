@@ -8,6 +8,7 @@ import '../widgets/user_home/meal_progress.dart';
 import '../widgets/user_home/quick_stats.dart';
 import '../widgets/user_home/recent_items_list.dart';
 import '../widgets/user_home/camera_modal.dart';
+import '../widgets/user_home/footer_action_bar.dart';
 import 'history_screen.dart';
 import 'quick_add_screen.dart';
 import 'pricing_plans_screen.dart' as pricing;
@@ -406,217 +407,255 @@ class _UserHomeScreenState extends State<UserHomeScreen>
           ),
         ),
       ),
-      child: SafeArea(
-        child: CustomScrollView(
-          slivers: [
-            // Enhanced Header
-            SliverToBoxAdapter(
-              child: const EnhancedHeader(),
-            ),
-            
-            // Main Content
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 24),
-                    
-                    // Advanced Progress Visualization
-                    ProgressVisualization(
-                      totalProgress: _totalProgress,
-                      dailyProteinTarget: widget.dailyProteinTarget,
-                      goal: widget.goal,
-                      trainingMultiplier: widget.trainingMultiplier,
-                      ringAnimation: _ringAnimation,
-                      pulseAnimation: _pulseAnimation,
-                    ),
-                    
-                    const SizedBox(height: 32),
-                    
-                    // Per-meal Mini-rings
-                    MealProgress(
-                      meals: widget.meals,
-                      mealProgress: _mealProgress,
-                      dailyProteinTarget: widget.dailyProteinTarget,
-                    ),
-                    
-                    const SizedBox(height: 32),
-                    
-                    // Quick Stats Panel
-                    QuickStats(
-                      totalProgress: _totalProgress,
-                      progressPercentage: _progressPercentage,
-                    ),
-                    
-                    const SizedBox(height: 32),
-                    
-                    // Quick Actions Grid
-                    Container(
-                      padding: const EdgeInsets.all(20.0),
-                      decoration: BoxDecoration(
-                        color: CupertinoColors.white,
-                        borderRadius: BorderRadius.circular(16.0),
-                        boxShadow: [
-                          BoxShadow(
-                            color: CupertinoColors.black.withValues(alpha: 0.05),
-                            blurRadius: 10.0,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Quick Actions',
-                            style: TextStyle(
-                              color: AppColors.textPrimary,
-                              fontSize: 20,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _buildQuickActionCard(
-                                  icon: CupertinoIcons.camera,
-                                  title: _isLoadingImage ? 'Loading...' : 'Upload Photo',
-                                  subtitle: _isLoadingImage ? 'Processing image...' : 'Take a photo of your meal',
-                                  onTap: () => _showCameraSettingsModal(context),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: _buildQuickActionCard(
-                                  icon: CupertinoIcons.chart_bar,
-                                  title: 'View History',
-                                  subtitle: 'Check your progress',
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      CupertinoPageRoute(
-                                        builder: (context) => HistoryScreen(
-                                          dailyProteinTarget: widget.dailyProteinTarget,
-                                          meals: widget.meals,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _buildQuickActionCard(
-                                  icon: CupertinoIcons.slider_horizontal_3,
-                                  title: 'Edit Goals',
-                                  subtitle: 'Update your targets',
-                                  onTap: () async {
-                                    final result = await Navigator.pushNamed(
-                                      context,
-                                      '/profile-settings',
-                                      arguments: {
-                                        'height': widget.height,
-                                        'weight': widget.weight,
-                                        'trainingMultiplier': widget.trainingMultiplier,
-                                        'goal': widget.goal,
-                                        'dailyProteinTarget': widget.dailyProteinTarget,
-                                      },
-                                    );
-                                    
-                                    // Refresh the screen if profile was updated
-                                    if (result == true) {
-                                      setState(() {
-                                        // Trigger a rebuild to reflect any changes
-                                      });
-                                    }
-                                  },
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: _buildQuickActionCard(
-                                  icon: CupertinoIcons.add,
-                                  title: 'Quick Add',
-                                  subtitle: 'Add protein manually',
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      CupertinoPageRoute(
-                                        builder: (context) => QuickAddScreen(
-                                          mealProgress: _mealProgress,
-                                          mealTargets: {
-                                            'Breakfast': widget.dailyProteinTarget / 4,
-                                            'Lunch': widget.dailyProteinTarget / 4,
-                                            'Dinner': widget.dailyProteinTarget / 4,
-                                            'Snack': widget.dailyProteinTarget / 4,
-                                          },
-                                          enabledMeals: widget.meals,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    
-                    const SizedBox(height: 32),
-                    
-                    // Recent Items List
-                    RecentItemsList(
-                      recentItems: _recentItems,
-                      filteredItems: _filteredItems,
-                      showSearchBar: _showSearchBar,
-                      searchQuery: _searchQuery,
-                      selectedMealFilter: _selectedMealFilter,
-                      availableMeals: _availableMeals,
-                      editingItemId: _editingItemId,
-                      editControllers: _editControllers,
-                      dailyProteinTarget: widget.dailyProteinTarget,
-                      meals: widget.meals,
-                      onToggleSearchBar: _toggleSearchBar,
-                      onSearchChanged: (value) {
-                        setState(() {
-                          _searchQuery = value;
-                        });
-                      },
-                      onMealFilterChanged: (value) {
-                        setState(() {
-                          _selectedMealFilter = value;
-                        });
-                      },
-                      onTakePhoto: () => _showCameraSettingsModal(context),
-                      onClearFilters: () {
-                        setState(() {
-                          _searchQuery = '';
-                          _selectedMealFilter = 'All';
-                        });
-                      },
-                      onStartEditing: _startEditing,
-                      onSaveEdit: _saveEdit,
-                      onCancelEdit: _cancelEdit,
-                      onDeleteItem: _deleteItem,
-                      onEditItem: _startEditing,
-                      calculateProtein: _calculateProtein,
-                    ),
-                    
-                    const SizedBox(height: 100), // Space for FAB
-                  ],
+      child: Column(
+        children: [
+          // Main Content
+          Expanded(
+            child: CustomScrollView(
+              slivers: [
+                // Enhanced Header
+                SliverToBoxAdapter(
+                  child: const EnhancedHeader(),
                 ),
-              ),
+                
+                // Main Content
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 24),
+                        
+                        // Advanced Progress Visualization
+                        ProgressVisualization(
+                          totalProgress: _totalProgress,
+                          dailyProteinTarget: widget.dailyProteinTarget,
+                          goal: widget.goal,
+                          trainingMultiplier: widget.trainingMultiplier,
+                          ringAnimation: _ringAnimation,
+                          pulseAnimation: _pulseAnimation,
+                        ),
+                        
+                        const SizedBox(height: 32),
+                        
+                        // Per-meal Mini-rings
+                        MealProgress(
+                          meals: widget.meals,
+                          mealProgress: _mealProgress,
+                          dailyProteinTarget: widget.dailyProteinTarget,
+                        ),
+                        
+                        const SizedBox(height: 32),
+                        
+                        // Quick Stats Panel
+                        QuickStats(
+                          totalProgress: _totalProgress,
+                          progressPercentage: _progressPercentage,
+                        ),
+                        
+                        const SizedBox(height: 32),
+                        
+                        // Quick Actions Grid
+                        Container(
+                          padding: const EdgeInsets.all(20.0),
+                          decoration: BoxDecoration(
+                            color: CupertinoColors.white,
+                            borderRadius: BorderRadius.circular(16.0),
+                            boxShadow: [
+                              BoxShadow(
+                                color: CupertinoColors.black.withValues(alpha: 0.05),
+                                blurRadius: 10.0,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Quick Actions',
+                                style: TextStyle(
+                                  color: AppColors.textPrimary,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _buildQuickActionCard(
+                                      icon: CupertinoIcons.camera,
+                                      title: _isLoadingImage ? 'Loading...' : 'Upload Photo',
+                                      subtitle: _isLoadingImage ? 'Processing image...' : 'Take a photo of your meal',
+                                      onTap: () => _showCameraSettingsModal(context),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: _buildQuickActionCard(
+                                      icon: CupertinoIcons.chart_bar,
+                                      title: 'View History',
+                                      subtitle: 'Check your progress',
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          CupertinoPageRoute(
+                                            builder: (context) => HistoryScreen(
+                                              dailyProteinTarget: widget.dailyProteinTarget,
+                                              meals: widget.meals,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _buildQuickActionCard(
+                                      icon: CupertinoIcons.slider_horizontal_3,
+                                      title: 'Edit Goals',
+                                      subtitle: 'Update your targets',
+                                      onTap: () async {
+                                        final result = await Navigator.pushNamed(
+                                          context,
+                                          '/profile-settings',
+                                          arguments: {
+                                            'height': widget.height,
+                                            'weight': widget.weight,
+                                            'trainingMultiplier': widget.trainingMultiplier,
+                                            'goal': widget.goal,
+                                            'dailyProteinTarget': widget.dailyProteinTarget,
+                                          },
+                                        );
+                                        
+                                        // Refresh the screen if profile was updated
+                                        if (result == true) {
+                                          setState(() {
+                                            // Trigger a rebuild to reflect any changes
+                                          });
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: _buildQuickActionCard(
+                                      icon: CupertinoIcons.add,
+                                      title: 'Quick Add',
+                                      subtitle: 'Add protein manually',
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          CupertinoPageRoute(
+                                            builder: (context) => QuickAddScreen(
+                                              mealProgress: _mealProgress,
+                                              mealTargets: {
+                                                'Breakfast': widget.dailyProteinTarget / 4,
+                                                'Lunch': widget.dailyProteinTarget / 4,
+                                                'Dinner': widget.dailyProteinTarget / 4,
+                                                'Snack': widget.dailyProteinTarget / 4,
+                                              },
+                                              enabledMeals: widget.meals,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        
+                        const SizedBox(height: 32),
+                        
+                        // Recent Items List
+                        RecentItemsList(
+                          recentItems: _recentItems,
+                          filteredItems: _filteredItems,
+                          showSearchBar: _showSearchBar,
+                          searchQuery: _searchQuery,
+                          selectedMealFilter: _selectedMealFilter,
+                          availableMeals: _availableMeals,
+                          editingItemId: _editingItemId,
+                          editControllers: _editControllers,
+                          dailyProteinTarget: widget.dailyProteinTarget,
+                          meals: widget.meals,
+                          onToggleSearchBar: _toggleSearchBar,
+                          onSearchChanged: (value) {
+                            setState(() {
+                              _searchQuery = value;
+                            });
+                          },
+                          onMealFilterChanged: (value) {
+                            setState(() {
+                              _selectedMealFilter = value;
+                            });
+                          },
+                          onTakePhoto: () => _showCameraSettingsModal(context),
+                          onClearFilters: () {
+                            setState(() {
+                              _searchQuery = '';
+                              _selectedMealFilter = 'All';
+                            });
+                          },
+                          onStartEditing: _startEditing,
+                          onSaveEdit: _saveEdit,
+                          onCancelEdit: _cancelEdit,
+                          onDeleteItem: _deleteItem,
+                          onEditItem: _startEditing,
+                          calculateProtein: _calculateProtein,
+                        ),
+                        
+                        const SizedBox(height: 32), // Space for footer
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+          
+          // Footer Action Bar
+          FooterActionBar(
+            onQuickAdd: () {
+              Navigator.push(
+                context,
+                CupertinoPageRoute(
+                  builder: (context) => QuickAddScreen(
+                    mealProgress: _mealProgress,
+                    mealTargets: {
+                      'Breakfast': widget.dailyProteinTarget / 4,
+                      'Lunch': widget.dailyProteinTarget / 4,
+                      'Dinner': widget.dailyProteinTarget / 4,
+                      'Snack': widget.dailyProteinTarget / 4,
+                    },
+                    enabledMeals: widget.meals,
+                  ),
+                ),
+              );
+            },
+            onCamera: () => _showCameraSettingsModal(context),
+            onAnalytics: () {
+              Navigator.push(
+                context,
+                CupertinoPageRoute(
+                  builder: (context) => HistoryScreen(
+                    dailyProteinTarget: widget.dailyProteinTarget,
+                    meals: widget.meals,
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
       ),
     );
   }
