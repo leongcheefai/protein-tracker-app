@@ -1,0 +1,270 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                  String    @id @default(cuid())
+  email              String    @unique
+  name               String?
+  password           String?   // nullable for OAuth users
+  profileImageUrl    String?
+  
+  // Body metrics
+  height             Float?    @default(170.0)
+  weight             Float?    @default(70.0)
+  trainingMultiplier Float?    @default(1.8)
+  goal               Goal      @default(MAINTAIN)
+  dailyProteinTarget Float?    @default(126.0)
+  
+  // Authentication
+  emailVerified      DateTime?
+  emailVerificationToken String?
+  passwordResetToken String?
+  passwordResetExpires DateTime?
+  
+  // Timestamps
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  lastLoginAt        DateTime?
+  
+  // Relations
+  settings           UserSettings?
+  subscription       Subscription?
+  foodItems          FoodItem[]
+  dailyProgress      DailyProgress[]
+  mealProgress       MealProgress[]
+  detectedFoods      DetectedFood[]
+  
+  @@map("users")
+}
+
+model UserSettings {
+  id                     String @id @default(cuid())
+  userId                 String @unique
+  
+  // Notification settings
+  notificationsEnabled   Boolean @default(true)
+  mealReminderTimes      Json    @default("{\"breakfast\":\"08:00\",\"lunch\":\"12:30\",\"snack\":\"16:00\",\"dinner\":\"19:00\"}")
+  doNotDisturbStart      String  @default("22:00")
+  doNotDisturbEnd        String  @default("07:00")
+  nightlySummaryEnabled  Boolean @default(true)
+  
+  // App preferences
+  preferredUnits         String  @default("metric") // metric or imperial
+  darkModeEnabled        Boolean @default(false)
+  
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+  
+  // Relations
+  user                   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("user_settings")
+}
+
+model Food {
+  id             String @id @default(cuid())
+  name           String
+  category       FoodCategory @default(OTHER)
+  proteinPer100g Float
+  caloriesPer100g Float?
+  brand          String?
+  barcode        String? @unique
+  
+  // Food database metadata
+  isVerified     Boolean @default(false)
+  source         String? // "user", "database", "api"
+  
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  // Relations
+  foodItems      FoodItem[]
+  
+  @@map("foods")
+}
+
+model FoodItem {
+  id                String    @id @default(cuid())
+  userId            String
+  foodId            String?   // nullable for custom foods
+  
+  // Food details
+  customName        String?   // for custom foods not in database
+  portionSize       Float
+  proteinContent    Float
+  calories          Float?
+  
+  // Context
+  mealType          MealType
+  imagePath         String?
+  dateLogged        DateTime  @default(now())
+  
+  // Quick add metadata
+  isQuickAdd        Boolean   @default(false)
+  proteinPer100g    Float?    // calculated value for consistency
+  
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  // Relations
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  food              Food?     @relation(fields: [foodId], references: [id])
+  
+  @@map("food_items")
+}
+
+model DetectedFood {
+  id                String   @id @default(cuid())
+  userId            String
+  imagePath         String
+  
+  // Detection results
+  detectionResults  Json     // Array of detected food objects with confidence scores
+  processingStatus  String   @default("completed") // processing, completed, failed
+  
+  // Metadata
+  modelVersion      String?
+  processingTime    Int?     // milliseconds
+  
+  createdAt         DateTime @default(now())
+  
+  // Relations
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("detected_foods")
+}
+
+model DailyProgress {
+  id            String   @id @default(cuid())
+  userId        String
+  date          DateTime @db.Date
+  
+  // Progress metrics
+  totalProtein  Float
+  dailyTarget   Float
+  goalMet       Boolean  @default(false)
+  streakCount   Int      @default(0)
+  
+  // Calculated fields
+  achievementPercentage Float // totalProtein / dailyTarget * 100
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // Relations
+  user          User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mealProgress  MealProgress[]
+  
+  @@unique([userId, date])
+  @@map("daily_progress")
+}
+
+model MealProgress {
+  id               String        @id @default(cuid())
+  userId           String
+  dailyProgressId  String
+  date             DateTime      @db.Date
+  mealType         MealType
+  
+  // Meal metrics
+  targetProtein    Float
+  actualProtein    Float
+  itemsCount       Int           @default(0)
+  
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  
+  // Relations
+  user             User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dailyProgress    DailyProgress @relation(fields: [dailyProgressId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, date, mealType])
+  @@map("meal_progress")
+}
+
+model Subscription {
+  id                  String            @id @default(cuid())
+  userId              String            @unique
+  
+  // Subscription details
+  planType            SubscriptionPlan  @default(FREE)
+  billingPeriod       BillingPeriod?
+  status              SubscriptionStatus @default(ACTIVE)
+  
+  // Billing dates
+  currentPeriodStart  DateTime?
+  currentPeriodEnd    DateTime?
+  trialStart          DateTime?
+  trialEnd            DateTime?
+  cancelAt            DateTime?
+  canceledAt          DateTime?
+  
+  // Payment details
+  stripeCustomerId    String?
+  stripeSubscriptionId String?
+  stripePriceId       String?
+  
+  // Metadata
+  metadata            Json?
+  
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  
+  // Relations
+  user                User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("subscriptions")
+}
+
+// Enums
+enum Goal {
+  MAINTAIN
+  BULK  
+  CUT
+}
+
+enum FoodCategory {
+  PROTEIN
+  CARBOHYDRATE
+  VEGETABLE
+  FRUIT
+  DAIRY
+  NUTS
+  BEVERAGES
+  OTHER
+}
+
+enum MealType {
+  BREAKFAST
+  LUNCH
+  DINNER
+  SNACK
+}
+
+enum SubscriptionPlan {
+  FREE
+  PRO
+}
+
+enum BillingPeriod {
+  MONTHLY
+  ANNUAL
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  TRIALING
+  PAST_DUE
+  CANCELED
+  UNPAID
+  INCOMPLETE
+}
