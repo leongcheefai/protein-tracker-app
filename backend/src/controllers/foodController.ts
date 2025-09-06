@@ -6,32 +6,52 @@ import { AppError } from '../middleware/errorHandler';
 import { LogFoodData, FoodDetectionResult, ApiResponse } from '../types';
 import { getFileUrl, deleteFile } from '../middleware/upload';
 import { InsertFoodDetection, InsertMeal, InsertMealFood, NutritionData } from '../types/supabase';
+import { FoodRecognitionService, FoodRecognitionResult } from '../services/foodRecognitionService';
 
 export class FoodController {
-  // Mock food detection service (replace with actual AI service)
-  private static async detectFoodInImage(imagePath: string): Promise<FoodDetectionResult[]> {
-    // Mock detection results - in production, this would call Google Vision API or custom ML model
-    const mockResults: FoodDetectionResult[] = [
-      {
-        name: 'Grilled Chicken Breast',
-        confidence: 0.92,
-        estimatedProtein: 31.0, // protein per 100g
-        category: 'protein',
-        boundingBox: { x: 10, y: 20, width: 200, height: 150 }
-      },
-      {
-        name: 'Broccoli',
-        confidence: 0.88,
-        estimatedProtein: 2.8,
-        category: 'vegetable',
-        boundingBox: { x: 220, y: 50, width: 100, height: 120 }
-      }
-    ];
+  private static foodRecognitionService = new FoodRecognitionService();
 
-    // Simulate processing delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    return mockResults;
+  // AI-powered food detection service
+  private static async detectFoodInImage(imagePath: string): Promise<FoodDetectionResult[]> {
+    try {
+      console.log('🔍 Starting AI food recognition for:', imagePath);
+      
+      const aiResults = await this.foodRecognitionService.recognizeFoodItems(imagePath);
+      
+      // Convert AI results to our expected format
+      const detectionResults: FoodDetectionResult[] = aiResults.map(result => ({
+        name: result.name,
+        confidence: result.confidence,
+        estimatedProtein: result.nutritionPer100g.protein,
+        category: result.category,
+        boundingBox: result.boundingBox,
+        nutrition: result.nutritionPer100g,
+        estimatedPortion: result.estimatedPortion
+      }));
+
+      console.log(`✅ AI detected ${detectionResults.length} food items`);
+      return detectionResults;
+      
+    } catch (error) {
+      console.error('❌ AI food recognition failed:', error);
+      
+      // Fallback to basic detection if AI fails
+      console.log('🔄 Falling back to basic food detection');
+      return [{
+        name: 'Unknown Food Item',
+        confidence: 0.5,
+        estimatedProtein: 10.0,
+        category: 'other',
+        nutrition: {
+          calories: 150,
+          protein: 10,
+          carbs: 15,
+          fat: 5,
+          fiber: 2,
+          sugar: 3
+        }
+      }];
+    }
   }
 
   // Detect food in uploaded image

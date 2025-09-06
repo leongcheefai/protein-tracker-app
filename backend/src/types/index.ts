@@ -58,6 +58,18 @@ export interface FoodDetectionResult {
     width: number;
     height: number;
   };
+  nutrition?: {
+    calories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+    fiber?: number;
+    sugar?: number;
+  };
+  estimatedPortion?: {
+    grams: number;
+    description: string;
+  };
 }
 
 export interface LogFoodData {
