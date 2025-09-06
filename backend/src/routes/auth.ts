@@ -2,32 +2,19 @@ import { Router } from 'express';
 import { AuthController } from '../controllers/authController';
 import { authenticate } from '../middleware/auth';
 import { 
-  validateUserRegistration, 
-  validateUserLogin 
+  validateTokenVerification,
+  validateProfileUpdate,
+  validateId 
 } from '../middleware/validation';
 
 const router = Router();
 
 /**
- * @route POST /api/auth/register
- * @desc Register a new user
+ * @route POST /api/auth/verify
+ * @desc Verify Supabase token and ensure user profile exists
  * @access Public
  */
-router.post('/register', validateUserRegistration, AuthController.register);
-
-/**
- * @route POST /api/auth/login
- * @desc Login user
- * @access Public
- */
-router.post('/login', validateUserLogin, AuthController.login);
-
-/**
- * @route POST /api/auth/refresh
- * @desc Refresh access token
- * @access Public
- */
-router.post('/refresh', AuthController.refreshToken);
+router.post('/verify', validateTokenVerification, AuthController.verifyToken);
 
 /**
  * @route GET /api/auth/profile
@@ -37,17 +24,17 @@ router.post('/refresh', AuthController.refreshToken);
 router.get('/profile', authenticate, AuthController.getProfile);
 
 /**
- * @route POST /api/auth/google
- * @desc Google OAuth authentication
- * @access Public
+ * @route PUT /api/auth/profile
+ * @desc Update user profile
+ * @access Private
  */
-router.post('/google', AuthController.googleAuth);
+router.put('/profile', authenticate, validateProfileUpdate, AuthController.updateProfile);
 
 /**
- * @route POST /api/auth/apple
- * @desc Apple Sign In authentication
- * @access Public
+ * @route DELETE /api/auth/account
+ * @desc Delete user account
+ * @access Private
  */
-router.post('/apple', AuthController.appleAuth);
+router.delete('/account', authenticate, AuthController.deleteAccount);
 
 export default router;

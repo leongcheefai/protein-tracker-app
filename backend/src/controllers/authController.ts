@@ -1,178 +1,59 @@
 import { Request, Response, NextFunction } from 'express';
-import { prisma } from '../utils/database';
-import { AuthService, AuthenticatedRequest } from '../middleware/auth';
+import { DatabaseService, supabase } from '../utils/database';
+import { SupabaseAuthService, AuthenticatedRequest } from '../middleware/auth';
 import { AppError } from '../middleware/errorHandler';
-import { CreateUserData, ApiResponse } from '../types';
+import { ApiResponse } from '../types';
+import { InsertUserProfile, UpdateUserProfile } from '../types/supabase';
 
 export class AuthController {
-  // Register a new user
-  static async register(req: Request, res: Response, next: NextFunction): Promise<void> {
+  // Verify Supabase token and ensure user profile exists
+  static async verifyToken(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { email, password, name }: CreateUserData = req.body;
+      const { token } = req.body;
 
-      // Check if user already exists
-      const existingUser = await prisma.user.findUnique({
-        where: { email },
-      });
-
-      if (existingUser) {
-        throw new AppError('User with this email already exists', 409);
+      if (!token) {
+        throw new AppError('Token is required', 400);
       }
 
-      // Hash password
-      const hashedPassword = await AuthService.hashPassword(password!);
-
-      // Create user
-      const user = await prisma.user.create({
-        data: {
-          email,
-          password: hashedPassword,
-          name,
-          settings: {
-            create: {
-              // Default settings will be applied by Prisma schema defaults
-            },
-          },
-        },
-        include: {
-          settings: true,
-        },
-      });
-
-      // Generate tokens
-      const { accessToken, refreshToken } = AuthService.generateTokens(user.id, user.email);
-
-      // Create user response (without password)
-      const userResponse = {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        profileImageUrl: user.profileImageUrl,
-        height: user.height,
-        weight: user.weight,
-        trainingMultiplier: user.trainingMultiplier,
-        goal: user.goal.toLowerCase(),
-        dailyProteinTarget: user.dailyProteinTarget,
-        createdAt: user.createdAt,
-      };
-
-      const response: ApiResponse = {
-        success: true,
-        data: {
-          user: userResponse,
-          accessToken,
-          refreshToken,
-        },
-        message: 'User registered successfully',
-        timestamp: new Date().toISOString(),
-      };
-
-      res.status(201).json(response);
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  // Login user
-  static async login(req: Request, res: Response, next: NextFunction): Promise<void> {
-    try {
-      const { email, password } = req.body;
-
-      // Find user
-      const user = await prisma.user.findUnique({
-        where: { email },
-        include: {
-          settings: true,
-          subscription: true,
-        },
-      });
-
-      if (!user || !user.password) {
-        throw new AppError('Invalid email or password', 401);
-      }
-
-      // Verify password
-      const isValidPassword = await AuthService.comparePassword(password, user.password);
+      // Verify token with Supabase
+      const decoded = await SupabaseAuthService.verifySupabaseToken(token);
       
-      if (!isValidPassword) {
-        throw new AppError('Invalid email or password', 401);
+      // Get or create user profile
+      let userProfile = await SupabaseAuthService.getUserProfile(decoded.sub);
+      
+      if (!userProfile && decoded.email) {
+        // Create user profile if it doesn't exist
+        const profileData: InsertUserProfile = {
+          id: decoded.sub,
+          email: decoded.email,
+          display_name: decoded.email.split('@')[0], // Default display name
+        };
+        
+        userProfile = await DatabaseService.createUserProfile(profileData);
       }
 
-      // Update last login
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { lastLoginAt: new Date() },
-      });
-
-      // Generate tokens
-      const { accessToken, refreshToken } = AuthService.generateTokens(user.id, user.email);
-
-      // Create user response (without password)
-      const userResponse = {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        profileImageUrl: user.profileImageUrl,
-        height: user.height,
-        weight: user.weight,
-        trainingMultiplier: user.trainingMultiplier,
-        goal: user.goal.toLowerCase(),
-        dailyProteinTarget: user.dailyProteinTarget,
-        settings: user.settings,
-        subscription: user.subscription ? {
-          planType: user.subscription.planType.toLowerCase(),
-          status: user.subscription.status.toLowerCase(),
-          trialEnd: user.subscription.trialEnd,
-        } : null,
-        createdAt: user.createdAt,
-        lastLoginAt: user.lastLoginAt,
-      };
+      if (!userProfile) {
+        throw new AppError('Failed to create or retrieve user profile', 500);
+      }
 
       const response: ApiResponse = {
         success: true,
         data: {
-          user: userResponse,
-          accessToken,
-          refreshToken,
+          user: {
+            id: userProfile.id,
+            email: userProfile.email,
+            display_name: userProfile.display_name,
+            age: userProfile.age,
+            weight: userProfile.weight,
+            height: userProfile.height,
+            daily_protein_goal: userProfile.daily_protein_goal,
+            activity_level: userProfile.activity_level,
+            units: userProfile.units,
+            created_at: userProfile.created_at,
+          },
+          token: token
         },
-        message: 'Login successful',
-        timestamp: new Date().toISOString(),
-      };
-
-      res.status(200).json(response);
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  // Refresh tokens
-  static async refreshToken(req: Request, res: Response, next: NextFunction): Promise<void> {
-    try {
-      const { refreshToken } = req.body;
-
-      if (!refreshToken) {
-        throw new AppError('Refresh token is required', 400);
-      }
-
-      // Verify refresh token
-      const decoded = AuthService.verifyRefreshToken(refreshToken);
-
-      // Get user to ensure they still exist
-      const user = await prisma.user.findUnique({
-        where: { id: decoded.userId },
-      });
-
-      if (!user) {
-        throw new AppError('User not found', 404);
-      }
-
-      // Generate new tokens
-      const tokens = AuthService.generateTokens(user.id, user.email);
-
-      const response: ApiResponse = {
-        success: true,
-        data: tokens,
-        message: 'Tokens refreshed successfully',
+        message: 'Token verified successfully',
         timestamp: new Date().toISOString(),
       };
 
@@ -187,41 +68,32 @@ export class AuthController {
     try {
       const userId = req.user!.id;
 
-      const user = await prisma.user.findUnique({
-        where: { id: userId },
-        include: {
-          settings: true,
-          subscription: true,
-        },
-      });
+      const userProfile = await DatabaseService.getUserProfile(userId);
 
-      if (!user) {
-        throw new AppError('User not found', 404);
+      if (!userProfile) {
+        throw new AppError('User profile not found', 404);
       }
-
-      const userResponse = {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        profileImageUrl: user.profileImageUrl,
-        height: user.height,
-        weight: user.weight,
-        trainingMultiplier: user.trainingMultiplier,
-        goal: user.goal.toLowerCase(),
-        dailyProteinTarget: user.dailyProteinTarget,
-        settings: user.settings,
-        subscription: user.subscription ? {
-          planType: user.subscription.planType.toLowerCase(),
-          status: user.subscription.status.toLowerCase(),
-          trialEnd: user.subscription.trialEnd,
-        } : null,
-        createdAt: user.createdAt,
-        lastLoginAt: user.lastLoginAt,
-      };
 
       const response: ApiResponse = {
         success: true,
-        data: { user: userResponse },
+        data: {
+          user: {
+            id: userProfile.id,
+            email: userProfile.email,
+            display_name: userProfile.display_name,
+            age: userProfile.age,
+            weight: userProfile.weight,
+            height: userProfile.height,
+            daily_protein_goal: userProfile.daily_protein_goal,
+            activity_level: userProfile.activity_level,
+            dietary_restrictions: userProfile.dietary_restrictions,
+            units: userProfile.units,
+            notifications_enabled: userProfile.notifications_enabled,
+            privacy_level: userProfile.privacy_level,
+            created_at: userProfile.created_at,
+            updated_at: userProfile.updated_at,
+          }
+        },
         timestamp: new Date().toISOString(),
       };
 
@@ -231,35 +103,69 @@ export class AuthController {
     }
   }
 
-  // Google OAuth (placeholder for future implementation)
-  static async googleAuth(req: Request, res: Response, next: NextFunction): Promise<void> {
+  // Update user profile
+  static async updateProfile(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { idToken } = req.body;
-      
-      if (!idToken) {
-        throw new AppError('Google ID token is required', 400);
-      }
+      const userId = req.user!.id;
+      const updateData: UpdateUserProfile = req.body;
 
-      // TODO: Implement Google OAuth verification
-      // For now, return error indicating feature is not implemented
-      throw new AppError('Google OAuth not implemented yet', 501);
+      // Remove id and timestamps from update data if present
+      const { id, created_at, updated_at, ...safeUpdateData } = updateData;
+
+      const updatedProfile = await DatabaseService.updateUserProfile(userId, safeUpdateData);
+
+      const response: ApiResponse = {
+        success: true,
+        data: {
+          user: {
+            id: updatedProfile.id,
+            email: updatedProfile.email,
+            display_name: updatedProfile.display_name,
+            age: updatedProfile.age,
+            weight: updatedProfile.weight,
+            height: updatedProfile.height,
+            daily_protein_goal: updatedProfile.daily_protein_goal,
+            activity_level: updatedProfile.activity_level,
+            dietary_restrictions: updatedProfile.dietary_restrictions,
+            units: updatedProfile.units,
+            notifications_enabled: updatedProfile.notifications_enabled,
+            privacy_level: updatedProfile.privacy_level,
+            created_at: updatedProfile.created_at,
+            updated_at: updatedProfile.updated_at,
+          }
+        },
+        message: 'Profile updated successfully',
+        timestamp: new Date().toISOString(),
+      };
+
+      res.status(200).json(response);
     } catch (error) {
       next(error);
     }
   }
 
-  // Apple Sign In (placeholder for future implementation)
-  static async appleAuth(req: Request, res: Response, next: NextFunction): Promise<void> {
+  // Delete user account
+  static async deleteAccount(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { identityToken, user } = req.body;
+      const userId = req.user!.id;
+
+      // Note: In Supabase, this would typically be handled by calling the Supabase Admin API
+      // to delete the user from auth.users, which would cascade delete the profile
+      // For now, we'll just delete the profile
       
-      if (!identityToken) {
-        throw new AppError('Apple identity token is required', 400);
+      const { error } = await supabase.auth.admin.deleteUser(userId);
+      
+      if (error) {
+        throw new AppError('Failed to delete user account', 500);
       }
 
-      // TODO: Implement Apple Sign In verification
-      // For now, return error indicating feature is not implemented
-      throw new AppError('Apple Sign In not implemented yet', 501);
+      const response: ApiResponse = {
+        success: true,
+        message: 'Account deleted successfully',
+        timestamp: new Date().toISOString(),
+      };
+
+      res.status(200).json(response);
     } catch (error) {
       next(error);
     }

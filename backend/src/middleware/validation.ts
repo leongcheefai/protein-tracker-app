@@ -203,6 +203,15 @@ export const validateUserSettings = [
   handleValidationErrors,
 ];
 
+// Token verification validation
+export const validateTokenVerification = [
+  body('token')
+    .isString()
+    .notEmpty()
+    .withMessage('Token is required'),
+  handleValidationErrors,
+];
+
 // Generic ID validation
 export const validateId = [
   param('id')
