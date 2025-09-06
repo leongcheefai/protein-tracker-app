@@ -10,9 +10,9 @@ This document outlines the comprehensive backend implementation plan for the Pro
 
 ## Technology Stack
 - **Framework**: Node.js with Express.js
-- **Database**: MongoDB with Mongoose ODM
-- **Authentication**: Firebase Admin SDK
-- **File Storage**: AWS S3 or Google Cloud Storage
+- **Database**: PostgreSQL with Supabase
+- **Authentication**: Supabase Auth (or Firebase Admin SDK)
+- **File Storage**: Supabase Storage (or AWS S3/Google Cloud Storage)
 - **AI/ML**: OpenAI GPT-4 Vision API for food recognition
 - **Image Processing**: Sharp.js for image optimization
 - **Validation**: Joi for request validation
@@ -25,23 +25,24 @@ This document outlines the comprehensive backend implementation plan for the Pro
 
 #### Tasks:
 1. **Database Configuration**
-   - Set up MongoDB connection
-   - Configure environment variables
-   - Set up database connection pooling
+   - Set up Supabase project and PostgreSQL database
+   - Configure environment variables (SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+   - Set up Supabase client with TypeScript types
 
 2. **Project Structure Organization**
    ```
    backend/
    ├── src/
    │   ├── controllers/     # Route handlers
-   │   ├── models/         # Database schemas
+   │   ├── types/          # TypeScript definitions (Supabase schema)
    │   ├── middleware/     # Custom middleware
    │   ├── services/       # Business logic
    │   ├── routes/         # API routes
-   │   ├── utils/          # Helper functions
-   │   └── config/         # Configuration files
+   │   ├── utils/          # Helper functions (DatabaseService)
+   │   └── config/         # Configuration files (Supabase client)
    ├── tests/              # Test files
    ├── uploads/            # Temporary file storage
+   ├── supabase_schema.sql # Database schema for Supabase
    └── docs/              # API documentation
    ```
 
@@ -56,46 +57,41 @@ This document outlines the comprehensive backend implementation plan for the Pro
 4. **Environment Configuration**
    - Development, staging, production configs
    - Environment variable validation
-   - Database connection strings
-   - API keys management
+   - Supabase project URLs and keys
+   - API keys management (OpenAI, AWS S3)
 
 ### Phase 2: Authentication & User Management
 **Timeline**: 1-2 weeks
 
 #### Tasks:
-1. **Firebase Admin Integration**
-   - Configure Firebase Admin SDK
-   - Create authentication middleware
-   - Token verification system
+1. **Supabase Auth Integration**
+   - Configure Supabase authentication
+   - Create authentication middleware for JWT verification
+   - Row Level Security (RLS) policy setup
 
-2. **User Model & Routes**
-   ```javascript
-   // User Schema
-   {
-     firebaseUid: String,
-     email: String,
-     displayName: String,
-     photoURL: String,
-     profile: {
-       age: Number,
-       weight: Number,
-       height: Number,
-       activityLevel: String,
-       dailyProteinGoal: Number,
-       dietaryRestrictions: [String]
-     },
-     preferences: {
-       notifications: Boolean,
-       units: String, // 'metric' | 'imperial'
-       privacy: String
-     },
-     createdAt: Date,
-     updatedAt: Date
-   }
+2. **User Profile Schema & Routes**
+   ```sql
+   -- User profiles table (extends auth.users)
+   CREATE TABLE user_profiles (
+     id UUID REFERENCES auth.users PRIMARY KEY,
+     display_name TEXT,
+     email TEXT,
+     age INTEGER CHECK (age >= 13 AND age <= 120),
+     weight DECIMAL(5,2) CHECK (weight > 0),
+     height DECIMAL(5,2) CHECK (height > 0),
+     daily_protein_goal DECIMAL(6,2) CHECK (daily_protein_goal >= 0),
+     activity_level activity_level DEFAULT 'moderately_active',
+     dietary_restrictions TEXT[],
+     units units DEFAULT 'metric',
+     notifications_enabled BOOLEAN DEFAULT true,
+     privacy_level privacy_level DEFAULT 'private',
+     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+   );
    ```
 
 3. **API Endpoints**
-   - `POST /api/auth/verify` - Verify Firebase token
+   - `POST /api/auth/verify` - Verify Supabase JWT token
    - `GET /api/users/profile` - Get user profile
    - `PUT /api/users/profile` - Update user profile
    - `DELETE /api/users/account` - Delete user account
@@ -107,8 +103,8 @@ This document outlines the comprehensive backend implementation plan for the Pro
 1. **Image Upload System**
    - File upload middleware with validation
    - Image compression and optimization
-   - Temporary storage management
-   - Cloud storage integration
+   - Supabase Storage integration for permanent storage
+   - Temporary local storage for processing
 
 2. **AI Integration**
    - OpenAI GPT-4 Vision API integration
@@ -116,85 +112,81 @@ This document outlines the comprehensive backend implementation plan for the Pro
    - Nutrition data extraction
    - Confidence scoring system
 
-3. **Food Database Models**
-   ```javascript
-   // Food Item Schema
-   {
-     name: String,
-     category: String,
-     nutritionPer100g: {
-       calories: Number,
-       protein: Number,
-       carbs: Number,
-       fat: Number,
-       fiber: Number,
-       sugar: Number
-     },
-     commonPortions: [{
-       name: String,
-       grams: Number
-     }],
-     verified: Boolean
-   }
+3. **Food Database Schema**
+   ```sql
+   -- Foods table
+   CREATE TABLE foods (
+     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+     name TEXT NOT NULL,
+     category TEXT,
+     brand TEXT,
+     barcode TEXT UNIQUE,
+     nutrition_per_100g JSONB NOT NULL,
+     common_portions JSONB,
+     verified BOOLEAN DEFAULT false,
+     user_id UUID REFERENCES auth.users ON DELETE SET NULL,
+     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+   );
    
-   // Detection Result Schema
-   {
-     userId: ObjectId,
-     imageUrl: String,
-     detectedFoods: [{
-       name: String,
-       confidence: Number,
-       boundingBox: Object,
-       nutritionData: Object
-     }],
-     processedAt: Date
-   }
+   -- Food detection results table
+   CREATE TABLE food_detections (
+     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+     user_id UUID REFERENCES auth.users ON DELETE CASCADE,
+     image_url TEXT NOT NULL,
+     detected_foods JSONB NOT NULL,
+     confidence_scores JSONB,
+     processed_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+     status TEXT DEFAULT 'completed'
+   );
    ```
 
 4. **API Endpoints**
-   - `POST /api/food/analyze` - Upload and analyze food photo
+   - `POST /api/food/detect` - Upload and detect food in photo
    - `GET /api/food/search` - Search food database
-   - `GET /api/food/suggestions` - Get food suggestions
+   - `POST /api/food/log` - Log food item from detection or manual entry
 
 ### Phase 4: Meal Logging & Tracking
 **Timeline**: 2 weeks
 
 #### Tasks:
-1. **Meal Models**
-   ```javascript
-   // Meal Entry Schema
-   {
-     userId: ObjectId,
-     mealType: String, // breakfast, lunch, dinner, snack
-     foods: [{
-       foodId: ObjectId,
-       quantity: Number,
-       unit: String,
-       nutrition: {
-         calories: Number,
-         protein: Number,
-         carbs: Number,
-         fat: Number
-       }
-     }],
-     totalNutrition: Object,
-     timestamp: Date,
-     photo: String,
-     notes: String
-   }
+1. **Meal Schema**
+   ```sql
+   -- Meals table
+   CREATE TABLE meals (
+     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+     user_id UUID REFERENCES auth.users ON DELETE CASCADE,
+     meal_type meal_type NOT NULL,
+     timestamp TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+     photo_url TEXT,
+     notes TEXT,
+     total_nutrition JSONB,
+     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+   );
+   
+   -- Meal foods junction table
+   CREATE TABLE meal_foods (
+     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+     meal_id UUID REFERENCES meals ON DELETE CASCADE,
+     food_id UUID REFERENCES foods ON DELETE CASCADE,
+     quantity DECIMAL(8,2) NOT NULL CHECK (quantity > 0),
+     unit TEXT NOT NULL,
+     nutrition_data JSONB,
+     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+   );
    ```
 
 2. **Logging System**
-   - Meal entry creation and validation
-   - Nutrition calculation logic
-   - Daily/weekly aggregations
-   - Data consistency checks
+   - Meal entry creation with RLS security
+   - Nutrition calculation using JSONB aggregation
+   - Real-time updates with Supabase subscriptions
+   - Data validation with PostgreSQL constraints
 
 3. **API Endpoints**
-   - `POST /api/meals` - Log new meal
-   - `GET /api/meals` - Get user meals (with date filtering)
-   - `PUT /api/meals/:id` - Update meal entry
-   - `DELETE /api/meals/:id` - Delete meal entry
+   - `GET /api/food/recent` - Get recent meals/food items
+   - `PUT /api/food/item/:id` - Update meal entry
+   - `DELETE /api/food/item/:id` - Delete meal entry
    - `GET /api/meals/daily/:date` - Get daily nutrition summary
 
 ### Phase 5: Analytics & Insights
@@ -268,68 +260,76 @@ This document outlines the comprehensive backend implementation plan for the Pro
 ```
 
 ### Authentication Flow
-1. Frontend sends Firebase ID token
-2. Backend verifies token with Firebase Admin
-3. User data retrieved/created in database
+1. Frontend authenticates with Supabase Auth
+2. Backend verifies Supabase JWT token
+3. User data retrieved from user_profiles table with RLS
 4. Subsequent requests include verified user context
 
 ## Database Schema Design
 
-### Key Collections
-- `users` - User profiles and preferences
+### Key Tables
+- `user_profiles` - User profiles and preferences (extends auth.users)
 - `foods` - Food database with nutrition info
 - `meals` - User meal entries
-- `detections` - AI food detection results
-- `analytics` - Computed nutrition analytics
-- `recipes` - User recipes and meal plans
+- `meal_foods` - Junction table linking meals to foods
+- `food_detections` - AI food detection results
+- `analytics` - Computed nutrition analytics (future)
 
 ### Indexing Strategy
-- User-based queries: `userId` indexes
-- Date-based queries: `timestamp` indexes
-- Food searches: Text indexes on food names
-- Compound indexes for complex queries
+- User-based queries: Automatic UUID indexes
+- Date-based queries: `timestamp` indexes with DESC ordering
+- Food searches: GIN indexes on food names for full-text search
+- JSONB indexes for nutrition data queries
+- Composite indexes for user + date queries
 
 ## Security & Performance
 
 ### Security Measures
-- Firebase authentication integration
+- Supabase authentication with JWT verification
+- Row Level Security (RLS) policies for data isolation
 - Input validation and sanitization
 - Rate limiting on API endpoints
-- File upload security
+- File upload security with type validation
 - Environment variable protection
+- PostgreSQL constraint validations
 
 ### Performance Optimizations
-- Database connection pooling
-- Query optimization and indexing
-- Image compression and CDN
+- Supabase connection pooling (built-in)
+- Query optimization with proper indexing
+- JSONB for efficient nutrition data storage
+- Image compression and Supabase Storage CDN
 - Response caching where appropriate
 - Pagination for large datasets
+- Real-time subscriptions for live updates
 
 ## Testing Strategy
 
 ### Unit Tests
-- Model validation
+- DatabaseService methods
 - Service layer logic
 - Utility functions
 - Authentication middleware
+- TypeScript type safety
 
 ### Integration Tests
-- API endpoint testing
-- Database operations
-- External service integration
+- API endpoint testing with Supabase
+- Database operations with RLS policies
+- External service integration (OpenAI, Storage)
 - File upload workflows
+- Authentication flows
 
 ### Load Testing
 - API performance under load
-- Database query optimization
+- PostgreSQL query optimization
 - Image processing bottlenecks
+- Supabase connection limits
 
 ## Deployment & DevOps
 
 ### Environment Setup
-- Development: Local MongoDB, test Firebase project
-- Staging: Cloud database, staging Firebase
-- Production: Production database, live Firebase
+- Development: Local development with Supabase project
+- Staging: Staging Supabase project with separate database
+- Production: Production Supabase project with live data
 
 ### CI/CD Pipeline
 1. Code commit triggers build
@@ -341,17 +341,18 @@ This document outlines the comprehensive backend implementation plan for the Pro
 ### Monitoring & Logging
 - Application performance monitoring
 - Error tracking and alerting
-- Database performance metrics
+- Supabase dashboard metrics and analytics
 - API usage analytics
+- PostgreSQL query performance monitoring
 
 ## Timeline Summary
 
 | Phase | Duration | Key Deliverables |
 |-------|----------|------------------|
-| Phase 1 | 1-2 weeks | Core infrastructure, database setup |
+| Phase 1 | 1-2 weeks | Supabase setup, core infrastructure ✅ |
 | Phase 2 | 1-2 weeks | Authentication, user management |
 | Phase 3 | 2-3 weeks | Food recognition, AI integration |
-| Phase 4 | 2 weeks | Meal logging, nutrition tracking |
+| Phase 4 | 2 weeks | Meal logging, nutrition tracking ✅ |
 | Phase 5 | 2 weeks | Analytics, insights engine |
 | Phase 6 | 2-3 weeks | Advanced features, integrations |
 
@@ -364,9 +365,36 @@ This document outlines the comprehensive backend implementation plan for the Pro
 - Scalable to 10,000+ concurrent users
 - Complete test coverage (>90%)
 
-## Next Steps
-1. Set up development environment
-2. Begin Phase 1 implementation
-3. Establish testing frameworks
-4. Configure CI/CD pipeline
-5. Document API endpoints as they're built
+## Implementation Status & Next Steps
+
+### ✅ Completed (Phase 1 & 4)
+1. **Supabase Configuration Complete**
+   - Database client setup with TypeScript types
+   - Complete SQL schema with RLS policies
+   - DatabaseService helper class for common operations
+
+2. **Core API Structure Ready**
+   - Food detection, logging, search, update, delete endpoints
+   - Authentication middleware structure
+   - Error handling and validation
+
+### 🚀 Next Priority Steps
+1. **Complete Supabase Setup**
+   - Run `npm install @supabase/supabase-js`
+   - Create Supabase project and run `supabase_schema.sql`
+   - Add credentials to `.env` file
+
+2. **Phase 2: Authentication Integration**
+   - Implement Supabase Auth middleware
+   - Test user profile creation and management
+   - Set up RLS policies testing
+
+3. **Phase 3: AI Integration**
+   - OpenAI GPT-4 Vision API setup
+   - Food recognition prompt engineering
+   - Image upload and processing pipeline
+
+4. **Testing & Documentation**
+   - API endpoint testing
+   - Database integration tests
+   - API documentation with current endpoints
