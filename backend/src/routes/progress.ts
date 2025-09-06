@@ -1,7 +1,6 @@
 import { Router } from 'express';
-import { ProgressController } from '../controllers/progressController';
 import { authenticate } from '../middleware/auth';
-import { validateDateRange } from '../middleware/validation';
+import { Request, Response } from 'express';
 
 const router = Router();
 
@@ -10,37 +9,67 @@ router.use(authenticate);
 
 /**
  * @route GET /api/progress/daily
- * @desc Get daily progress (defaults to today)
+ * @desc Get daily progress (TODO: Implement with Supabase)
  * @access Private
  */
-router.get('/daily', ProgressController.getDailyProgress);
+router.get('/daily', (req: Request, res: Response) => {
+  res.status(501).json({
+    success: false,
+    message: 'Daily progress tracking coming soon - Phase 5 implementation',
+    timestamp: new Date().toISOString()
+  });
+});
 
 /**
  * @route GET /api/progress/daily/:date
- * @desc Get daily progress for specific date (YYYY-MM-DD)
+ * @desc Get daily progress for specific date (TODO: Implement with Supabase)
  * @access Private
  */
-router.get('/daily/:date', ProgressController.getDailyProgress);
+router.get('/daily/:date', (req: Request, res: Response) => {
+  res.status(501).json({
+    success: false,
+    message: 'Daily progress tracking coming soon - Phase 5 implementation',
+    timestamp: new Date().toISOString()
+  });
+});
 
 /**
  * @route GET /api/progress/history
- * @desc Get historical progress data
+ * @desc Get historical progress data (TODO: Implement with Supabase)
  * @access Private
  */
-router.get('/history', validateDateRange, ProgressController.getHistoryData);
+router.get('/history', (req: Request, res: Response) => {
+  res.status(501).json({
+    success: false,
+    message: 'Progress history coming soon - Phase 5 implementation',
+    timestamp: new Date().toISOString()
+  });
+});
 
 /**
  * @route GET /api/progress/streak
- * @desc Get current and longest streak information
+ * @desc Get current and longest streak information (TODO: Implement with Supabase)
  * @access Private
  */
-router.get('/streak', ProgressController.getStreakInfo);
+router.get('/streak', (req: Request, res: Response) => {
+  res.status(501).json({
+    success: false,
+    message: 'Streak tracking coming soon - Phase 5 implementation',
+    timestamp: new Date().toISOString()
+  });
+});
 
 /**
  * @route GET /api/progress/weekly
- * @desc Get weekly summary for the last 7 days
+ * @desc Get weekly summary for the last 7 days (TODO: Implement with Supabase)
  * @access Private
  */
-router.get('/weekly', ProgressController.getWeeklySummary);
+router.get('/weekly', (req: Request, res: Response) => {
+  res.status(501).json({
+    success: false,
+    message: 'Weekly progress summary coming soon - Phase 5 implementation',
+    timestamp: new Date().toISOString()
+  });
+});
 
 export default router;

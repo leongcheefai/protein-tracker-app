@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { AnalyticsController } from '../controllers/analyticsController';
-import { authenticate, requirePremium } from '../middleware/auth';
+import { authenticate, requireAuth } from '../middleware/auth';
+import { Request, Response } from 'express';
 
 const router = Router();
 
@@ -9,30 +9,54 @@ router.use(authenticate);
 
 /**
  * @route GET /api/analytics/stats
- * @desc Get comprehensive statistics overview
+ * @desc Get comprehensive statistics overview (TODO: Implement with Supabase)
  * @access Private
  */
-router.get('/stats', AnalyticsController.getStatsOverview);
+router.get('/stats', (req: Request, res: Response) => {
+  res.status(501).json({
+    success: false,
+    message: 'Analytics features coming soon - Phase 5 implementation',
+    timestamp: new Date().toISOString()
+  });
+});
 
 /**
  * @route GET /api/analytics/meal-consistency
- * @desc Get meal consistency breakdown
+ * @desc Get meal consistency breakdown (TODO: Implement with Supabase)
  * @access Private
  */
-router.get('/meal-consistency', AnalyticsController.getMealConsistency);
+router.get('/meal-consistency', (req: Request, res: Response) => {
+  res.status(501).json({
+    success: false,
+    message: 'Meal consistency analytics coming soon - Phase 5 implementation',
+    timestamp: new Date().toISOString()
+  });
+});
 
 /**
  * @route GET /api/analytics/weekly-trend
- * @desc Get weekly protein intake trend
+ * @desc Get weekly protein intake trend (TODO: Implement with Supabase)
  * @access Private
  */
-router.get('/weekly-trend', AnalyticsController.getWeeklyTrend);
+router.get('/weekly-trend', (req: Request, res: Response) => {
+  res.status(501).json({
+    success: false,
+    message: 'Weekly trend analytics coming soon - Phase 5 implementation',
+    timestamp: new Date().toISOString()
+  });
+});
 
 /**
  * @route GET /api/analytics/export
- * @desc Export user data (Premium feature)
- * @access Private (Premium)
+ * @desc Export user data (TODO: Implement with Supabase)
+ * @access Private
  */
-router.get('/export', requirePremium, AnalyticsController.exportData);
+router.get('/export', (req: Request, res: Response) => {
+  res.status(501).json({
+    success: false,
+    message: 'Data export feature coming soon - Phase 5 implementation',
+    timestamp: new Date().toISOString()
+  });
+});
 
 export default router;
