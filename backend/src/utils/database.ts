@@ -21,7 +21,7 @@ export class DatabaseService {
   static async createUserProfile(profile: Database['public']['Tables']['user_profiles']['Insert']) {
     const { data, error } = await supabase
       .from('user_profiles')
-      .insert(profile)
+      .insert([profile])
       .select()
       .single();
     
@@ -58,7 +58,7 @@ export class DatabaseService {
   static async createFood(food: Database['public']['Tables']['foods']['Insert']) {
     const { data, error } = await supabase
       .from('foods')
-      .insert(food)
+      .insert([food])
       .select()
       .single();
     
@@ -70,7 +70,7 @@ export class DatabaseService {
   static async createMeal(meal: Database['public']['Tables']['meals']['Insert']) {
     const { data, error } = await supabase
       .from('meals')
-      .insert(meal)
+      .insert([meal])
       .select()
       .single();
     
@@ -107,7 +107,7 @@ export class DatabaseService {
   static async createFoodDetection(detection: Database['public']['Tables']['food_detections']['Insert']) {
     const { data, error } = await supabase
       .from('food_detections')
-      .insert(detection)
+      .insert([detection])
       .select()
       .single();
     
@@ -118,6 +118,54 @@ export class DatabaseService {
   static async getFoodDetection(id: string) {
     const { data, error } = await supabase
       .from('food_detections')
+      .select('*')
+      .eq('id', id)
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+
+  // Additional meal food operations
+  static async createMealFood(mealFood: Database['public']['Tables']['meal_foods']['Insert']) {
+    const { data, error } = await supabase
+      .from('meal_foods')
+      .insert([mealFood])
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+
+  static async getMealFoods(mealId: string) {
+    const { data, error } = await supabase
+      .from('meal_foods')
+      .select(`
+        *,
+        foods (*)
+      `)
+      .eq('meal_id', mealId);
+    
+    if (error) throw error;
+    return data;
+  }
+
+  static async deleteMealFood(id: string) {
+    const { data, error } = await supabase
+      .from('meal_foods')
+      .delete()
+      .eq('id', id)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+
+  static async getFoodById(id: string) {
+    const { data, error } = await supabase
+      .from('foods')
       .select('*')
       .eq('id', id)
       .single();

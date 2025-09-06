@@ -1,10 +1,11 @@
 import { Response, NextFunction } from 'express';
 import path from 'path';
-import { prisma } from '../utils/database';
+import { DatabaseService, supabase } from '../utils/database';
 import { AuthenticatedRequest } from '../middleware/auth';
 import { AppError } from '../middleware/errorHandler';
 import { LogFoodData, FoodDetectionResult, ApiResponse } from '../types';
 import { getFileUrl, deleteFile } from '../middleware/upload';
+import { InsertFoodDetection, InsertMeal, InsertMealFood, NutritionData } from '../types/supabase';
 
 export class FoodController {
   // Mock food detection service (replace with actual AI service)
@@ -49,15 +50,15 @@ export class FoodController {
       const detectionResults = await FoodController.detectFoodInImage(imagePath);
 
       // Save detection results to database
-      const detectedFood = await prisma.detectedFood.create({
-        data: {
-          userId,
-          imagePath: imageUrl,
-          detectionResults: detectionResults as any,
-          processingStatus: 'completed',
-          processingTime: 1000, // Mock processing time
-        },
-      });
+      const detectionData: InsertFoodDetection = {
+        user_id: userId,
+        image_url: imageUrl,
+        detected_foods: detectionResults as any,
+        confidence_scores: detectionResults.map(r => ({ name: r.name, confidence: r.confidence })) as any,
+        status: 'completed'
+      };
+
+      const detectedFood = await DatabaseService.createFoodDetection(detectionData);
 
       const response: ApiResponse = {
         success: true,
@@ -84,62 +85,67 @@ export class FoodController {
     }
   }
 
-  // Log food item
+  // Log food item (simplified for new schema)
   static async logFood(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.user!.id;
       const logData: LogFoodData = req.body;
 
       // Get or create food entry
-      let foodId = null;
+      let food = null;
       if (logData.foodName && !logData.isQuickAdd) {
-        // Try to find existing food in database
-        let food = await prisma.food.findFirst({
-          where: {
-            name: {
-              contains: logData.foodName,
-              mode: 'insensitive',
-            },
-          },
-        });
+        // Search for existing food
+        const searchResults = await DatabaseService.searchFoods(logData.foodName, 1);
+        
+        if (searchResults && searchResults.length > 0) {
+          food = searchResults[0];
+        } else {
+          // Create new food entry
+          const nutritionData: NutritionData = {
+            calories: logData.calories || 0,
+            protein: (logData.proteinContent / logData.portionSize) * 100,
+            carbs: 0,
+            fat: 0
+          };
 
-        // Create new food entry if not found
-        if (!food) {
-          const proteinPer100g = (logData.proteinContent / logData.portionSize) * 100;
-          const caloriesPer100g = logData.calories ? (logData.calories / logData.portionSize) * 100 : null;
-          
-          food = await prisma.food.create({
-            data: {
-              name: logData.foodName,
-              proteinPer100g,
-              caloriesPer100g,
-              category: 'OTHER', // Default category
-              source: 'user',
-            },
+          food = await DatabaseService.createFood({
+            name: logData.foodName,
+            category: 'other',
+            nutrition_per_100g: nutritionData as any,
+            verified: false,
+            user_id: userId
           });
         }
-        
-        foodId = food.id;
       }
 
-      // Create food item entry
-      const foodItem = await prisma.foodItem.create({
-        data: {
-          userId,
-          foodId,
-          customName: logData.customName || logData.foodName,
-          portionSize: logData.portionSize,
-          proteinContent: logData.proteinContent,
-          calories: logData.calories,
-          mealType: logData.mealType.toUpperCase() as 'BREAKFAST' | 'LUNCH' | 'DINNER' | 'SNACK',
-          imagePath: logData.imagePath,
-          isQuickAdd: logData.isQuickAdd || false,
-          proteinPer100g: (logData.proteinContent / logData.portionSize) * 100,
-        },
-        include: {
-          food: true,
-        },
-      });
+      // Create meal entry
+      const mealData: InsertMeal = {
+        user_id: userId,
+        meal_type: logData.mealType.toLowerCase(),
+        timestamp: new Date().toISOString(),
+        photo_url: logData.imagePath
+      };
+
+      const meal = await DatabaseService.createMeal(mealData);
+
+      // Create meal food entry if we have a food
+      let mealFood = null;
+      if (food) {
+        const mealFoodData: InsertMealFood = {
+          meal_id: meal.id,
+          food_id: food.id,
+          quantity: logData.portionSize,
+          unit: 'grams',
+          nutrition_data: {
+            calories: logData.calories || 0,
+            protein: logData.proteinContent,
+            carbs: 0,
+            fat: 0
+          } as any
+        };
+
+        mealFood = await DatabaseService.createMealFood(mealFoodData);
+      }
 
       // Update daily progress
       await this.updateDailyProgress(userId, logData.mealType, logData.proteinContent);
@@ -147,15 +153,15 @@ export class FoodController {
       const response: ApiResponse = {
         success: true,
         data: {
-          foodItem: {
-            id: foodItem.id,
-            name: foodItem.customName || foodItem.food?.name,
-            portionSize: foodItem.portionSize,
-            proteinContent: foodItem.proteinContent,
-            calories: foodItem.calories,
-            mealType: foodItem.mealType.toLowerCase(),
-            imagePath: foodItem.imagePath,
-            dateLogged: foodItem.dateLogged,
+          meal: {
+            id: meal.id,
+            name: logData.customName || logData.foodName,
+            portionSize: logData.portionSize,
+            proteinContent: logData.proteinContent,
+            calories: logData.calories,
+            mealType: logData.mealType.toLowerCase(),
+            imagePath: logData.imagePath,
+            timestamp: meal.timestamp,
           },
         },
         message: 'Food logged successfully',
@@ -168,44 +174,34 @@ export class FoodController {
     }
   }
 
-  // Get recent food items
+  // Get recent food items (now returns recent meals)
   static async getRecentFoodItems(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.user!.id;
       const limit = parseInt(req.query.limit as string) || 20;
-      const offset = parseInt(req.query.offset as string) || 0;
+      
+      // Get recent meals with their foods
+      const meals = await DatabaseService.getUserMeals(userId);
+      const recentMeals = meals.slice(0, limit);
 
-      const foodItems = await prisma.foodItem.findMany({
-        where: { userId },
-        include: {
-          food: true,
-        },
-        orderBy: { dateLogged: 'desc' },
-        take: limit,
-        skip: offset,
-      });
-
-      const formattedItems = foodItems.map(item => ({
-        id: item.id,
-        name: item.customName || item.food?.name || 'Custom Food',
-        portionSize: item.portionSize,
-        proteinContent: item.proteinContent,
-        calories: item.calories,
-        mealType: item.mealType.toLowerCase(),
-        imagePath: item.imagePath,
-        dateLogged: item.dateLogged,
-        isQuickAdd: item.isQuickAdd,
-        category: item.food?.category?.toLowerCase() || 'other',
+      const formattedItems = recentMeals.map(meal => ({
+        id: meal.id,
+        name: `${meal.meal_type} meal`,
+        mealType: meal.meal_type,
+        imagePath: meal.photo_url,
+        timestamp: meal.timestamp,
+        notes: meal.notes,
+        totalNutrition: meal.total_nutrition,
+        foods: meal.meal_foods || []
       }));
 
       const response: ApiResponse = {
         success: true,
         data: {
-          foodItems: formattedItems,
+          meals: formattedItems,
           pagination: {
             limit,
-            offset,
-            total: await prisma.foodItem.count({ where: { userId } }),
+            total: meals.length,
           },
         },
         timestamp: new Date().toISOString(),
@@ -217,60 +213,51 @@ export class FoodController {
     }
   }
 
-  // Update food item
+  // Update food item (simplified - updates meal)
   static async updateFoodItem(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.user!.id;
-      const itemId = req.params.id;
+      const mealId = req.params.id;
       const updateData = req.body;
 
-      // Check if food item belongs to user
-      const existingItem = await prisma.foodItem.findFirst({
-        where: {
-          id: itemId,
-          userId,
-        },
-      });
+      // Check if meal belongs to user and update it
+      const { data: existingMeal, error: fetchError } = await supabase
+        .from('meals')
+        .select('*')
+        .eq('id', mealId)
+        .eq('user_id', userId)
+        .single();
 
-      if (!existingItem) {
-        throw new AppError('Food item not found', 404);
+      if (fetchError || !existingMeal) {
+        throw new AppError('Meal not found', 404);
       }
 
-      const updatedItem = await prisma.foodItem.update({
-        where: { id: itemId },
-        data: {
-          ...updateData,
-          mealType: updateData.mealType?.toUpperCase(),
-          proteinPer100g: updateData.proteinContent && updateData.portionSize 
-            ? (updateData.proteinContent / updateData.portionSize) * 100 
-            : undefined,
-        },
-        include: {
-          food: true,
-        },
-      });
+      const { data: updatedMeal, error: updateError } = await supabase
+        .from('meals')
+        .update({
+          meal_type: updateData.mealType?.toLowerCase(),
+          notes: updateData.notes,
+          photo_url: updateData.imagePath,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', mealId)
+        .select()
+        .single();
 
-      // Update daily progress if protein content changed
-      if (updateData.proteinContent !== undefined) {
-        const proteinDiff = updateData.proteinContent - existingItem.proteinContent;
-        await this.updateDailyProgress(userId, updateData.mealType || existingItem.mealType, proteinDiff);
-      }
+      if (updateError) throw updateError;
 
       const response: ApiResponse = {
         success: true,
         data: {
-          foodItem: {
-            id: updatedItem.id,
-            name: updatedItem.customName || updatedItem.food?.name,
-            portionSize: updatedItem.portionSize,
-            proteinContent: updatedItem.proteinContent,
-            calories: updatedItem.calories,
-            mealType: updatedItem.mealType.toLowerCase(),
-            imagePath: updatedItem.imagePath,
-            dateLogged: updatedItem.dateLogged,
+          meal: {
+            id: updatedMeal.id,
+            mealType: updatedMeal.meal_type,
+            notes: updatedMeal.notes,
+            imagePath: updatedMeal.photo_url,
+            timestamp: updatedMeal.timestamp,
           },
         },
-        message: 'Food item updated successfully',
+        message: 'Meal updated successfully',
         timestamp: new Date().toISOString(),
       };
 
@@ -280,36 +267,36 @@ export class FoodController {
     }
   }
 
-  // Delete food item
+  // Delete food item (deletes meal)
   static async deleteFoodItem(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.user!.id;
-      const itemId = req.params.id;
+      const mealId = req.params.id;
 
-      // Check if food item belongs to user
-      const existingItem = await prisma.foodItem.findFirst({
-        where: {
-          id: itemId,
-          userId,
-        },
-      });
+      // Check if meal belongs to user
+      const { data: existingMeal, error: fetchError } = await supabase
+        .from('meals')
+        .select('*')
+        .eq('id', mealId)
+        .eq('user_id', userId)
+        .single();
 
-      if (!existingItem) {
-        throw new AppError('Food item not found', 404);
+      if (fetchError || !existingMeal) {
+        throw new AppError('Meal not found', 404);
       }
 
-      // Delete the food item
-      await prisma.foodItem.delete({
-        where: { id: itemId },
-      });
+      // Delete the meal (meal_foods will be cascade deleted)
+      const { error: deleteError } = await supabase
+        .from('meals')
+        .delete()
+        .eq('id', mealId);
 
-      // Update daily progress by subtracting the protein
-      await this.updateDailyProgress(userId, existingItem.mealType, -existingItem.proteinContent);
+      if (deleteError) throw deleteError;
 
       // Clean up image file if exists
-      if (existingItem.imagePath) {
+      if (existingMeal.photo_url) {
         try {
-          const filename = path.basename(existingItem.imagePath);
+          const filename = path.basename(existingMeal.photo_url);
           const filepath = path.join(process.env.UPLOAD_DIR || './uploads', 'food-images', filename);
           await deleteFile(filepath);
         } catch (deleteError) {
@@ -319,7 +306,7 @@ export class FoodController {
 
       const response: ApiResponse = {
         success: true,
-        message: 'Food item deleted successfully',
+        message: 'Meal deleted successfully',
         timestamp: new Date().toISOString(),
       };
 
@@ -339,19 +326,7 @@ export class FoodController {
         throw new AppError('Search query must be at least 2 characters long', 400);
       }
 
-      const foods = await prisma.food.findMany({
-        where: {
-          name: {
-            contains: query,
-            mode: 'insensitive',
-          },
-        },
-        take: limit,
-        orderBy: [
-          { isVerified: 'desc' }, // Verified foods first
-          { name: 'asc' },
-        ],
-      });
+      const foods = await DatabaseService.searchFoods(query, limit);
 
       const response: ApiResponse = {
         success: true,
@@ -359,10 +334,9 @@ export class FoodController {
           foods: foods.map(food => ({
             id: food.id,
             name: food.name,
-            category: food.category.toLowerCase(),
-            proteinPer100g: food.proteinPer100g,
-            caloriesPer100g: food.caloriesPer100g,
-            isVerified: food.isVerified,
+            category: food.category,
+            nutritionPer100g: food.nutrition_per_100g,
+            isVerified: food.verified,
           })),
         },
         timestamp: new Date().toISOString(),
@@ -374,93 +348,10 @@ export class FoodController {
     }
   }
 
-  // Helper method to update daily progress
+  // Helper method to update daily progress (TODO: implement with analytics schema)
   private static async updateDailyProgress(userId: string, mealType: string, proteinAmount: number): Promise<void> {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    // Get user's daily protein target
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { dailyProteinTarget: true },
-    });
-
-    const dailyTarget = user?.dailyProteinTarget || 126;
-
-    // Update or create daily progress
-    const existingProgress = await prisma.dailyProgress.findUnique({
-      where: {
-        userId_date: {
-          userId,
-          date: today,
-        },
-      },
-    });
-
-    if (existingProgress) {
-      const newTotalProtein = existingProgress.totalProtein + proteinAmount;
-      const goalMet = newTotalProtein >= dailyTarget;
-
-      await prisma.dailyProgress.update({
-        where: { id: existingProgress.id },
-        data: {
-          totalProtein: newTotalProtein,
-          goalMet,
-          achievementPercentage: (newTotalProtein / dailyTarget) * 100,
-        },
-      });
-    } else {
-      const goalMet = proteinAmount >= dailyTarget;
-      
-      await prisma.dailyProgress.create({
-        data: {
-          userId,
-          date: today,
-          totalProtein: proteinAmount,
-          dailyTarget,
-          goalMet,
-          achievementPercentage: (proteinAmount / dailyTarget) * 100,
-          streakCount: 1, // This would need more complex logic for actual streaks
-        },
-      });
-    }
-
-    // Update meal progress
-    const mealTypeEnum = mealType.toUpperCase() as 'BREAKFAST' | 'LUNCH' | 'DINNER' | 'SNACK';
-    const mealTarget = dailyTarget / 4; // Simple equal distribution
-
-    const existingMealProgress = await prisma.mealProgress.findUnique({
-      where: {
-        userId_date_mealType: {
-          userId,
-          date: today,
-          mealType: mealTypeEnum,
-        },
-      },
-    });
-
-    if (existingMealProgress) {
-      await prisma.mealProgress.update({
-        where: { id: existingMealProgress.id },
-        data: {
-          actualProtein: existingMealProgress.actualProtein + proteinAmount,
-          itemsCount: existingMealProgress.itemsCount + (proteinAmount > 0 ? 1 : -1),
-        },
-      });
-    } else if (proteinAmount > 0) {
-      await prisma.mealProgress.create({
-        data: {
-          userId,
-          date: today,
-          mealType: mealTypeEnum,
-          targetProtein: mealTarget,
-          actualProtein: proteinAmount,
-          itemsCount: 1,
-          dailyProgressId: existingProgress?.id || (await prisma.dailyProgress.findUnique({
-            where: { userId_date: { userId, date: today } }
-          }))?.id || '',
-        },
-      });
-    }
+    // TODO: Implement daily progress tracking with Supabase
+    // This would require additional tables for daily_progress and meal_progress
+    console.log(`Daily progress update for user ${userId}: ${proteinAmount}g protein from ${mealType}`);
   }
 }
