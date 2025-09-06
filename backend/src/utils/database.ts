@@ -1,25 +1,149 @@
-import { PrismaClient } from '@prisma/client';
+import supabase from '../config/supabase';
+import { Database } from '../types/supabase';
 
-declare global {
-  var __db__: PrismaClient | undefined;
-}
+// Export Supabase client for database operations
+export { supabase };
 
-let prisma: PrismaClient;
-
-if (process.env.NODE_ENV === 'production') {
-  prisma = new PrismaClient();
-} else {
-  if (!global.__db__) {
-    global.__db__ = new PrismaClient({
-      log: ['query', 'error', 'warn'],
-    });
+// Helper functions for common database operations
+export class DatabaseService {
+  // User operations
+  static async getUserProfile(userId: string) {
+    const { data, error } = await supabase
+      .from('user_profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
+    
+    if (error) throw error;
+    return data;
   }
-  prisma = global.__db__;
+
+  static async createUserProfile(profile: Database['public']['Tables']['user_profiles']['Insert']) {
+    const { data, error } = await supabase
+      .from('user_profiles')
+      .insert(profile)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+
+  static async updateUserProfile(userId: string, updates: Database['public']['Tables']['user_profiles']['Update']) {
+    const { data, error } = await supabase
+      .from('user_profiles')
+      .update({ ...updates, updated_at: new Date().toISOString() })
+      .eq('id', userId)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+
+  // Food operations
+  static async searchFoods(query: string, limit = 20) {
+    const { data, error } = await supabase
+      .from('foods')
+      .select('*')
+      .ilike('name', `%${query}%`)
+      .order('verified', { ascending: false })
+      .order('name')
+      .limit(limit);
+    
+    if (error) throw error;
+    return data;
+  }
+
+  static async createFood(food: Database['public']['Tables']['foods']['Insert']) {
+    const { data, error } = await supabase
+      .from('foods')
+      .insert(food)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+
+  // Meal operations
+  static async createMeal(meal: Database['public']['Tables']['meals']['Insert']) {
+    const { data, error } = await supabase
+      .from('meals')
+      .insert(meal)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+
+  static async getUserMeals(userId: string, startDate?: string, endDate?: string) {
+    let query = supabase
+      .from('meals')
+      .select(`
+        *,
+        meal_foods (
+          *,
+          foods (*)
+        )
+      `)
+      .eq('user_id', userId)
+      .order('timestamp', { ascending: false });
+
+    if (startDate) {
+      query = query.gte('timestamp', startDate);
+    }
+    if (endDate) {
+      query = query.lte('timestamp', endDate);
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+    return data;
+  }
+
+  // Food detection operations
+  static async createFoodDetection(detection: Database['public']['Tables']['food_detections']['Insert']) {
+    const { data, error } = await supabase
+      .from('food_detections')
+      .insert(detection)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+
+  static async getFoodDetection(id: string) {
+    const { data, error } = await supabase
+      .from('food_detections')
+      .select('*')
+      .eq('id', id)
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
 }
 
-// Handle graceful shutdown
-process.on('beforeExit', async () => {
-  await prisma.$disconnect();
-});
-
-export { prisma };
+// Connection test function
+export async function testConnection() {
+  try {
+    const { data, error } = await supabase
+      .from('user_profiles')
+      .select('count')
+      .limit(1);
+    
+    if (error) {
+      console.error('Database connection failed:', error.message);
+      return false;
+    }
+    
+    console.log('Database connection successful');
+    return true;
+  } catch (error) {
+    console.error('Database connection test failed:', error);
+    return false;
+  }
+}
