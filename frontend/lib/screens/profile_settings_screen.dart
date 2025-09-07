@@ -93,7 +93,7 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
     });
   }
 
-  void _saveChanges() {
+  void _saveChanges() async {
     // Validate inputs
     double? height = double.tryParse(_heightController.text);
     double? weight = double.tryParse(_weightController.text);
@@ -113,24 +113,51 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
       return;
     }
 
-    // Update provider
+    // Update provider with backend-synced data
     final settingsProvider = Provider.of<UserSettingsProvider>(context, listen: false);
-    settingsProvider.updateProfile(
-      height: height,
-      weight: weight,
-      trainingMultiplier: _selectedTrainingMultiplier,
-      goal: _selectedGoal,
-      dailyProteinTarget: _dailyProteinTarget,
-    );
+    
+    try {
+      // Update backend profile
+      final success = await settingsProvider.updateProfile(
+        displayName: _nameController.text.trim().isEmpty ? null : _nameController.text.trim(),
+        height: height,
+        weight: weight,
+        dailyProteinTarget: _dailyProteinTarget,
+      );
+      
+      if (success) {
+        // Update local settings (training multiplier and goal are local-only for now)
+        // Note: These could be stored locally or you could extend the backend model
+        // For now, we'll update them via the existing local methods
+        settingsProvider.recalculateDailyTarget();
 
-    // TODO: Save profile photo to local storage or cloud storage
-    if (_profilePhoto != null) {
-      // In a real app, you would save the photo here
-      // For example: await _saveProfilePhoto(_profilePhoto!);
+        // TODO: Save profile photo to local storage or cloud storage
+        if (_profilePhoto != null) {
+          // In a real app, you would save the photo here
+          // For example: await _saveProfilePhoto(_profilePhoto!);
+        }
+
+        // Show success and navigate back
+        if (mounted) {
+          ProfileSettingsHelpers.showSuccessDialog(context);
+        }
+      } else {
+        // Show error from settings provider
+        if (mounted) {
+          ProfileSettingsHelpers.showErrorDialog(
+            context, 
+            settingsProvider.errorMessage ?? 'Failed to update profile. Please try again.'
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ProfileSettingsHelpers.showErrorDialog(
+          context, 
+          'An unexpected error occurred. Please try again.'
+        );
+      }
     }
-
-    // Show success and navigate back
-    ProfileSettingsHelpers.showSuccessDialog(context);
   }
 
   @override
