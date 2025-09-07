@@ -1,135 +1,68 @@
 import { Response, NextFunction } from 'express';
-import { prisma } from '../utils/database';
 import { AuthenticatedRequest } from '../middleware/auth';
 import { AppError } from '../middleware/errorHandler';
-import { WeeklyStats, MealConsistency, ApiResponse } from '../types';
-import { requirePremium } from '../middleware/auth';
+import { ApiResponse } from '../types';
+import { AnalyticsService } from '../services/analyticsService';
 
 export class AnalyticsController {
-  // Get comprehensive statistics overview
+  /**
+   * Get comprehensive analytics overview
+   */
   static async getStatsOverview(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.user!.id;
+      const { startDate, endDate, period } = req.query;
 
-      // Get date range (default to last 30 days)
-      const endDate = new Date();
-      endDate.setHours(23, 59, 59, 999);
-      
-      const startDate = new Date();
-      startDate.setDate(startDate.getDate() - 29); // Last 30 days
-      startDate.setHours(0, 0, 0, 0);
+      let start: Date | undefined;
+      let end: Date | undefined;
 
-      // Get all progress data in range
-      const progressData = await prisma.dailyProgress.findMany({
-        where: {
-          userId,
-          date: {
-            gte: startDate,
-            lte: endDate,
-          },
-        },
-        include: {
-          mealProgress: true,
-        },
-        orderBy: { date: 'asc' },
-      });
-
-      if (progressData.length === 0) {
-        const response: ApiResponse = {
-          success: true,
-          data: {
-            weeklyAverage: 0,
-            goalHitPercentage: 0,
-            mostConsistentMeal: 'lunch',
-            currentStreak: 0,
-            longestStreak: 0,
-            totalDaysTracked: 0,
-            bestDay: null,
-            bestDayProtein: 0,
-            weeklyTrend: [],
-            mealConsistency: {
-              breakfast: 0,
-              lunch: 0,
-              dinner: 0,
-              snack: 0,
-            },
-          },
-          timestamp: new Date().toISOString(),
-        };
-
-        res.status(200).json(response);
-        return;
+      // Parse date parameters
+      if (startDate && typeof startDate === 'string') {
+        start = new Date(startDate);
+        if (isNaN(start.getTime())) {
+          throw new AppError('Invalid start date format', 400);
+        }
       }
 
-      // Calculate basic stats
-      const totalProtein = progressData.reduce((sum, day) => sum + day.totalProtein, 0);
-      const weeklyAverage = totalProtein / progressData.length;
-      const goalsMetCount = progressData.filter(day => day.goalMet).length;
-      const goalHitPercentage = (goalsMetCount / progressData.length) * 100;
+      if (endDate && typeof endDate === 'string') {
+        end = new Date(endDate);
+        if (isNaN(end.getTime())) {
+          throw new AppError('Invalid end date format', 400);
+        }
+      }
 
-      // Find best day
-      const bestDay = progressData.reduce((best, current) => 
-        current.totalProtein > best.totalProtein ? current : best
-      );
+      // Handle predefined periods
+      if (period && typeof period === 'string') {
+        end = new Date();
+        end.setHours(23, 59, 59, 999);
+        start = new Date();
 
-      // Get current and longest streak
-      const currentStreak = progressData[progressData.length - 1]?.streakCount || 0;
-      const longestStreak = Math.max(...progressData.map(day => day.streakCount));
+        switch (period) {
+          case '7d':
+            start.setDate(start.getDate() - 6);
+            break;
+          case '30d':
+            start.setDate(start.getDate() - 29);
+            break;
+          case '90d':
+            start.setDate(start.getDate() - 89);
+            break;
+          case '1y':
+            start.setFullYear(start.getFullYear() - 1);
+            break;
+          default:
+            throw new AppError('Invalid period. Use 7d, 30d, 90d, or 1y', 400);
+        }
+        start.setHours(0, 0, 0, 0);
+      }
 
-      // Calculate weekly trend (last 7 days)
-      const weeklyTrend = progressData.slice(-7).map(day => day.totalProtein);
+      const analytics = await AnalyticsService.getAnalyticsOverview(userId, start, end);
 
-      // Calculate meal consistency
-      const mealStats = {
-        breakfast: { total: 0, count: 0 },
-        lunch: { total: 0, count: 0 },
-        dinner: { total: 0, count: 0 },
-        snack: { total: 0, count: 0 },
-      };
-
-      progressData.forEach(day => {
-        day.mealProgress.forEach(meal => {
-          const mealKey = meal.mealType.toLowerCase() as keyof typeof mealStats;
-          if (mealStats[mealKey]) {
-            const targetMet = meal.actualProtein >= meal.targetProtein;
-            if (targetMet) mealStats[mealKey].total++;
-            mealStats[mealKey].count++;
-          }
-        });
-      });
-
-      const mealConsistency: MealConsistency = {
-        breakfast: mealStats.breakfast.count > 0 ? (mealStats.breakfast.total / mealStats.breakfast.count) * 100 : 0,
-        lunch: mealStats.lunch.count > 0 ? (mealStats.lunch.total / mealStats.lunch.count) * 100 : 0,
-        dinner: mealStats.dinner.count > 0 ? (mealStats.dinner.total / mealStats.dinner.count) * 100 : 0,
-        snack: mealStats.snack.count > 0 ? (mealStats.snack.total / mealStats.snack.count) * 100 : 0,
-      };
-
-      // Find most consistent meal
-      const mostConsistentMeal = Object.entries(mealConsistency).reduce((best, [meal, percentage]) => 
-        percentage > best.percentage ? { meal, percentage } : best,
-        { meal: 'lunch', percentage: 0 }
-      ).meal;
-
-      const stats: WeeklyStats = {
-        weeklyAverage: Math.round(weeklyAverage * 100) / 100,
-        goalHitPercentage: Math.round(goalHitPercentage * 100) / 100,
-        mostConsistentMeal,
-        currentStreak,
-        longestStreak,
-        totalDaysTracked: progressData.length,
-        weeklyTrend,
-      };
-
-      const response: ApiResponse = {
+      const response: ApiResponse<typeof analytics> = {
         success: true,
-        data: {
-          ...stats,
-          bestDay: bestDay.date.toISOString().split('T')[0],
-          bestDayProtein: bestDay.totalProtein,
-          mealConsistency,
-        },
-        timestamp: new Date().toISOString(),
+        data: analytics,
+        message: 'Analytics overview retrieved successfully',
+        timestamp: new Date().toISOString()
       };
 
       res.status(200).json(response);
@@ -138,66 +71,28 @@ export class AnalyticsController {
     }
   }
 
-  // Get meal consistency breakdown
+  /**
+   * Get meal consistency analysis
+   */
   static async getMealConsistency(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.user!.id;
-      const days = parseInt(req.query.days as string) || 30;
+      const { days = 30 } = req.query;
 
       const endDate = new Date();
       endDate.setHours(23, 59, 59, 999);
-      
+
       const startDate = new Date();
-      startDate.setDate(startDate.getDate() - (days - 1));
+      startDate.setDate(startDate.getDate() - (parseInt(days as string) - 1));
       startDate.setHours(0, 0, 0, 0);
 
-      const mealProgress = await prisma.mealProgress.findMany({
-        where: {
-          userId,
-          date: {
-            gte: startDate,
-            lte: endDate,
-          },
-        },
-        orderBy: [
-          { date: 'desc' },
-          { mealType: 'asc' },
-        ],
-      });
+      const analytics = await AnalyticsService.getAnalyticsOverview(userId, startDate, endDate);
 
-      // Group by meal type and calculate consistency
-      const mealStats = {
-        breakfast: [] as number[],
-        lunch: [] as number[],
-        dinner: [] as number[],
-        snack: [] as number[],
-      };
-
-      mealProgress.forEach(meal => {
-        const mealKey = meal.mealType.toLowerCase() as keyof typeof mealStats;
-        if (mealStats[mealKey]) {
-          const percentage = (meal.actualProtein / meal.targetProtein) * 100;
-          mealStats[mealKey].push(Math.min(percentage, 100)); // Cap at 100%
-        }
-      });
-
-      const consistency = Object.entries(mealStats).reduce((acc, [meal, values]) => {
-        const average = values.length > 0 ? values.reduce((sum, val) => sum + val, 0) / values.length : 0;
-        acc[meal] = Math.round(average * 100) / 100;
-        return acc;
-      }, {} as any);
-
-      const response: ApiResponse = {
+      const response: ApiResponse<typeof analytics.mealTimingAnalysis> = {
         success: true,
-        data: {
-          consistency,
-          period: {
-            days,
-            startDate: startDate.toISOString().split('T')[0],
-            endDate: endDate.toISOString().split('T')[0],
-          },
-        },
-        timestamp: new Date().toISOString(),
+        data: analytics.mealTimingAnalysis,
+        message: 'Meal consistency analysis retrieved successfully',
+        timestamp: new Date().toISOString()
       };
 
       res.status(200).json(response);
@@ -206,87 +101,28 @@ export class AnalyticsController {
     }
   }
 
-  // Get weekly protein intake trend
+  /**
+   * Get weekly trends
+   */
   static async getWeeklyTrend(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.user!.id;
-      const weeks = parseInt(req.query.weeks as string) || 4;
+      const { weeks = 8 } = req.query;
 
       const endDate = new Date();
       endDate.setHours(23, 59, 59, 999);
-      
+
       const startDate = new Date();
-      startDate.setDate(startDate.getDate() - (weeks * 7 - 1));
+      startDate.setDate(startDate.getDate() - (parseInt(weeks as string) * 7 - 1));
       startDate.setHours(0, 0, 0, 0);
 
-      const progressData = await prisma.dailyProgress.findMany({
-        where: {
-          userId,
-          date: {
-            gte: startDate,
-            lte: endDate,
-          },
-        },
-        orderBy: { date: 'asc' },
-      });
+      const analytics = await AnalyticsService.getAnalyticsOverview(userId, startDate, endDate);
 
-      // Group data by weeks
-      const weeklyData: { week: string; average: number; days: number }[] = [];
-      const currentWeekData: number[] = [];
-      let currentWeekStart = new Date(startDate);
-
-      progressData.forEach(day => {
-        const dayDate = new Date(day.date);
-        const weekStart = new Date(currentWeekStart);
-        const weekEnd = new Date(currentWeekStart);
-        weekEnd.setDate(weekEnd.getDate() + 6);
-
-        if (dayDate >= weekStart && dayDate <= weekEnd) {
-          currentWeekData.push(day.totalProtein);
-        } else {
-          // Save current week and start new one
-          if (currentWeekData.length > 0) {
-            const average = currentWeekData.reduce((sum, val) => sum + val, 0) / currentWeekData.length;
-            weeklyData.push({
-              week: `${weekStart.toISOString().split('T')[0]} to ${weekEnd.toISOString().split('T')[0]}`,
-              average: Math.round(average * 100) / 100,
-              days: currentWeekData.length,
-            });
-            currentWeekData.length = 0; // Clear array
-          }
-          
-          // Update week start
-          while (dayDate > weekEnd) {
-            currentWeekStart.setDate(currentWeekStart.getDate() + 7);
-            weekEnd.setDate(weekEnd.getDate() + 7);
-          }
-          currentWeekData.push(day.totalProtein);
-        }
-      });
-
-      // Add final week if there's data
-      if (currentWeekData.length > 0) {
-        const weekEnd = new Date(currentWeekStart);
-        weekEnd.setDate(weekEnd.getDate() + 6);
-        const average = currentWeekData.reduce((sum, val) => sum + val, 0) / currentWeekData.length;
-        weeklyData.push({
-          week: `${currentWeekStart.toISOString().split('T')[0]} to ${weekEnd.toISOString().split('T')[0]}`,
-          average: Math.round(average * 100) / 100,
-          days: currentWeekData.length,
-        });
-      }
-
-      const response: ApiResponse = {
+      const response: ApiResponse<typeof analytics.weeklyStats> = {
         success: true,
-        data: {
-          weeklyTrend: weeklyData,
-          period: {
-            weeks,
-            startDate: startDate.toISOString().split('T')[0],
-            endDate: endDate.toISOString().split('T')[0],
-          },
-        },
-        timestamp: new Date().toISOString(),
+        data: analytics.weeklyStats,
+        message: 'Weekly trend analysis retrieved successfully',
+        timestamp: new Date().toISOString()
       };
 
       res.status(200).json(response);
@@ -295,95 +131,292 @@ export class AnalyticsController {
     }
   }
 
-  // Export user data (Premium feature)
+  /**
+   * Get streak information
+   */
+  static async getStreaks(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const userId = req.user!.id;
+
+      // Get last 90 days for accurate streak calculation
+      const endDate = new Date();
+      endDate.setHours(23, 59, 59, 999);
+
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - 89);
+      startDate.setHours(0, 0, 0, 0);
+
+      const analytics = await AnalyticsService.getAnalyticsOverview(userId, startDate, endDate);
+
+      const response: ApiResponse<typeof analytics.streakData> = {
+        success: true,
+        data: analytics.streakData,
+        message: 'Streak information retrieved successfully',
+        timestamp: new Date().toISOString()
+      };
+
+      res.status(200).json(response);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Get personalized insights
+   */
+  static async getInsights(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const userId = req.user!.id;
+
+      // Get last 30 days for insights
+      const endDate = new Date();
+      endDate.setHours(23, 59, 59, 999);
+
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - 29);
+      startDate.setHours(0, 0, 0, 0);
+
+      const analytics = await AnalyticsService.getAnalyticsOverview(userId, startDate, endDate);
+
+      const response: ApiResponse<typeof analytics.insights> = {
+        success: true,
+        data: analytics.insights,
+        message: 'Personalized insights retrieved successfully',
+        timestamp: new Date().toISOString()
+      };
+
+      res.status(200).json(response);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Get user achievements
+   */
+  static async getAchievements(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const userId = req.user!.id;
+
+      // Get last 90 days for achievements
+      const endDate = new Date();
+      endDate.setHours(23, 59, 59, 999);
+
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - 89);
+      startDate.setHours(0, 0, 0, 0);
+
+      const analytics = await AnalyticsService.getAnalyticsOverview(userId, startDate, endDate);
+
+      const response: ApiResponse<typeof analytics.achievements> = {
+        success: true,
+        data: analytics.achievements,
+        message: 'User achievements retrieved successfully',
+        timestamp: new Date().toISOString()
+      };
+
+      res.status(200).json(response);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Get daily breakdown for a specific date range
+   */
+  static async getDailyBreakdown(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const userId = req.user!.id;
+      const { startDate, endDate } = req.query;
+
+      if (!startDate || !endDate) {
+        throw new AppError('Start date and end date are required', 400);
+      }
+
+      const start = new Date(startDate as string);
+      const end = new Date(endDate as string);
+
+      if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+        throw new AppError('Invalid date format', 400);
+      }
+
+      // Limit to 90 days max
+      const diffTime = Math.abs(end.getTime() - start.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      
+      if (diffDays > 90) {
+        throw new AppError('Date range cannot exceed 90 days', 400);
+      }
+
+      const analytics = await AnalyticsService.getAnalyticsOverview(userId, start, end);
+
+      const response: ApiResponse<typeof analytics.dailyStats> = {
+        success: true,
+        data: analytics.dailyStats,
+        message: 'Daily breakdown retrieved successfully',
+        timestamp: new Date().toISOString()
+      };
+
+      res.status(200).json(response);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Export user data
+   */
   static async exportData(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.user!.id;
-      const format = req.query.format as string || 'json';
+      const { format = 'json', startDate, endDate } = req.query;
 
-      if (!['json', 'csv'].includes(format)) {
-        throw new AppError('Invalid format. Supported formats: json, csv', 400);
+      if (!['json', 'csv'].includes(format as string)) {
+        throw new AppError('Invalid format. Use json or csv', 400);
       }
 
-      // Get all user data
-      const [user, foodItems, dailyProgress, mealProgress] = await Promise.all([
-        prisma.user.findUnique({
-          where: { id: userId },
-          include: {
-            settings: true,
-            subscription: true,
-          },
-        }),
-        prisma.foodItem.findMany({
-          where: { userId },
-          include: { food: true },
-          orderBy: { dateLogged: 'desc' },
-        }),
-        prisma.dailyProgress.findMany({
-          where: { userId },
-          orderBy: { date: 'desc' },
-        }),
-        prisma.mealProgress.findMany({
-          where: { userId },
-          orderBy: [{ date: 'desc' }, { mealType: 'asc' }],
-        }),
-      ]);
+      let start: Date | undefined;
+      let end: Date | undefined;
 
-      const exportData = {
-        user: {
-          id: user?.id,
-          email: user?.email,
-          name: user?.name,
-          height: user?.height,
-          weight: user?.weight,
-          goal: user?.goal,
-          dailyProteinTarget: user?.dailyProteinTarget,
-          createdAt: user?.createdAt,
-          settings: user?.settings,
-        },
-        foodItems: foodItems.map(item => ({
-          id: item.id,
-          name: item.customName || item.food?.name,
-          portionSize: item.portionSize,
-          proteinContent: item.proteinContent,
-          calories: item.calories,
-          mealType: item.mealType,
-          dateLogged: item.dateLogged,
-          isQuickAdd: item.isQuickAdd,
-        })),
-        dailyProgress: dailyProgress.map(day => ({
-          date: day.date,
-          totalProtein: day.totalProtein,
-          dailyTarget: day.dailyTarget,
-          goalMet: day.goalMet,
-          streakCount: day.streakCount,
-          achievementPercentage: day.achievementPercentage,
-        })),
-        mealProgress: mealProgress.map(meal => ({
-          date: meal.date,
-          mealType: meal.mealType,
-          targetProtein: meal.targetProtein,
-          actualProtein: meal.actualProtein,
-          itemsCount: meal.itemsCount,
-        })),
-        exportedAt: new Date().toISOString(),
+      if (startDate && typeof startDate === 'string') {
+        start = new Date(startDate);
+        if (isNaN(start.getTime())) {
+          throw new AppError('Invalid start date format', 400);
+        }
+      }
+
+      if (endDate && typeof endDate === 'string') {
+        end = new Date(endDate);
+        if (isNaN(end.getTime())) {
+          throw new AppError('Invalid end date format', 400);
+        }
+      }
+
+      const exportData = await AnalyticsService.exportUserData(
+        userId,
+        format as 'json' | 'csv',
+        start,
+        end
+      );
+
+      res.setHeader('Content-Type', exportData.contentType);
+      res.setHeader('Content-Disposition', `attachment; filename="${exportData.filename}"`);
+      res.send(exportData.data);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Get nutrition recommendations based on patterns
+   */
+  static async getNutritionRecommendations(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const userId = req.user!.id;
+
+      // Get last 14 days for pattern analysis
+      const endDate = new Date();
+      endDate.setHours(23, 59, 59, 999);
+
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - 13);
+      startDate.setHours(0, 0, 0, 0);
+
+      const analytics = await AnalyticsService.getAnalyticsOverview(userId, startDate, endDate);
+
+      // Filter for actionable recommendations
+      const recommendations = analytics.insights.filter(insight => 
+        insight.actionable && ['recommendation', 'warning'].includes(insight.type)
+      );
+
+      const response: ApiResponse<typeof recommendations> = {
+        success: true,
+        data: recommendations,
+        message: 'Nutrition recommendations retrieved successfully',
+        timestamp: new Date().toISOString()
       };
 
-      if (format === 'json') {
-        res.setHeader('Content-Type', 'application/json');
-        res.setHeader('Content-Disposition', 'attachment; filename="protein-tracker-data.json"');
-        res.status(200).json(exportData);
-      } else if (format === 'csv') {
-        // For CSV, we'll export the food items as the main data
-        const csvHeader = 'Date,Food Name,Portion Size (g),Protein (g),Calories,Meal Type,Is Quick Add\n';
-        const csvRows = exportData.foodItems.map(item => 
-          `${item.dateLogged},${item.name},${item.portionSize},${item.proteinContent},${item.calories || ''},${item.mealType},${item.isQuickAdd}`
-        ).join('\n');
+      res.status(200).json(response);
+    } catch (error) {
+      next(error);
+    }
+  }
 
-        res.setHeader('Content-Type', 'text/csv');
-        res.setHeader('Content-Disposition', 'attachment; filename="protein-tracker-data.csv"');
-        res.status(200).send(csvHeader + csvRows);
+  /**
+   * Get comparative analysis (current vs previous period)
+   */
+  static async getComparative(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const userId = req.user!.id;
+      const { period = '30d' } = req.query;
+
+      let days: number;
+      switch (period) {
+        case '7d': days = 7; break;
+        case '30d': days = 30; break;
+        case '90d': days = 90; break;
+        default: days = 30;
       }
+
+      // Current period
+      const currentEnd = new Date();
+      currentEnd.setHours(23, 59, 59, 999);
+      const currentStart = new Date();
+      currentStart.setDate(currentStart.getDate() - (days - 1));
+      currentStart.setHours(0, 0, 0, 0);
+
+      // Previous period
+      const previousEnd = new Date(currentStart);
+      previousEnd.setDate(previousEnd.getDate() - 1);
+      previousEnd.setHours(23, 59, 59, 999);
+      const previousStart = new Date(previousEnd);
+      previousStart.setDate(previousStart.getDate() - (days - 1));
+      previousStart.setHours(0, 0, 0, 0);
+
+      const [currentAnalytics, previousAnalytics] = await Promise.all([
+        AnalyticsService.getAnalyticsOverview(userId, currentStart, currentEnd),
+        AnalyticsService.getAnalyticsOverview(userId, previousStart, previousEnd),
+      ]);
+
+      // Calculate comparisons
+      const currentAvg = currentAnalytics.dailyStats.reduce((sum, day) => sum + day.totalProtein, 0) / currentAnalytics.dailyStats.length || 0;
+      const previousAvg = previousAnalytics.dailyStats.reduce((sum, day) => sum + day.totalProtein, 0) / previousAnalytics.dailyStats.length || 0;
+      
+      const proteinChange = previousAvg > 0 ? ((currentAvg - previousAvg) / previousAvg) * 100 : 0;
+      
+      const currentGoalMet = currentAnalytics.dailyStats.filter(day => day.goalMet).length;
+      const previousGoalMet = previousAnalytics.dailyStats.filter(day => day.goalMet).length;
+      const goalMetChange = previousGoalMet > 0 ? ((currentGoalMet - previousGoalMet) / previousGoalMet) * 100 : 0;
+
+      const comparison = {
+        current: {
+          period: currentAnalytics.period,
+          averageProtein: Math.round(currentAvg * 10) / 10,
+          daysWithGoalMet: currentGoalMet,
+          totalDays: currentAnalytics.dailyStats.length,
+          streak: currentAnalytics.streakData.currentStreak,
+        },
+        previous: {
+          period: previousAnalytics.period,
+          averageProtein: Math.round(previousAvg * 10) / 10,
+          daysWithGoalMet: previousGoalMet,
+          totalDays: previousAnalytics.dailyStats.length,
+        },
+        changes: {
+          proteinChange: Math.round(proteinChange * 10) / 10,
+          goalMetChange: Math.round(goalMetChange * 10) / 10,
+          trend: proteinChange > 5 ? 'improving' : proteinChange < -5 ? 'declining' : 'stable',
+        }
+      };
+
+      const response: ApiResponse<typeof comparison> = {
+        success: true,
+        data: comparison,
+        message: 'Comparative analysis retrieved successfully',
+        timestamp: new Date().toISOString()
+      };
+
+      res.status(200).json(response);
     } catch (error) {
       next(error);
     }

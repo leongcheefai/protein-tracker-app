@@ -37,9 +37,11 @@ import 'screens/premium_features_unlock_screen.dart';
 import 'screens/profile_setup_screen.dart';
 import 'screens/enhanced_meal_logging_screen.dart';
 import 'screens/meal_success_screen.dart';
+import 'screens/analytics_dashboard_screen.dart';
 import 'utils/user_settings_provider.dart';
 import 'utils/meal_tracking_provider.dart';
 import 'utils/nutrition_service.dart';
+import 'utils/analytics_service.dart';
 
 void main() {
   runApp(const ProteinPaceApp());
@@ -306,6 +308,7 @@ class ProteinPaceApp extends StatelessWidget {
               nutrition: args['nutrition'] as NutritionData,
             );
           },
+          '/analytics': (context) => const AnalyticsDashboardScreen(),
         },
       ),
     );

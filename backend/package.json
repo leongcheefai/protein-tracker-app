@@ -25,6 +25,7 @@
   "dependencies": {
     "@prisma/client": "^5.7.1",
     "@supabase/supabase-js": "^2.57.2",
+    "axios": "^1.11.0",
     "bcrypt": "^5.1.1",
     "compression": "^1.7.4",
     "cors": "^2.8.5",
