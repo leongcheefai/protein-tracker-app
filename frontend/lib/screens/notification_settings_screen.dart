@@ -263,7 +263,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                   child: _buildTimeSelector(
                     'Start Time',
                     settings.doNotDisturbStart,
-                    (time) => settings.updateNotificationSettings(doNotDisturbStart: time),
+                    (time) => settings.updateLocalNotificationSettings(doNotDisturbStart: time),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -271,7 +271,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                   child: _buildTimeSelector(
                     'End Time',
                     settings.doNotDisturbEnd,
-                    (time) => settings.updateNotificationSettings(doNotDisturbEnd: time),
+                    (time) => settings.updateLocalNotificationSettings(doNotDisturbEnd: time),
                   ),
                 ),
               ],
@@ -399,7 +399,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                   CupertinoSwitch(
                     value: settings.nightlySummaryEnabled,
                     onChanged: (value) {
-                      settings.updateNotificationSettings(nightlySummaryEnabled: value);
+                      settings.updateLocalNotificationSettings(nightlySummaryEnabled: value);
                     },
                     activeTrackColor: AppColors.primary,
                   ),
