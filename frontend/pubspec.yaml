@@ -48,8 +48,11 @@ dependencies:
   google_sign_in: ^6.2.1
   sign_in_with_apple: ^6.1.0
   
-  # HTTP client
+  # HTTP client & API integration
   http: ^1.1.0
+  dio: ^5.4.0
+  connectivity_plus: ^5.0.0
+  flutter_secure_storage: ^9.0.0
 
 dev_dependencies:
   flutter_test:
