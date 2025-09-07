@@ -1,8 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
+import 'package:provider/provider.dart';
 import 'third_party_auth_loading_screen.dart';
 import '../main.dart';
+import '../providers/auth_provider.dart' as auth_provider;
 
 class AuthenticationWelcomeScreen extends StatefulWidget {
   const AuthenticationWelcomeScreen({super.key});
@@ -321,23 +323,53 @@ class _AuthenticationWelcomeScreenState extends State<AuthenticationWelcomeScree
   }
 
   void _handleGoogleSignIn() async {
-    Navigator.of(context).pushNamed(
-      '/third-party-auth-loading',
-      arguments: {
-        'provider': AuthProvider.google,
-        'onCancel': () => Navigator.of(context).pop(),
-      },
-    );
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final authProviderInstance = Provider.of<auth_provider.AuthProvider>(context, listen: false);
+      final success = await authProviderInstance.signInWithGoogle();
+      
+      if (!success) {
+        setState(() {
+          _errorMessage = authProviderInstance.errorMessage ?? 'Google sign in failed. Please try again.';
+          _isLoading = false;
+        });
+      }
+      // If successful, AuthProvider will handle navigation
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'An unexpected error occurred. Please try again.';
+        _isLoading = false;
+      });
+    }
   }
 
   void _handleAppleSignIn() async {
-    Navigator.of(context).pushNamed(
-      '/third-party-auth-loading',
-      arguments: {
-        'provider': AuthProvider.apple,
-        'onCancel': () => Navigator.of(context).pop(),
-      },
-    );
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final authProviderInstance = Provider.of<auth_provider.AuthProvider>(context, listen: false);
+      final success = await authProviderInstance.signInWithApple();
+      
+      if (!success) {
+        setState(() {
+          _errorMessage = authProviderInstance.errorMessage ?? 'Apple sign in failed. Please try again.';
+          _isLoading = false;
+        });
+      }
+      // If successful, AuthProvider will handle navigation
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'An unexpected error occurred. Please try again.';
+        _isLoading = false;
+      });
+    }
   }
 
   void _navigateToEmailSignup() {

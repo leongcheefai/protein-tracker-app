@@ -1,6 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../main.dart';
+import '../providers/auth_provider.dart';
+import '../utils/error_handler.dart';
 
 class EmailSignupScreen extends StatefulWidget {
   const EmailSignupScreen({super.key});
@@ -444,21 +447,35 @@ class _EmailSignupScreenState extends State<EmailSignupScreen> {
     });
 
     try {
-      // TODO: Implement Firebase Auth signup
-      // For now, simulate loading
-      await Future.delayed(const Duration(seconds: 2));
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final success = await authProvider.signUpWithEmail(
+        _emailController.text.trim(),
+        _passwordController.text,
+      );
       
-      // Simulate success - navigate to profile setup
-      if (mounted) {
-        Navigator.of(context).pushReplacementNamed(
-          '/profile-setup',
-          arguments: {
-            'name': _nameController.text,
-            'email': _emailController.text,
-            'profileImageUrl': null,
-            'isReturningUser': false,
-          },
-        );
+      if (success) {
+        // Signup successful - now update profile with display name
+        if (authProvider.currentUser != null) {
+          final updatedProfile = authProvider.currentUser!.copyWith(
+            displayName: _nameController.text.trim(),
+          );
+          await authProvider.updateUserProfile(updatedProfile);
+        }
+        
+        // AuthProvider will handle navigation via auth state listener
+        if (mounted) {
+          // Clear the form
+          _nameController.clear();
+          _emailController.clear();
+          _passwordController.clear();
+          _confirmPasswordController.clear();
+        }
+      } else {
+        // Show error from AuthProvider
+        setState(() {
+          _errorMessage = authProvider.errorMessage ?? 'Sign up failed. Please try again.';
+          _isLoading = false;
+        });
       }
     } catch (e) {
       setState(() {

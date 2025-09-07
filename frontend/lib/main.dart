@@ -1,5 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'services/service_locator.dart';
+import 'providers/auth_provider.dart';
 import 'screens/splash_screen.dart';
 import 'screens/authentication_welcome_screen.dart';
 import 'screens/email_signup_screen.dart';
@@ -41,9 +44,16 @@ import 'screens/analytics_dashboard_screen.dart';
 import 'utils/user_settings_provider.dart';
 import 'utils/meal_tracking_provider.dart';
 import 'utils/nutrition_service.dart';
-import 'utils/analytics_service.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize Firebase
+  await Firebase.initializeApp();
+  
+  // Initialize our service locator
+  await ServiceLocator().initialize();
+  
   runApp(const ProteinPaceApp());
 }
 
@@ -54,23 +64,26 @@ class ProteinPaceApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (context) => AuthProvider()..startAuthStateListener()),
         ChangeNotifierProvider(create: (context) => UserSettingsProvider()),
         ChangeNotifierProvider(create: (context) => MealTrackingProvider()),
       ],
-      child: CupertinoApp(
-        title: 'Fuelie',
-        debugShowCheckedModeBanner: false,
-        theme: const CupertinoThemeData(
-          primaryColor: AppColors.primary,
-          brightness: Brightness.light,
-          textTheme: CupertinoTextThemeData(
-            textStyle: TextStyle(
-              fontFamily: 'SF Pro Display',
+      child: Consumer<AuthProvider>(
+        builder: (context, authProvider, _) {
+          return CupertinoApp(
+            title: 'Fuelie',
+            debugShowCheckedModeBanner: false,
+            theme: const CupertinoThemeData(
+              primaryColor: AppColors.primary,
+              brightness: Brightness.light,
+              textTheme: CupertinoTextThemeData(
+                textStyle: TextStyle(
+                  fontFamily: 'SF Pro Display',
+                ),
+              ),
             ),
-          ),
-        ),
-        initialRoute: '/',
-        routes: {
+            home: _buildHomeScreen(authProvider),
+            routes: {
           '/': (context) => const SplashScreen(),
           '/auth-welcome': (context) => const AuthenticationWelcomeScreen(),
           '/welcome': (context) => const WelcomeScreen(),
@@ -309,9 +322,36 @@ class ProteinPaceApp extends StatelessWidget {
             );
           },
           '/analytics': (context) => const AnalyticsDashboardScreen(),
+            },
+          );
         },
       ),
     );
+  }
+
+  Widget _buildHomeScreen(AuthProvider authProvider) {
+    switch (authProvider.state) {
+      case AuthenticationState.unknown:
+        return const SplashScreen();
+      case AuthenticationState.unauthenticated:
+        return const AuthenticationWelcomeScreen();
+      case AuthenticationState.authenticating:
+        return const SplashScreen(); // or a loading screen
+      case AuthenticationState.authenticated:
+        // Check if user has complete profile, otherwise go to setup
+        if (authProvider.hasCompleteProfile) {
+          return UserHomeScreen(
+            height: authProvider.height ?? 170.0,
+            weight: authProvider.weight ?? 70.0,
+            trainingMultiplier: 1.8, // Default, can be made configurable later
+            goal: 'maintain', // Default, can be made configurable later
+            dailyProteinTarget: authProvider.dailyProteinGoal ?? 126.0,
+            meals: const {}, // Will be populated by MealTrackingProvider
+          );
+        } else {
+          return const WelcomeScreen(); // Profile setup flow
+        }
+    }
   }
 }
 

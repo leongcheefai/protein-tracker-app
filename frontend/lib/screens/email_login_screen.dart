@@ -1,6 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../main.dart';
+import '../providers/auth_provider.dart';
+import '../utils/error_handler.dart';
 
 class EmailLoginScreen extends StatefulWidget {
   const EmailLoginScreen({super.key});
@@ -303,19 +306,30 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
     });
 
     try {
-      // TODO: Implement Firebase Auth sign in
-      // For now, simulate loading
-      await Future.delayed(const Duration(seconds: 2));
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final success = await authProvider.signInWithEmail(
+        _emailController.text.trim(),
+        _passwordController.text,
+      );
       
-      // Simulate success - navigate to user home for returning users
-      if (mounted) {
-        // TODO: Navigate to user home with actual user data
-        // For now, navigate to welcome screen which will handle the flow
-        Navigator.of(context).pushReplacementNamed('/welcome');
+      if (success) {
+        // Authentication successful - AuthProvider will handle navigation
+        // via the auth state listener in main.dart
+        if (mounted) {
+          // Clear the form
+          _emailController.clear();
+          _passwordController.clear();
+        }
+      } else {
+        // Show error from AuthProvider
+        setState(() {
+          _errorMessage = authProvider.errorMessage ?? 'Sign in failed. Please try again.';
+          _isLoading = false;
+        });
       }
     } catch (e) {
       setState(() {
-        _errorMessage = 'Invalid email or password. Please try again.';
+        _errorMessage = 'An unexpected error occurred. Please try again.';
         _isLoading = false;
       });
     }
