@@ -212,6 +212,66 @@ export const validateTokenVerification = [
   handleValidationErrors,
 ];
 
+// Meal validation rules
+export const validateMealCreation = [
+  body('meal_type')
+    .isIn(['breakfast', 'lunch', 'dinner', 'snack'])
+    .withMessage('Meal type must be one of: breakfast, lunch, dinner, snack'),
+  body('timestamp')
+    .optional()
+    .isISO8601()
+    .withMessage('Timestamp must be a valid ISO 8601 date'),
+  body('photo_url')
+    .optional()
+    .isURL()
+    .withMessage('Photo URL must be a valid URL'),
+  body('notes')
+    .optional()
+    .trim()
+    .isLength({ max: 500 })
+    .withMessage('Notes must be less than 500 characters'),
+  body('foods')
+    .optional()
+    .isArray()
+    .withMessage('Foods must be an array'),
+  body('foods.*.food_id')
+    .if(body('foods').exists())
+    .isString()
+    .notEmpty()
+    .withMessage('Food ID is required for each food item'),
+  body('foods.*.quantity')
+    .if(body('foods').exists())
+    .isFloat({ min: 0.1, max: 5000 })
+    .withMessage('Quantity must be between 0.1 and 5000'),
+  body('foods.*.unit')
+    .if(body('foods').exists())
+    .isString()
+    .notEmpty()
+    .withMessage('Unit is required for each food item'),
+  handleValidationErrors,
+];
+
+export const validateMealUpdate = [
+  body('meal_type')
+    .optional()
+    .isIn(['breakfast', 'lunch', 'dinner', 'snack'])
+    .withMessage('Meal type must be one of: breakfast, lunch, dinner, snack'),
+  body('timestamp')
+    .optional()
+    .isISO8601()
+    .withMessage('Timestamp must be a valid ISO 8601 date'),
+  body('photo_url')
+    .optional()
+    .isURL()
+    .withMessage('Photo URL must be a valid URL'),
+  body('notes')
+    .optional()
+    .trim()
+    .isLength({ max: 500 })
+    .withMessage('Notes must be less than 500 characters'),
+  handleValidationErrors,
+];
+
 // Generic ID validation
 export const validateId = [
   param('id')

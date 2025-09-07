@@ -10,6 +10,7 @@ import { requestLogger } from './middleware/requestLogger';
 import authRoutes from './routes/auth';
 import userRoutes from './routes/user';
 import foodRoutes from './routes/food';
+import mealsRoutes from './routes/meals';
 import progressRoutes from './routes/progress';
 import analyticsRoutes from './routes/analytics';
 
@@ -58,6 +59,7 @@ app.get('/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/food', foodRoutes);
+app.use('/api/meals', mealsRoutes);
 app.use('/api/progress', progressRoutes);
 app.use('/api/analytics', analyticsRoutes);
 

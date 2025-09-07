@@ -163,6 +163,30 @@ export class DatabaseService {
     return data;
   }
 
+  static async updateMeal(mealId: string, updates: Database['public']['Tables']['meals']['Update']) {
+    const { data, error } = await supabase
+      .from('meals')
+      .update({ ...updates, updated_at: new Date().toISOString() })
+      .eq('id', mealId)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+
+  static async deleteMeal(mealId: string) {
+    const { data, error } = await supabase
+      .from('meals')
+      .delete()
+      .eq('id', mealId)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+
   static async getFoodById(id: string) {
     const { data, error } = await supabase
       .from('foods')

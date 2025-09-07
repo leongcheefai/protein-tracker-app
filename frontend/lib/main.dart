@@ -35,7 +35,11 @@ import 'screens/payment_success_screen.dart';
 import 'screens/subscription_management_screen.dart';
 import 'screens/premium_features_unlock_screen.dart';
 import 'screens/profile_setup_screen.dart';
+import 'screens/enhanced_meal_logging_screen.dart';
+import 'screens/meal_success_screen.dart';
 import 'utils/user_settings_provider.dart';
+import 'utils/meal_tracking_provider.dart';
+import 'utils/nutrition_service.dart';
 
 void main() {
   runApp(const ProteinPaceApp());
@@ -46,8 +50,11 @@ class ProteinPaceApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => UserSettingsProvider(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => UserSettingsProvider()),
+        ChangeNotifierProvider(create: (context) => MealTrackingProvider()),
+      ],
       child: CupertinoApp(
         title: 'Fuelie',
         debugShowCheckedModeBanner: false,
@@ -282,6 +289,21 @@ class ProteinPaceApp extends StatelessWidget {
               email: args['email'] as String,
               profileImageUrl: args['profileImageUrl'] as String?,
               isReturningUser: args['isReturningUser'] as bool? ?? false,
+            );
+          },
+          '/enhanced-meal-logging': (context) {
+            final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+            return EnhancedMealLoggingScreen(
+              imagePath: args?['imagePath'] as String?,
+              detectedFoods: args?['detectedFoods'] as List<Map<String, dynamic>>?,
+              preselectedMealType: args?['preselectedMealType'] as String?,
+            );
+          },
+          '/meal-success': (context) {
+            final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+            return MealSuccessScreen(
+              meal: args['meal'] as Meal,
+              nutrition: args['nutrition'] as NutritionData,
             );
           },
         },
