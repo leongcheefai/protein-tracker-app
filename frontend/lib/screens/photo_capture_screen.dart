@@ -1,5 +1,7 @@
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
+import 'package:provider/provider.dart';
+import '../providers/food_provider.dart';
 
 class PhotoCaptureScreen extends StatefulWidget {
   final String imagePath;
@@ -150,8 +152,31 @@ class _PhotoCaptureScreenState extends State<PhotoCaptureScreen> {
                         ),
                         child: Center(
                           child: _isProcessing
-                              ? const CupertinoActivityIndicator(
-                                  color: CupertinoColors.white,
+                              ? Consumer<FoodProvider>(
+                                  builder: (context, foodProvider, child) {
+                                    if (foodProvider.isUploading && foodProvider.uploadProgress > 0) {
+                                      return Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          const CupertinoActivityIndicator(
+                                            color: CupertinoColors.white,
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Text(
+                                            '${(foodProvider.uploadProgress * 100).toInt()}%',
+                                            style: const TextStyle(
+                                              color: CupertinoColors.white,
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                                    }
+                                    return const CupertinoActivityIndicator(
+                                      color: CupertinoColors.white,
+                                    );
+                                  },
                                 )
                               : const Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
@@ -200,24 +225,38 @@ class _PhotoCaptureScreenState extends State<PhotoCaptureScreen> {
   Future<void> _usePhoto() async {
     if (_isProcessing) return;
     
+    final foodProvider = Provider.of<FoodProvider>(context, listen: false);
+    
     try {
       setState(() {
         _isProcessing = true;
       });
       
-      // Simulate processing time
-      await Future.delayed(const Duration(milliseconds: 500));
+      // Start food detection using the backend
+      final success = await foodProvider.detectFoodFromPath(widget.imagePath);
       
       if (mounted) {
         setState(() {
           _isProcessing = false;
         });
         
-        Navigator.pushReplacementNamed(
-          context,
-          '/processing',
-          arguments: widget.imagePath,
-        );
+        if (success && foodProvider.hasDetectionResults) {
+          // Navigate to food detection results screen
+          Navigator.pushReplacementNamed(
+            context,
+            '/food-detection-results',
+            arguments: {
+              'imagePath': widget.imagePath,
+              'detectedFoods': foodProvider.detectedFoods.map((f) => f.toJson()).toList(),
+            },
+          );
+        } else {
+          // Show error dialog
+          _showErrorDialog(
+            'Food Detection Failed',
+            foodProvider.errorMessage ?? 'Unable to detect food in this image. Please try again with a clearer photo.',
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -225,20 +264,31 @@ class _PhotoCaptureScreenState extends State<PhotoCaptureScreen> {
           _isProcessing = false;
         });
         
-        showCupertinoDialog(
-          context: context,
-          builder: (context) => CupertinoAlertDialog(
-            title: const Text('Navigation Error'),
-            content: Text('Failed to proceed: $e'),
-            actions: [
-              CupertinoDialogAction(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('OK'),
-              ),
-            ],
-          ),
-        );
+        _showErrorDialog('Processing Error', 'Failed to process image: $e');
       }
     }
+  }
+
+  void _showErrorDialog(String title, String message) {
+    showCupertinoDialog(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: [
+          CupertinoDialogAction(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+          CupertinoDialogAction(
+            onPressed: () {
+              Navigator.pop(context); // Close dialog
+              _retakePhoto(); // Go back to retake
+            },
+            child: const Text('Retake Photo'),
+          ),
+        ],
+      ),
+    );
   }
 }
