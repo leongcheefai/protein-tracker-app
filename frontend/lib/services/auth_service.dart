@@ -1,4 +1,4 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'api_service.dart';
@@ -7,7 +7,7 @@ import '../models/dto/user_profile_dto.dart';
 
 class AuthService {
   final ApiService _apiService;
-  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  final SupabaseClient _supabase = Supabase.instance.client;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   AuthService(this._apiService);
@@ -17,31 +17,31 @@ class AuthService {
     String password,
   ) async {
     try {
-      // Sign in with Firebase
-      final credential = await _firebaseAuth.signInWithEmailAndPassword(
+      // Sign in with Supabase
+      final response = await _supabase.auth.signInWithPassword(
         email: email,
         password: password,
       );
 
-      if (credential.user == null) {
+      if (response.user == null) {
         return ApiResponse.error(
           ApiError.authentication('Sign in failed'),
         );
       }
 
-      // Get Firebase ID token
-      final idToken = await credential.user!.getIdToken();
-      if (idToken == null) {
+      // Get Supabase access token
+      final accessToken = response.session?.accessToken;
+      if (accessToken == null) {
         return ApiResponse.error(
           ApiError.authentication('Failed to get authentication token'),
         );
       }
       
       // Verify with backend and get user profile
-      return await _verifyTokenWithBackend(idToken);
-    } on FirebaseAuthException catch (e) {
+      return await _verifyTokenWithBackend(accessToken);
+    } on AuthException catch (e) {
       return ApiResponse.error(
-        ApiError.authentication(_getFirebaseErrorMessage(e.code)),
+        ApiError.authentication(e.message),
       );
     } catch (e) {
       return ApiResponse.error(
@@ -55,31 +55,31 @@ class AuthService {
     String password,
   ) async {
     try {
-      // Create user with Firebase
-      final credential = await _firebaseAuth.createUserWithEmailAndPassword(
+      // Create user with Supabase
+      final response = await _supabase.auth.signUp(
         email: email,
         password: password,
       );
 
-      if (credential.user == null) {
+      if (response.user == null) {
         return ApiResponse.error(
           ApiError.authentication('Sign up failed'),
         );
       }
 
-      // Get Firebase ID token
-      final idToken = await credential.user!.getIdToken();
-      if (idToken == null) {
+      // Get Supabase access token
+      final accessToken = response.session?.accessToken;
+      if (accessToken == null) {
         return ApiResponse.error(
           ApiError.authentication('Failed to get authentication token'),
         );
       }
       
       // Verify with backend and create user profile
-      return await _verifyTokenWithBackend(idToken);
-    } on FirebaseAuthException catch (e) {
+      return await _verifyTokenWithBackend(accessToken);
+    } on AuthException catch (e) {
       return ApiResponse.error(
-        ApiError.authentication(_getFirebaseErrorMessage(e.code)),
+        ApiError.authentication(e.message),
       );
     } catch (e) {
       return ApiResponse.error(
@@ -105,32 +105,35 @@ class AuthService {
       // Obtain the auth details from the request
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
 
-      // Create a new credential
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
+      if (googleAuth.idToken == null || googleAuth.accessToken == null) {
+        return ApiResponse.error(
+          ApiError.authentication('Failed to get Google tokens'),
+        );
+      }
+
+      // Sign in to Supabase with Google credential
+      final response = await _supabase.auth.signInWithIdToken(
+        provider: OAuthProvider.google,
+        idToken: googleAuth.idToken!,
+        accessToken: googleAuth.accessToken!,
       );
 
-      // Sign in to Firebase with the Google credential
-      final UserCredential userCredential = 
-          await _firebaseAuth.signInWithCredential(credential);
-
-      if (userCredential.user == null) {
+      if (response.user == null) {
         return ApiResponse.error(
           ApiError.authentication('Google sign in failed'),
         );
       }
 
-      // Get Firebase ID token
-      final idToken = await userCredential.user!.getIdToken();
-      if (idToken == null) {
+      // Get Supabase access token
+      final accessToken = response.session?.accessToken;
+      if (accessToken == null) {
         return ApiResponse.error(
           ApiError.authentication('Failed to get authentication token'),
         );
       }
       
       // Verify with backend
-      return await _verifyTokenWithBackend(idToken);
+      return await _verifyTokenWithBackend(accessToken);
     } catch (e) {
       return ApiResponse.error(
         ApiError.authentication('Google sign in error: ${e.toString()}'),
@@ -148,32 +151,34 @@ class AuthService {
         ],
       );
 
-      // Create an Apple credential
-      final oauthCredential = OAuthProvider("apple.com").credential(
-        idToken: appleCredential.identityToken,
-        accessToken: appleCredential.authorizationCode,
+      if (appleCredential.identityToken == null) {
+        return ApiResponse.error(
+          ApiError.authentication('Failed to get Apple ID token'),
+        );
+      }
+
+      // Sign in to Supabase with Apple credential
+      final response = await _supabase.auth.signInWithIdToken(
+        provider: OAuthProvider.apple,
+        idToken: appleCredential.identityToken!,
       );
 
-      // Sign in to Firebase with the Apple credential
-      final UserCredential userCredential = 
-          await _firebaseAuth.signInWithCredential(oauthCredential);
-
-      if (userCredential.user == null) {
+      if (response.user == null) {
         return ApiResponse.error(
           ApiError.authentication('Apple sign in failed'),
         );
       }
 
-      // Get Firebase ID token
-      final idToken = await userCredential.user!.getIdToken();
-      if (idToken == null) {
+      // Get Supabase access token
+      final accessToken = response.session?.accessToken;
+      if (accessToken == null) {
         return ApiResponse.error(
           ApiError.authentication('Failed to get authentication token'),
         );
       }
       
       // Verify with backend
-      return await _verifyTokenWithBackend(idToken);
+      return await _verifyTokenWithBackend(accessToken);
     } catch (e) {
       return ApiResponse.error(
         ApiError.authentication('Apple sign in error: ${e.toString()}'),
@@ -181,14 +186,14 @@ class AuthService {
     }
   }
 
-  Future<ApiResponse<UserProfileDto>> _verifyTokenWithBackend(String firebaseToken) async {
-    // Set the Firebase token temporarily for verification
-    await _apiService.setAuthToken(firebaseToken);
+  Future<ApiResponse<UserProfileDto>> _verifyTokenWithBackend(String supabaseToken) async {
+    // Set the Supabase token temporarily for verification
+    await _apiService.setAuthToken(supabaseToken);
     
     // Call backend to verify token and get/create user profile
     final response = await _apiService.post<UserProfileDto>(
       '/auth/verify',
-      {'token': firebaseToken},
+      {'token': supabaseToken},
       fromJson: (json) => UserProfileDto.fromJson(json),
     );
 
@@ -204,8 +209,8 @@ class AuthService {
 
   Future<void> signOut() async {
     try {
-      // Sign out from Firebase
-      await _firebaseAuth.signOut();
+      // Sign out from Supabase
+      await _supabase.auth.signOut();
       
       // Sign out from Google
       await _googleSignIn.signOut();
@@ -223,12 +228,12 @@ class AuthService {
   }
 
   Future<void> refreshToken() async {
-    final currentUser = _firebaseAuth.currentUser;
-    if (currentUser != null) {
+    final session = _supabase.auth.currentSession;
+    if (session != null) {
       try {
-        final idToken = await currentUser.getIdToken(true); // Force refresh
-        if (idToken != null) {
-          await _apiService.setAuthToken(idToken);
+        final response = await _supabase.auth.refreshSession();
+        if (response.session?.accessToken != null) {
+          await _apiService.setAuthToken(response.session!.accessToken);
         } else {
           throw Exception('Failed to refresh token');
         }
@@ -240,32 +245,10 @@ class AuthService {
     }
   }
 
-  User? get currentUser => _firebaseAuth.currentUser;
+  User? get currentUser => _supabase.auth.currentUser;
   
-  bool get isAuthenticated => _firebaseAuth.currentUser != null;
+  bool get isAuthenticated => _supabase.auth.currentUser != null;
 
-  Stream<User?> get authStateChanges => _firebaseAuth.authStateChanges();
+  Stream<AuthState> get authStateChanges => _supabase.auth.onAuthStateChange;
 
-  String _getFirebaseErrorMessage(String code) {
-    switch (code) {
-      case 'user-not-found':
-        return 'No user found with this email address';
-      case 'wrong-password':
-        return 'Incorrect password';
-      case 'email-already-in-use':
-        return 'An account already exists with this email address';
-      case 'weak-password':
-        return 'Password is too weak';
-      case 'invalid-email':
-        return 'Invalid email address';
-      case 'user-disabled':
-        return 'This account has been disabled';
-      case 'too-many-requests':
-        return 'Too many failed attempts. Please try again later';
-      case 'operation-not-allowed':
-        return 'This sign-in method is not enabled';
-      default:
-        return 'Authentication error: $code';
-    }
-  }
 }

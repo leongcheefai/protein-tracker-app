@@ -1,7 +1,8 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'config/supabase_config.dart';
 import 'services/service_locator.dart';
 import 'providers/auth_provider.dart';
 import 'providers/user_profile_provider.dart';
@@ -52,16 +53,32 @@ import 'utils/nutrition_service.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Initialize Firebase with error handling
+  // Load environment variables first
+  await SupabaseConfig.load();
+  
+  // Initialize Supabase with error handling
   try {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
+    // Validate configuration before initializing
+    SupabaseConfig.validateConfiguration();
+    
+    await Supabase.initialize(
+      url: SupabaseConfig.validatedUrl,
+      anonKey: SupabaseConfig.validatedAnonKey,
     );
-    print('Firebase initialized successfully');
+    
+    if (kDebugMode) {
+      print('✅ Supabase initialized successfully');
+    }
   } catch (e) {
-    print('Firebase initialization failed: $e');
-    // For development, continue without Firebase
-    print('Continuing without Firebase for development...');
+    if (kDebugMode) {
+      print('❌ Supabase initialization failed: $e');
+      if (!SupabaseConfig.isConfigured) {
+        print(SupabaseConfig.configurationStatus);
+      }
+    }
+    
+    // Re-throw the error so the app doesn't start with invalid config
+    rethrow;
   }
   
   // Initialize our service locator

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'config/supabase_config.dart';
 import 'services/service_locator.dart';
 
 /// Main entry point for API integration testing
@@ -7,8 +8,23 @@ import 'services/service_locator.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Initialize Firebase
-  await Firebase.initializeApp();
+  // Load environment variables first
+  await SupabaseConfig.load();
+  
+  // Initialize Supabase
+  try {
+    SupabaseConfig.validateConfiguration();
+    await Supabase.initialize(
+      url: SupabaseConfig.validatedUrl,
+      anonKey: SupabaseConfig.validatedAnonKey,
+    );
+    print('✅ Supabase initialized successfully');
+  } catch (e) {
+    print('❌ Supabase initialization failed: $e');
+    if (!SupabaseConfig.isConfigured) {
+      print(SupabaseConfig.configurationStatus);
+    }
+  }
   
   // Initialize our service locator
   await ServiceLocator().initialize();

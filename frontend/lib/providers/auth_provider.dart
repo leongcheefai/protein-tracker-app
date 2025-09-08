@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/service_locator.dart';
 import '../services/auth_service.dart';
 import '../models/api_response.dart';
@@ -41,8 +41,8 @@ class AuthProvider extends ChangeNotifier {
   Future<void> _initializeAuth() async {
     try {
       // Check if user is already authenticated
-      final firebaseUser = _authService.currentUser;
-      if (firebaseUser != null) {
+      final supabaseUser = _authService.currentUser;
+      if (supabaseUser != null) {
         // Try to load existing backend token and verify
         await _authService.refreshToken();
         
@@ -206,9 +206,10 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  // Listen to Firebase auth state changes
+  // Listen to Supabase auth state changes
   void startAuthStateListener() {
-    _authService.authStateChanges.listen((User? user) async {
+    _authService.authStateChanges.listen((AuthState authState) async {
+      final user = authState.session?.user;
       if (user == null && isAuthenticated) {
         // User signed out externally, update our state
         await _signOutInternal();
