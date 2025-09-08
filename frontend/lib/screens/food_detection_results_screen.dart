@@ -270,7 +270,7 @@ class _FoodDetectionResultsScreenState extends State<FoodDetectionResultsScreen>
                                   child: Row(
                                     children: [
                                       Icon(
-                                        CupertinoIcons.scale_mass,
+                                        CupertinoIcons.cube_box,
                                         size: 16,
                                         color: Colors.grey[600],
                                       ),
