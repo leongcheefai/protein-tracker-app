@@ -1,49 +1,53 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../main.dart';
 import '../../utils/meal_utils.dart';
 import '../../utils/progress_utils.dart';
+import '../../utils/meal_tracking_provider.dart';
 
 class MealProgress extends StatelessWidget {
   final Map<String, bool> meals;
-  final Map<String, double> mealProgress;
   final double dailyProteinTarget;
 
   const MealProgress({
     super.key,
     required this.meals,
-    required this.mealProgress,
     required this.dailyProteinTarget,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Meal Progress',
-          style: TextStyle(
-            color: AppColors.textPrimary,
-            fontSize: 24,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        
-        const SizedBox(height: 16),
-        
-        SizedBox(
-          height: 120,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: meals.entries.length,
-            itemBuilder: (context, index) {
-              final mealEntry = meals.entries.elementAt(index);
-              final mealName = mealEntry.key;
-              final isEnabled = mealEntry.value;
-              final progress = mealProgress[mealName] ?? 0.0;
-              final target = dailyProteinTarget / 
-                  meals.values.where((enabled) => enabled).length;
-              final mealPercentage = target > 0 ? (progress / target) : 0.0;
+    return Consumer<MealTrackingProvider>(
+      builder: (context, mealProvider, child) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Meal Progress',
+              style: TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: 24,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            
+            const SizedBox(height: 16),
+            
+            SizedBox(
+              height: 120,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: meals.entries.length,
+                itemBuilder: (context, index) {
+                  final mealEntry = meals.entries.elementAt(index);
+                  final mealName = mealEntry.key;
+                  final isEnabled = mealEntry.value;
+                  
+                  // Get real progress from provider
+                  final mealSummary = mealProvider.mealSummary;
+                  final progress = (mealSummary[mealName]?['protein'] ?? 0.0).toDouble();
+                  final target = (mealSummary[mealName]?['target'] ?? (dailyProteinTarget / 4)).toDouble();
+                  final mealPercentage = target > 0 ? (progress / target) : 0.0;
               
               return Container(
                 width: 90,
@@ -110,7 +114,9 @@ class MealProgress extends StatelessWidget {
             },
           ),
         ),
-      ],
+        ],
+      );
+      },
     );
   }
 }

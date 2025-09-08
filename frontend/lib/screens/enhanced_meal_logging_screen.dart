@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '../main.dart';
 import '../utils/nutrition_service.dart';
 import '../utils/meal_tracking_provider.dart';
+import '../models/dto/meal_dto.dart';
+import '../models/dto/food_dto.dart';
 
 class EnhancedMealLoggingScreen extends StatefulWidget {
   final String? imagePath;
@@ -197,12 +199,22 @@ class _EnhancedMealLoggingScreenState extends State<EnhancedMealLoggingScreen> {
     try {
       final mealTracker = Provider.of<MealTrackingProvider>(context, listen: false);
       
-      final foods = _selectedFoods.map((mealFood) => {
-        'food_id': mealFood.food.id,
-        'quantity': mealFood.quantity,
-        'unit': mealFood.unit,
-        'nutrition_data': mealFood.nutritionData.toJson(),
-      }).toList();
+      final foods = _selectedFoods.map((mealFood) => MealFoodDto(
+        id: '',
+        mealId: '',
+        foodId: mealFood.food.id,
+        quantity: mealFood.quantity,
+        unit: mealFood.unit,
+        nutritionData: NutritionDataDto(
+          calories: mealFood.nutritionData.calories,
+          protein: mealFood.nutritionData.protein,
+          carbs: mealFood.nutritionData.carbs,
+          fat: mealFood.nutritionData.fat,
+          fiber: mealFood.nutritionData.fiber,
+          sugar: mealFood.nutritionData.sugar,
+          sodium: mealFood.nutritionData.sodium,
+        ),
+      )).toList();
 
       final meal = await mealTracker.createMeal(
         mealType: _selectedMeal,
@@ -211,17 +223,19 @@ class _EnhancedMealLoggingScreenState extends State<EnhancedMealLoggingScreen> {
         foods: foods,
       );
 
-      if (meal != null) {
-        Navigator.pushReplacementNamed(
-          context,
-          '/meal-success',
-          arguments: {
-            'meal': meal,
-            'nutrition': _totalNutrition,
-          },
-        );
-      } else {
-        _showError('Failed to save meal');
+      if (mounted) {
+        if (meal != null) {
+          Navigator.pushReplacementNamed(
+            context,
+            '/meal-success',
+            arguments: {
+              'meal': meal,
+              'nutrition': _totalNutrition,
+            },
+          );
+        } else {
+          _showError('Failed to save meal');
+        }
       }
     } catch (e) {
       _showError('Error saving meal: $e');

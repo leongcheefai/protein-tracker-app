@@ -1,39 +1,71 @@
 import 'package:flutter/foundation.dart';
+import '../services/service_locator.dart';
+import '../services/meal_service.dart';
+import '../models/dto/meal_dto.dart';
+import '../models/dto/food_dto.dart';
 import 'nutrition_service.dart';
 
 class MealTrackingProvider extends ChangeNotifier {
-  List<Meal> _meals = [];
-  Map<String, dynamic>? _todaysSummary;
+  List<MealDto> _meals = [];
+  NutritionSummaryDto? _todaysSummary;
   bool _isLoading = false;
   String? _error;
+  
+  final MealService _mealService;
+
+  MealTrackingProvider() : _mealService = ServiceLocator().mealService;
 
   // Getters
-  List<Meal> get meals => _meals;
-  Map<String, dynamic>? get todaysSummary => _todaysSummary;
+  List<MealDto> get meals => _meals;
+  NutritionSummaryDto? get todaysSummary => _todaysSummary;
   bool get isLoading => _isLoading;
   String? get error => _error;
 
   // Daily totals
-  double get todaysTotalProtein => _todaysSummary?['totalProtein']?.toDouble() ?? 0.0;
-  double get todaysTotalCalories => _todaysSummary?['totalCalories']?.toDouble() ?? 0.0;
-  double get dailyProteinGoal => _todaysSummary?['dailyGoal']?.toDouble() ?? 100.0;
-  int get todaysProgress => _todaysSummary?['progress'] ?? 0;
+  double get todaysTotalProtein => _todaysSummary?.totalNutrition.protein ?? 0.0;
+  double get todaysTotalCalories => _todaysSummary?.totalNutrition.calories ?? 0.0;
+  double get dailyProteinGoal => _todaysSummary?.proteinGoal ?? 100.0;
+  double get todaysProgress => _todaysSummary?.proteinProgress ?? 0.0;
 
   // Meal breakdown for today
-  Map<String, dynamic> get mealSummary => _todaysSummary?['mealSummary'] ?? {
-    'breakfast': {'count': 0, 'protein': 0.0, 'target': 25.0},
-    'lunch': {'count': 0, 'protein': 0.0, 'target': 25.0},
-    'dinner': {'count': 0, 'protein': 0.0, 'target': 25.0},
-    'snack': {'count': 0, 'protein': 0.0, 'target': 25.0},
-  };
+  Map<String, dynamic> get mealSummary {
+    if (_todaysSummary == null) {
+      return {
+        'breakfast': {'count': 0, 'protein': 0.0, 'target': 25.0},
+        'lunch': {'count': 0, 'protein': 0.0, 'target': 25.0},
+        'dinner': {'count': 0, 'protein': 0.0, 'target': 25.0},
+        'snack': {'count': 0, 'protein': 0.0, 'target': 25.0},
+      };
+    }
+    
+    final breakdown = <String, dynamic>{};
+    for (final entry in _todaysSummary!.mealBreakdown.entries) {
+      breakdown[entry.key] = {
+        'count': 1, // Simplified - would need more data from backend
+        'protein': entry.value.protein,
+        'target': dailyProteinGoal / 4, // Divide by 4 meals equally
+      };
+    }
+    
+    // Ensure all meal types exist
+    for (final meal in ['breakfast', 'lunch', 'dinner', 'snack']) {
+      breakdown.putIfAbsent(meal, () => {
+        'count': 0,
+        'protein': 0.0,
+        'target': dailyProteinGoal / 4,
+      });
+    }
+    
+    return breakdown;
+  }
 
   // Filter meals by type
-  List<Meal> getMealsByType(String mealType) {
+  List<MealDto> getMealsByType(String mealType) {
     return _meals.where((meal) => meal.mealType.toLowerCase() == mealType.toLowerCase()).toList();
   }
 
   // Get meals for today
-  List<Meal> get todaysMeals {
+  List<MealDto> get todaysMeals {
     final today = DateTime.now();
     return _meals.where((meal) {
       return meal.timestamp.year == today.year &&
@@ -43,7 +75,7 @@ class MealTrackingProvider extends ChangeNotifier {
   }
 
   // Get meals for a specific date
-  List<Meal> getMealsForDate(DateTime date) {
+  List<MealDto> getMealsForDate(DateTime date) {
     return _meals.where((meal) {
       return meal.timestamp.year == date.year &&
              meal.timestamp.month == date.month &&
@@ -55,8 +87,13 @@ class MealTrackingProvider extends ChangeNotifier {
   Future<void> loadTodaysSummary() async {
     _setLoading(true);
     try {
-      _todaysSummary = await NutritionService.getTodaysSummary();
-      _error = null;
+      final response = await _mealService.getTodaysSummary();
+      if (response.success && response.data != null) {
+        _todaysSummary = response.data!;
+        _error = null;
+      } else {
+        _error = response.error?.message ?? 'Failed to load today\'s summary';
+      }
       notifyListeners();
     } catch (e) {
       _error = e.toString();
@@ -68,18 +105,25 @@ class MealTrackingProvider extends ChangeNotifier {
 
   // Load meals with optional filtering
   Future<void> loadMeals({
-    String? startDate,
-    String? endDate,
+    DateTime? date,
     String? mealType,
+    int? limit,
+    int? offset,
   }) async {
     _setLoading(true);
     try {
-      _meals = await NutritionService.getUserMeals(
-        startDate: startDate,
-        endDate: endDate,
+      final response = await _mealService.getMeals(
+        date: date,
         mealType: mealType,
+        limit: limit,
+        offset: offset,
       );
-      _error = null;
+      if (response.success && response.data != null) {
+        _meals = response.data!;
+        _error = null;
+      } else {
+        _error = response.error?.message ?? 'Failed to load meals';
+      }
       notifyListeners();
     } catch (e) {
       _error = e.toString();
@@ -90,31 +134,42 @@ class MealTrackingProvider extends ChangeNotifier {
   }
 
   // Create a new meal
-  Future<Meal?> createMeal({
+  Future<MealDto?> createMeal({
     required String mealType,
     DateTime? timestamp,
     String? photoUrl,
     String? notes,
-    List<Map<String, dynamic>>? foods,
+    List<MealFoodDto>? foods,
   }) async {
     _setLoading(true);
     try {
-      final meal = await NutritionService.createMeal(
+      // Create a new MealDto instance
+      final newMeal = MealDto(
+        id: '', // Will be assigned by backend
+        userId: '', // Will be assigned by backend
         mealType: mealType,
-        timestamp: timestamp,
+        timestamp: timestamp ?? DateTime.now(),
         photoUrl: photoUrl,
         notes: notes,
-        foods: foods,
+        foods: foods ?? [],
       );
+
+      final response = await _mealService.createMeal(newMeal);
       
-      _meals.insert(0, meal); // Add to beginning of list
-      _error = null;
-      notifyListeners();
-      
-      // Refresh today's summary
-      loadTodaysSummary();
-      
-      return meal;
+      if (response.success && response.data != null) {
+        _meals.insert(0, response.data!); // Add to beginning of list
+        _error = null;
+        notifyListeners();
+        
+        // Refresh today's summary
+        loadTodaysSummary();
+        
+        return response.data!;
+      } else {
+        _error = response.error?.message ?? 'Failed to create meal';
+        notifyListeners();
+        return null;
+      }
     } catch (e) {
       _error = e.toString();
       notifyListeners();
@@ -125,22 +180,28 @@ class MealTrackingProvider extends ChangeNotifier {
   }
 
   // Update a meal
-  Future<bool> updateMeal(String id, Map<String, dynamic> updates) async {
+  Future<bool> updateMeal(String id, MealDto updatedMeal) async {
     _setLoading(true);
     try {
-      final updatedMeal = await NutritionService.updateMeal(id, updates);
+      final response = await _mealService.updateMeal(id, updatedMeal);
       
-      final index = _meals.indexWhere((meal) => meal.id == id);
-      if (index != -1) {
-        _meals[index] = updatedMeal;
-        notifyListeners();
+      if (response.success && response.data != null) {
+        final index = _meals.indexWhere((meal) => meal.id == id);
+        if (index != -1) {
+          _meals[index] = response.data!;
+          notifyListeners();
+          
+          // Refresh today's summary
+          loadTodaysSummary();
+        }
         
-        // Refresh today's summary
-        loadTodaysSummary();
+        _error = null;
+        return true;
+      } else {
+        _error = response.error?.message ?? 'Failed to update meal';
+        notifyListeners();
+        return false;
       }
-      
-      _error = null;
-      return true;
     } catch (e) {
       _error = e.toString();
       notifyListeners();
@@ -154,16 +215,22 @@ class MealTrackingProvider extends ChangeNotifier {
   Future<bool> deleteMeal(String id) async {
     _setLoading(true);
     try {
-      await NutritionService.deleteMeal(id);
+      final response = await _mealService.deleteMeal(id);
       
-      _meals.removeWhere((meal) => meal.id == id);
-      _error = null;
-      notifyListeners();
-      
-      // Refresh today's summary
-      loadTodaysSummary();
-      
-      return true;
+      if (response.success) {
+        _meals.removeWhere((meal) => meal.id == id);
+        _error = null;
+        notifyListeners();
+        
+        // Refresh today's summary
+        loadTodaysSummary();
+        
+        return true;
+      } else {
+        _error = response.error?.message ?? 'Failed to delete meal';
+        notifyListeners();
+        return false;
+      }
     } catch (e) {
       _error = e.toString();
       notifyListeners();
@@ -174,13 +241,18 @@ class MealTrackingProvider extends ChangeNotifier {
   }
 
   // Load meals for a specific date
-  Future<Map<String, dynamic>?> loadMealsForDate(DateTime date) async {
+  Future<NutritionSummaryDto?> loadMealsForDate(DateTime date) async {
     _setLoading(true);
     try {
-      final dateString = '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-      final result = await NutritionService.getMealsByDate(dateString);
-      _error = null;
-      return result;
+      final response = await _mealService.getDateSummary(date);
+      if (response.success && response.data != null) {
+        _error = null;
+        return response.data!;
+      } else {
+        _error = response.error?.message ?? 'Failed to load meals for date';
+        notifyListeners();
+        return null;
+      }
     } catch (e) {
       _error = e.toString();
       notifyListeners();
@@ -249,15 +321,15 @@ class MealTrackingProvider extends ChangeNotifier {
   }
 
   // Quick add meal (simplified creation)
-  Future<Meal?> quickAddMeal({
+  Future<MealDto?> quickAddMeal({
     required String mealType,
     required String foodName,
     required double proteinContent,
     required double portionSize,
     double? calories,
   }) async {
-    // Create a simplified food entry for quick adds
-    final nutritionData = NutritionData(
+    // Create a simplified nutrition data for quick adds
+    final nutritionData = NutritionDataDto(
       calories: calories ?? 0,
       protein: proteinContent,
       carbs: 0,
@@ -267,19 +339,19 @@ class MealTrackingProvider extends ChangeNotifier {
       sodium: 0,
     );
 
-    final foods = [
-      {
-        'food_id': 'quick-add', // Special ID for quick adds
-        'quantity': portionSize,
-        'unit': 'grams',
-        'nutrition_data': nutritionData.toJson(),
-        'custom_name': foodName,
-      }
-    ];
+    // Create a MealFoodDto for the quick add
+    final mealFood = MealFoodDto(
+      id: '', // Will be assigned by backend
+      mealId: '', // Will be assigned by backend
+      foodId: 'quick-add', // Special ID for quick adds
+      quantity: portionSize,
+      unit: 'grams',
+      nutritionData: nutritionData,
+    );
 
     return await createMeal(
       mealType: mealType,
-      foods: foods,
+      foods: [mealFood],
     );
   }
 
@@ -296,7 +368,7 @@ class MealTrackingProvider extends ChangeNotifier {
     
     final totalProtein = weekMeals.fold<double>(
       0.0,
-      (sum, meal) => sum + meal.nutrition.protein,
+      (sum, meal) => sum + (meal.totalNutrition?.protein ?? 0.0),
     );
     
     return totalProtein / 7; // Average per day

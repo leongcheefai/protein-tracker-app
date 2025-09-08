@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
+import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../main.dart';
+import '../utils/meal_tracking_provider.dart';
 import '../widgets/user_home/enhanced_header.dart';
 import '../widgets/user_home/progress_visualization.dart';
 import '../widgets/user_home/meal_progress.dart';
@@ -154,6 +156,16 @@ class _UserHomeScreenState extends State<UserHomeScreen>
     _initializeAnimations();
     _startAnimations();
     _initializeEditControllers();
+    _initializeMealData();
+  }
+  
+  void _initializeMealData() {
+    // Initialize meal tracking data when home screen loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final mealProvider = Provider.of<MealTrackingProvider>(context, listen: false);
+      mealProvider.loadTodaysSummary();
+      mealProvider.loadMeals();
+    });
   }
 
   void _initializeAnimations() {
@@ -442,7 +454,6 @@ class _UserHomeScreenState extends State<UserHomeScreen>
                         // Per-meal Mini-rings
                         MealProgress(
                           meals: widget.meals,
-                          mealProgress: _mealProgress,
                           dailyProteinTarget: widget.dailyProteinTarget,
                         ),
                         

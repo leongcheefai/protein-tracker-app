@@ -1,6 +1,10 @@
 import 'package:flutter/cupertino.dart';
+import 'package:provider/provider.dart';
 import 'dart:math' as math;
 import '../main.dart';
+import '../utils/meal_tracking_provider.dart';
+import '../models/dto/meal_dto.dart';
+import '../models/dto/food_dto.dart';
 
 class MealAssignmentScreen extends StatefulWidget {
   final String imagePath;
@@ -70,20 +74,87 @@ class _MealAssignmentScreenState extends State<MealAssignmentScreen> {
     });
   }
 
-  void _save() {
-    Navigator.pushNamed(
-      context,
-      '/confirmation',
-      arguments: {
-        'imagePath': widget.imagePath,
-        'foodName': widget.detectedFoods[widget.selectedFoodIndex]['name'],
-        'portion': widget.portion,
-        'protein': widget.protein,
-        'meal': _selectedMeal,
-        'mealProgress': _mealProgress,
-        'mealTargets': _mealTargets,
-      },
-    );
+  void _save() async {
+    final mealProvider = Provider.of<MealTrackingProvider>(context, listen: false);
+    final selectedFood = widget.detectedFoods[widget.selectedFoodIndex];
+    
+    try {
+      // Create nutrition data for the portion
+      final nutritionData = NutritionDataDto(
+        calories: (selectedFood['calories'] ?? 0).toDouble() * (widget.portion / 100),
+        protein: widget.protein,
+        carbs: (selectedFood['carbs'] ?? 0).toDouble() * (widget.portion / 100),
+        fat: (selectedFood['fat'] ?? 0).toDouble() * (widget.portion / 100),
+      );
+      
+      // Create meal food entry
+      final mealFood = MealFoodDto(
+        id: '',
+        mealId: '',
+        foodId: selectedFood['id'] ?? 'detected-food',
+        quantity: widget.portion,
+        unit: 'grams',
+        nutritionData: nutritionData,
+      );
+      
+      // Save meal to backend
+      final meal = await mealProvider.createMeal(
+        mealType: _selectedMeal,
+        photoUrl: widget.imagePath,
+        notes: 'Added via food detection',
+        foods: [mealFood],
+      );
+      
+      if (mounted && meal != null) {
+        // Navigate to confirmation screen on success
+        Navigator.pushNamed(
+          context,
+          '/confirmation',
+          arguments: {
+            'imagePath': widget.imagePath,
+            'foodName': selectedFood['name'],
+            'portion': widget.portion,
+            'protein': widget.protein,
+            'meal': _selectedMeal,
+            'mealProgress': _mealProgress,
+            'mealTargets': _mealTargets,
+            'success': true,
+          },
+        );
+      } else if (mounted) {
+        // Show error if meal creation failed
+        showCupertinoDialog(
+          context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: const Text('Error'),
+            content: Text(mealProvider.error ?? 'Failed to save meal'),
+            actions: [
+              CupertinoDialogAction(
+                child: const Text('OK'),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ],
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        // Show error dialog
+        showCupertinoDialog(
+          context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: const Text('Error'),
+            content: Text('Failed to save meal: $e'),
+            actions: [
+              CupertinoDialogAction(
+                child: const Text('OK'),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ],
+          ),
+        );
+      }
+    }
   }
 
   Map<String, dynamic> get selectedFood => widget.detectedFoods[widget.selectedFoodIndex];
