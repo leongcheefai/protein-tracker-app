@@ -4,7 +4,6 @@ import '../services/service_locator.dart';
 import '../services/food_service.dart';
 import '../services/camera_service.dart';
 import '../models/dto/food_dto.dart';
-import '../models/api_response.dart';
 
 class FoodProvider extends ChangeNotifier {
   final FoodService _foodService = ServiceLocator().foodService;

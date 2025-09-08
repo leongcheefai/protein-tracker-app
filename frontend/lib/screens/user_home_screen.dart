@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../main.dart';
 import '../utils/meal_tracking_provider.dart';
+import '../providers/progress_provider.dart';
 import '../widgets/user_home/enhanced_header.dart';
 import '../widgets/user_home/progress_visualization.dart';
 import '../widgets/user_home/meal_progress.dart';
@@ -160,11 +161,18 @@ class _UserHomeScreenState extends State<UserHomeScreen>
   }
   
   void _initializeMealData() {
-    // Initialize meal tracking data when home screen loads
+    // Initialize meal tracking and progress data when home screen loads
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final mealProvider = Provider.of<MealTrackingProvider>(context, listen: false);
+      final progressProvider = Provider.of<ProgressProvider>(context, listen: false);
+      
       mealProvider.loadTodaysSummary();
       mealProvider.loadMeals();
+      
+      // Initialize progress data if needed
+      if (progressProvider.needsRefresh) {
+        progressProvider.loadProgressData();
+      }
     });
   }
 

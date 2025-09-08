@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:provider/provider.dart';
-import 'third_party_auth_loading_screen.dart';
 import '../main.dart';
 import '../providers/auth_provider.dart' as auth_provider;
 

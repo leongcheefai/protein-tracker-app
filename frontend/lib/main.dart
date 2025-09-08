@@ -5,6 +5,7 @@ import 'services/service_locator.dart';
 import 'providers/auth_provider.dart';
 import 'providers/user_profile_provider.dart';
 import 'providers/food_provider.dart';
+import 'providers/progress_provider.dart';
 import 'screens/splash_screen.dart';
 import 'screens/authentication_welcome_screen.dart';
 import 'screens/email_signup_screen.dart';
@@ -71,6 +72,7 @@ class ProteinPaceApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => FoodProvider()),
         ChangeNotifierProvider(create: (context) => UserSettingsProvider()),
         ChangeNotifierProvider(create: (context) => MealTrackingProvider()),
+        ChangeNotifierProvider(create: (context) => ProgressProvider()),
       ],
       child: Consumer2<AuthProvider, UserProfileProvider>(
         builder: (context, authProvider, profileProvider, _) {
