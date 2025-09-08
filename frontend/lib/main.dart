@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 import 'services/service_locator.dart';
 import 'providers/auth_provider.dart';
 import 'providers/user_profile_provider.dart';
@@ -51,8 +52,17 @@ import 'utils/nutrition_service.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Initialize Firebase
-  await Firebase.initializeApp();
+  // Initialize Firebase with error handling
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    print('Firebase initialized successfully');
+  } catch (e) {
+    print('Firebase initialization failed: $e');
+    // For development, continue without Firebase
+    print('Continuing without Firebase for development...');
+  }
   
   // Initialize our service locator
   await ServiceLocator().initialize();
