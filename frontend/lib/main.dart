@@ -107,7 +107,6 @@ class ProteinPaceApp extends StatelessWidget {
             ),
             home: _buildHomeScreen(authProvider),
             routes: {
-          '/': (context) => const SplashScreen(),
           '/auth-welcome': (context) => const AuthenticationWelcomeScreen(),
           '/welcome': (context) => const WelcomeScreen(),
           '/email-signup': (context) => const EmailSignupScreen(),

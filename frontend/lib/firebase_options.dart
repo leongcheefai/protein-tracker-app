@@ -58,12 +58,12 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'demo-ios-api-key',
-    appId: '1:123456789:ios:demo',
-    messagingSenderId: '123456789',
-    projectId: 'demo-project',
-    storageBucket: 'demo-project.appspot.com',
-    iosBundleId: 'com.example.frontend',
+    apiKey: 'AIzaSyAWUZlU59Z095lnQNwsK_85HyRNqWgeZHo',
+    appId: '1:869840998061:ios:780bf52f7e394afcda8024',
+    messagingSenderId: '869840998061',
+    projectId: 'fuelie',
+    storageBucket: 'fuelie.firebasestorage.app',
+    iosBundleId: 'fuelie',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
