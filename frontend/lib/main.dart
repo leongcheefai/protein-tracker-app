@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'services/service_locator.dart';
 import 'providers/auth_provider.dart';
+import 'providers/user_profile_provider.dart';
 import 'screens/splash_screen.dart';
 import 'screens/authentication_welcome_screen.dart';
 import 'screens/email_signup_screen.dart';
@@ -65,11 +66,19 @@ class ProteinPaceApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => AuthProvider()..startAuthStateListener()),
+        ChangeNotifierProvider(create: (context) => UserProfileProvider()),
         ChangeNotifierProvider(create: (context) => UserSettingsProvider()),
         ChangeNotifierProvider(create: (context) => MealTrackingProvider()),
       ],
-      child: Consumer<AuthProvider>(
-        builder: (context, authProvider, _) {
+      child: Consumer2<AuthProvider, UserProfileProvider>(
+        builder: (context, authProvider, profileProvider, _) {
+          // Initialize profile provider when user is authenticated
+          if (authProvider.isAuthenticated && profileProvider.profile == null) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              profileProvider.initializeFromAuth(authProvider.currentUser);
+            });
+          }
+          
           return CupertinoApp(
             title: 'Fuelie',
             debugShowCheckedModeBanner: false,
@@ -196,20 +205,7 @@ class ProteinPaceApp extends StatelessWidget {
               dailyProteinTarget: args['dailyProteinTarget'] as double,
             );
           },
-          '/profile-settings': (context) {
-            final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
-            return ProfileSettingsScreen(
-              height: args['height'] as double,
-              weight: args['weight'] as double,
-              trainingMultiplier: args['trainingMultiplier'] as double,
-              goal: args['goal'] as String,
-              dailyProteinTarget: args['dailyProteinTarget'] as double,
-              userEmail: args['userEmail'] as String?,
-              userName: args['userName'] as String?,
-              authProvider: args['authProvider'] as String?,
-              profileImageUrl: args['profileImageUrl'] as String?,
-            );
-          },
+          '/profile-settings': (context) => const ProfileSettingsScreen(),
           '/notification-settings': (context) => const NotificationSettingsScreen(),
           '/privacy-settings': (context) => const PrivacySettingsScreen(),
           '/about-help': (context) => const AboutHelpScreen(),

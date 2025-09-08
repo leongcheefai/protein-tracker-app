@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart' show Divider;
 import 'package:provider/provider.dart';
 import 'dart:io';
-import '../utils/user_settings_provider.dart';
+import '../providers/user_profile_provider.dart';
+import '../providers/auth_provider.dart';
 import '../widgets/profile_settings/profile_photo_section.dart';
 import '../widgets/profile_settings/login_details_section.dart';
 import '../widgets/profile_settings/body_metrics_section.dart';
@@ -9,28 +11,7 @@ import '../widgets/profile_settings/training_goal_section.dart';
 import '../utils/profile_settings_helpers.dart';
 
 class ProfileSettingsScreen extends StatefulWidget {
-  final double height;
-  final double weight;
-  final double trainingMultiplier;
-  final String goal;
-  final double dailyProteinTarget;
-  final String? userEmail;
-  final String? userName;
-  final String? authProvider; // 'email', 'google', 'apple'
-  final String? profileImageUrl;
-
-  const ProfileSettingsScreen({
-    super.key,
-    required this.height,
-    required this.weight,
-    required this.trainingMultiplier,
-    required this.goal,
-    required this.dailyProteinTarget,
-    this.userEmail,
-    this.userName,
-    this.authProvider,
-    this.profileImageUrl,
-  });
+  const ProfileSettingsScreen({super.key});
 
   @override
   State<ProfileSettingsScreen> createState() => _ProfileSettingsScreenState();
@@ -40,25 +21,40 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
   late TextEditingController _heightController;
   late TextEditingController _weightController;
   late TextEditingController _nameController;
-  late TextEditingController _emailController;
-  late double _selectedTrainingMultiplier;
-  late String _selectedGoal;
-  late double _dailyProteinTarget;
+  late TextEditingController _ageController;
+  String _selectedActivityLevel = 'moderately_active';
+  List<String> _dietaryRestrictions = [];
+  String _units = 'metric';
   File? _profilePhoto;
 
   @override
   void initState() {
     super.initState();
-    // Initialize controllers first
-    _heightController = TextEditingController(text: widget.height.toString());
-    _weightController = TextEditingController(text: widget.weight.toString());
-    _nameController = TextEditingController(text: widget.userName ?? '');
-    _emailController = TextEditingController(text: widget.userEmail ?? '');
     
-    // Initialize other state variables
-    _selectedTrainingMultiplier = widget.trainingMultiplier;
-    _selectedGoal = widget.goal;
-    _dailyProteinTarget = widget.dailyProteinTarget;
+    // Initialize controllers
+    _heightController = TextEditingController();
+    _weightController = TextEditingController();
+    _nameController = TextEditingController();
+    _ageController = TextEditingController();
+    
+    // Load current profile data
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadProfileData();
+    });
+  }
+
+  void _loadProfileData() {
+    final profileProvider = Provider.of<UserProfileProvider>(context, listen: false);
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    
+    // Initialize from current user data
+    _heightController.text = profileProvider.height?.toString() ?? '';
+    _weightController.text = profileProvider.weight?.toString() ?? '';
+    _nameController.text = profileProvider.displayName ?? authProvider.displayName;
+    _ageController.text = profileProvider.age?.toString() ?? '';
+    _selectedActivityLevel = profileProvider.activityLevel ?? 'moderately_active';
+    _dietaryRestrictions = profileProvider.dietaryRestrictions ?? [];
+    _units = profileProvider.units ?? 'metric';
   }
 
   @override
@@ -66,37 +62,42 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
     _heightController.dispose();
     _weightController.dispose();
     _nameController.dispose();
-    _emailController.dispose();
+    _ageController.dispose();
     super.dispose();
   }
 
-  void _updateDailyTarget() {
-    double weight = double.tryParse(_weightController.text) ?? widget.weight;
+  double _calculateDailyProteinTarget() {
+    final weight = double.tryParse(_weightController.text) ?? 70.0;
     
-    // Calculate new daily protein target
-    double newTarget = weight * _selectedTrainingMultiplier;
+    // Base calculation: moderate protein intake
+    double multiplier = 1.2; // sedentary
     
-    // Apply goal multiplier
-    switch (_selectedGoal) {
-      case 'bulk':
-        newTarget *= 1.1; // 10% increase for bulking
+    switch (_selectedActivityLevel) {
+      case 'sedentary':
+        multiplier = 1.2;
         break;
-      case 'cut':
-        newTarget *= 0.9; // 10% decrease for cutting
+      case 'lightly_active':
+        multiplier = 1.4;
         break;
-      default: // maintain
+      case 'moderately_active':
+        multiplier = 1.6;
+        break;
+      case 'very_active':
+        multiplier = 1.8;
+        break;
+      case 'extra_active':
+        multiplier = 2.0;
         break;
     }
     
-    setState(() {
-      _dailyProteinTarget = newTarget;
-    });
+    return weight * multiplier;
   }
 
   void _saveChanges() async {
     // Validate inputs
-    double? height = double.tryParse(_heightController.text);
-    double? weight = double.tryParse(_weightController.text);
+    final height = double.tryParse(_heightController.text);
+    final weight = double.tryParse(_weightController.text);
+    final age = int.tryParse(_ageController.text);
     
     if (height == null || weight == null) {
       ProfileSettingsHelpers.showErrorDialog(context, 'Please enter valid height and weight values.');
@@ -113,28 +114,38 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
       return;
     }
 
-    // Update provider with backend-synced data
-    final settingsProvider = Provider.of<UserSettingsProvider>(context, listen: false);
+    if (age != null && (age < 13 || age > 120)) {
+      ProfileSettingsHelpers.showErrorDialog(context, 'Age must be between 13-120 years.');
+      return;
+    }
+
+    final profileProvider = Provider.of<UserProfileProvider>(context, listen: false);
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
     
     try {
+      // Calculate daily protein goal based on current inputs
+      final dailyProteinGoal = _calculateDailyProteinTarget();
+      
       // Update backend profile
-      final success = await settingsProvider.updateProfile(
+      final success = await profileProvider.updateBasicProfile(
         displayName: _nameController.text.trim().isEmpty ? null : _nameController.text.trim(),
+        age: age,
         height: height,
         weight: weight,
-        dailyProteinTarget: _dailyProteinTarget,
+        dailyProteinGoal: dailyProteinGoal,
+        activityLevel: _selectedActivityLevel,
+        dietaryRestrictions: _dietaryRestrictions,
+        units: _units,
       );
       
       if (success) {
-        // Update local settings (training multiplier and goal are local-only for now)
-        // Note: These could be stored locally or you could extend the backend model
-        // For now, we'll update them via the existing local methods
-        settingsProvider.recalculateDailyTarget();
+        // Update auth provider with latest profile data
+        await authProvider.refreshUserProfile();
 
-        // TODO: Save profile photo to local storage or cloud storage
+        // TODO: Save profile photo to cloud storage
         if (_profilePhoto != null) {
-          // In a real app, you would save the photo here
-          // For example: await _saveProfilePhoto(_profilePhoto!);
+          // In a real app, you would upload the photo here
+          // For example: await _uploadProfilePhoto(_profilePhoto!);
         }
 
         // Show success and navigate back
@@ -142,11 +153,11 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
           ProfileSettingsHelpers.showSuccessDialog(context);
         }
       } else {
-        // Show error from settings provider
+        // Show error from profile provider
         if (mounted) {
           ProfileSettingsHelpers.showErrorDialog(
             context, 
-            settingsProvider.errorMessage ?? 'Failed to update profile. Please try again.'
+            profileProvider.errorMessage ?? 'Failed to update profile. Please try again.'
           );
         }
       }
@@ -162,83 +173,396 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      navigationBar: CupertinoNavigationBar(
-        middle: const Text('Profile Settings'),
-        backgroundColor: CupertinoColors.systemBackground,
-        leading: CupertinoNavigationBarBackButton(
-          onPressed: () => Navigator.of(context).pop(false),
+    return Consumer2<UserProfileProvider, AuthProvider>(
+      builder: (context, profileProvider, authProvider, child) {
+        return CupertinoPageScaffold(
+          navigationBar: CupertinoNavigationBar(
+            middle: const Text('Profile Settings'),
+            backgroundColor: CupertinoColors.systemBackground,
+            leading: CupertinoNavigationBarBackButton(
+              onPressed: () => Navigator.of(context).pop(false),
+            ),
+          ),
+          child: SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Loading indicator
+                  if (profileProvider.isLoading)
+                    const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(16.0),
+                        child: CupertinoActivityIndicator(),
+                      ),
+                    ),
+                  
+                  // Profile Photo Section
+                  ProfilePhotoSection(
+                    profileImageUrl: null, // TODO: Add profile image URL support
+                    onPhotoChanged: (photo) {
+                      setState(() {
+                        _profilePhoto = photo;
+                      });
+                    },
+                  ),
+                  
+                  const SizedBox(height: 24),
+                  
+                  // Login Details Section
+                  LoginDetailsSection(
+                    userEmail: authProvider.userEmail,
+                    userName: profileProvider.displayName ?? authProvider.displayName,
+                    authProvider: 'email', // TODO: Get from auth provider
+                    nameController: _nameController,
+                    onPasswordChange: () => ProfileSettingsHelpers.handleChangePassword(context),
+                    onLinkAccount: () => ProfileSettingsHelpers.handleLinkAccount(context),
+                    onUnlinkAccount: () => ProfileSettingsHelpers.handleUnlinkAccount(
+                      context, 
+                      'Email & Password',
+                    ),
+                    onAccountSecurity: () => ProfileSettingsHelpers.handleAccountSecurity(context),
+                  ),
+                  
+                  const SizedBox(height: 24),
+                  
+                  // Personal Information Section
+                  _buildPersonalInfoSection(),
+                  
+                  const SizedBox(height: 24),
+                  
+                  // Body Metrics Section
+                  BodyMetricsSection(
+                    heightController: _heightController,
+                    weightController: _weightController,
+                    onChanged: () => setState(() {}), // Trigger rebuild to update protein target
+                  ),
+                  
+                  const SizedBox(height: 24),
+                  
+                  // Activity & Nutrition Goals Section
+                  _buildActivityGoalsSection(),
+                  
+                  const SizedBox(height: 32),
+                  
+                  // Save Button
+                  _buildSaveButton(),
+                  
+                  // Error message display
+                  if (profileProvider.errorMessage != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16.0),
+                      child: Text(
+                        profileProvider.errorMessage!,
+                        style: const TextStyle(
+                          color: CupertinoColors.systemRed,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildPersonalInfoSection() {
+    return Container(
+      decoration: BoxDecoration(
+        color: CupertinoColors.systemGrey6,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Text(
+              'Personal Information',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          CupertinoListTile(
+            title: const Text('Age'),
+            trailing: SizedBox(
+              width: 80,
+              child: CupertinoTextField(
+                controller: _ageController,
+                placeholder: 'Age',
+                keyboardType: TextInputType.number,
+                textAlign: TextAlign.end,
+                decoration: const BoxDecoration(),
+                style: const TextStyle(fontSize: 16),
+              ),
+            ),
+          ),
+          const Divider(height: 1, color: CupertinoColors.systemGrey4),
+          CupertinoListTile(
+            title: const Text('Units'),
+            trailing: CupertinoButton(
+              padding: EdgeInsets.zero,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(_units == 'metric' ? 'Metric' : 'Imperial'),
+                  const Icon(CupertinoIcons.chevron_right, size: 16),
+                ],
+              ),
+              onPressed: () {
+                setState(() {
+                  _units = _units == 'metric' ? 'imperial' : 'metric';
+                });
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActivityGoalsSection() {
+    final dailyProteinGoal = _calculateDailyProteinTarget();
+    
+    return Container(
+      decoration: BoxDecoration(
+        color: CupertinoColors.systemGrey6,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Text(
+              'Activity & Nutrition Goals',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          CupertinoListTile(
+            title: const Text('Activity Level'),
+            trailing: CupertinoButton(
+              padding: EdgeInsets.zero,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(_getActivityLevelName(_selectedActivityLevel)),
+                  const Icon(CupertinoIcons.chevron_right, size: 16),
+                ],
+              ),
+              onPressed: () => _showActivityLevelPicker(),
+            ),
+          ),
+          const Divider(height: 1, color: CupertinoColors.systemGrey4),
+          CupertinoListTile(
+            title: const Text('Daily Protein Goal'),
+            trailing: Text(
+              '${dailyProteinGoal.toStringAsFixed(0)}g',
+              style: const TextStyle(
+                color: CupertinoColors.systemGrey,
+                fontSize: 16,
+              ),
+            ),
+          ),
+          const Divider(height: 1, color: CupertinoColors.systemGrey4),
+          CupertinoListTile(
+            title: const Text('Dietary Restrictions'),
+            trailing: CupertinoButton(
+              padding: EdgeInsets.zero,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(_dietaryRestrictions.isEmpty ? 'None' : '${_dietaryRestrictions.length} selected'),
+                  const Icon(CupertinoIcons.chevron_right, size: 16),
+                ],
+              ),
+              onPressed: () => _showDietaryRestrictionsPicker(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getActivityLevelName(String level) {
+    switch (level) {
+      case 'sedentary':
+        return 'Sedentary';
+      case 'lightly_active':
+        return 'Lightly Active';
+      case 'moderately_active':
+        return 'Moderately Active';
+      case 'very_active':
+        return 'Very Active';
+      case 'extra_active':
+        return 'Extra Active';
+      default:
+        return 'Unknown';
+    }
+  }
+
+  void _showActivityLevelPicker() {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (context) => Container(
+        height: 250,
+        color: CupertinoColors.systemBackground.resolveFrom(context),
+        child: Column(
+          children: [
+            Container(
+              decoration: const BoxDecoration(
+                color: CupertinoColors.systemBackground,
+                border: Border(
+                  bottom: BorderSide(
+                    color: CupertinoColors.systemGrey4,
+                    width: 0.0,
+                  ),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  CupertinoButton(
+                    child: const Text('Cancel'),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                  CupertinoButton(
+                    child: const Text('Done'),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: CupertinoPicker(
+                itemExtent: 32.0,
+                scrollController: FixedExtentScrollController(
+                  initialItem: _getActivityLevelIndex(_selectedActivityLevel),
+                ),
+                onSelectedItemChanged: (index) {
+                  setState(() {
+                    _selectedActivityLevel = _getActivityLevelValue(index);
+                  });
+                },
+                children: const [
+                  Text('Sedentary'),
+                  Text('Lightly Active'),
+                  Text('Moderately Active'),
+                  Text('Very Active'),
+                  Text('Extra Active'),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
-      child: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Profile Photo Section
-              ProfilePhotoSection(
-                profileImageUrl: widget.profileImageUrl,
-                onPhotoChanged: (photo) {
-                  setState(() {
-                    _profilePhoto = photo;
-                  });
-                },
-              ),
-              
-              const SizedBox(height: 24),
-              
-              // Login Details Section
-              LoginDetailsSection(
-                userEmail: widget.userEmail,
-                userName: widget.userName,
-                authProvider: widget.authProvider,
-                nameController: _nameController,
-                onPasswordChange: () => ProfileSettingsHelpers.handleChangePassword(context),
-                onLinkAccount: () => ProfileSettingsHelpers.handleLinkAccount(context),
-                onUnlinkAccount: () => ProfileSettingsHelpers.handleUnlinkAccount(
-                  context, 
-                  _getAuthProviderName(),
+    );
+  }
+
+  int _getActivityLevelIndex(String level) {
+    switch (level) {
+      case 'sedentary': return 0;
+      case 'lightly_active': return 1;
+      case 'moderately_active': return 2;
+      case 'very_active': return 3;
+      case 'extra_active': return 4;
+      default: return 2;
+    }
+  }
+
+  String _getActivityLevelValue(int index) {
+    switch (index) {
+      case 0: return 'sedentary';
+      case 1: return 'lightly_active';
+      case 2: return 'moderately_active';
+      case 3: return 'very_active';
+      case 4: return 'extra_active';
+      default: return 'moderately_active';
+    }
+  }
+
+  void _showDietaryRestrictionsPicker() {
+    final restrictions = [
+      'Vegetarian',
+      'Vegan',
+      'Gluten-Free',
+      'Dairy-Free',
+      'Nut-Free',
+      'Low-Carb',
+      'Keto',
+      'Paleo',
+    ];
+
+    showCupertinoModalPopup(
+      context: context,
+      builder: (context) => Container(
+        height: 400,
+        color: CupertinoColors.systemBackground.resolveFrom(context),
+        child: Column(
+          children: [
+            Container(
+              decoration: const BoxDecoration(
+                color: CupertinoColors.systemBackground,
+                border: Border(
+                  bottom: BorderSide(
+                    color: CupertinoColors.systemGrey4,
+                    width: 0.0,
+                  ),
                 ),
-                onAccountSecurity: () => ProfileSettingsHelpers.handleAccountSecurity(context),
               ),
-              
-              const SizedBox(height: 24),
-              
-              // Body Metrics Section
-              BodyMetricsSection(
-                heightController: _heightController,
-                weightController: _weightController,
-                onChanged: _updateDailyTarget,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  CupertinoButton(
+                    child: const Text('Cancel'),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                  const Text(
+                    'Dietary Restrictions',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  CupertinoButton(
+                    child: const Text('Done'),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
               ),
-              
-              const SizedBox(height: 24),
-              
-              // Training and Goal Section
-              TrainingGoalSection(
-                selectedTrainingMultiplier: _selectedTrainingMultiplier,
-                selectedGoal: _selectedGoal,
-                dailyProteinTarget: _dailyProteinTarget,
-                onTrainingMultiplierChanged: (multiplier) {
-                  setState(() {
-                    _selectedTrainingMultiplier = multiplier;
-                  });
-                  _updateDailyTarget();
-                },
-                onGoalChanged: (goal) {
-                  setState(() {
-                    _selectedGoal = goal;
-                  });
-                  _updateDailyTarget();
-                },
+            ),
+            Expanded(
+              child: ListView(
+                children: restrictions.map((restriction) {
+                  final isSelected = _dietaryRestrictions.contains(restriction);
+                  return CupertinoListTile(
+                    title: Text(restriction),
+                    trailing: isSelected
+                        ? const Icon(CupertinoIcons.check_mark, color: CupertinoColors.activeBlue)
+                        : null,
+                    onTap: () {
+                      setState(() {
+                        if (isSelected) {
+                          _dietaryRestrictions.remove(restriction);
+                        } else {
+                          _dietaryRestrictions.add(restriction);
+                        }
+                      });
+                    },
+                  );
+                }).toList(),
               ),
-              
-              const SizedBox(height: 32),
-              
-              // Save Button
-              _buildSaveButton(),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -258,17 +582,5 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
         ),
       ),
     );
-  }
-
-  String _getAuthProviderName() {
-    switch (widget.authProvider) {
-      case 'google':
-        return 'Google';
-      case 'apple':
-        return 'Apple ID';
-      case 'email':
-      default:
-        return 'Email & Password';
-    }
   }
 }
