@@ -15,24 +15,45 @@ export class AuthController {
         throw new AppError('Token is required', 400);
       }
 
+      console.log('🔄 Verifying token for user authentication');
+
       // Verify token with Supabase
       const decoded = await SupabaseAuthService.verifySupabaseToken(token);
+      console.log(`✅ Token verified for user: ${decoded.sub}, email: ${decoded.email}`);
       
       // Get or create user profile
+      console.log(`🔍 Looking for existing user profile for user ID: ${decoded.sub}`);
       let userProfile = await SupabaseAuthService.getUserProfile(decoded.sub);
       
       if (!userProfile && decoded.email) {
-        // Create user profile if it doesn't exist
-        const profileData: InsertUserProfile = {
-          id: decoded.sub,
-          email: decoded.email,
-          display_name: decoded.email.split('@')[0], // Default display name
-        };
-        
-        userProfile = await DatabaseService.createUserProfile(profileData);
+        console.log(`📝 No profile found, attempting to create new profile for: ${decoded.email}`);
+        // Create user profile if it doesn't exist (only for new users)
+        try {
+          const profileData: InsertUserProfile = {
+            id: decoded.sub,
+            email: decoded.email,
+            display_name: decoded.email.split('@')[0], // Default display name
+          };
+          
+          userProfile = await DatabaseService.createUserProfileWithContext(profileData, token);
+          console.log(`✅ Successfully created new user profile for: ${decoded.email}`);
+        } catch (error: any) {
+          console.log(`❌ Profile creation failed: ${error.message}, code: ${error.code}`);
+          // If duplicate key error, the user already exists - try to get it again with user context
+          if (error.code === '23505') {
+            console.log(`🔄 Duplicate key error - trying to fetch existing profile with user context`);
+            // Try to get profile using user context instead of service account
+            userProfile = await DatabaseService.getUserProfileWithContext(decoded.sub, token);
+          } else {
+            throw error;
+          }
+        }
+      } else if (userProfile) {
+        console.log(`✅ Found existing user profile for: ${decoded.email}`);
       }
 
       if (!userProfile) {
+        console.log(`❌ Still no user profile found after all attempts for user: ${decoded.sub}`);
         throw new AppError('Failed to create or retrieve user profile', 500);
       }
 

@@ -29,6 +29,56 @@ export class DatabaseService {
     return data;
   }
 
+  // Get user profile with user context (to bypass RLS)
+  static async getUserProfileWithContext(userId: string, userToken: string) {
+    const { createClient } = require('@supabase/supabase-js');
+    const supabaseUrl = process.env.SUPABASE_URL!;
+    const supabaseAnonKey = process.env.SUPABASE_ANON_KEY!;
+    
+    // Create a new client with the user's token
+    const userClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: {
+        headers: {
+          Authorization: `Bearer ${userToken}`
+        }
+      }
+    });
+
+    const { data, error } = await userClient
+      .from('user_profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+
+  // Create user profile with user context (to bypass RLS)
+  static async createUserProfileWithContext(profile: Database['public']['Tables']['user_profiles']['Insert'], userToken: string) {
+    const { createClient } = require('@supabase/supabase-js');
+    const supabaseUrl = process.env.SUPABASE_URL!;
+    const supabaseAnonKey = process.env.SUPABASE_ANON_KEY!;
+    
+    // Create a new client with the user's token
+    const userClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: {
+        headers: {
+          Authorization: `Bearer ${userToken}`
+        }
+      }
+    });
+
+    const { data, error } = await userClient
+      .from('user_profiles')
+      .insert([profile])
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+
   static async updateUserProfile(userId: string, updates: Database['public']['Tables']['user_profiles']['Update']) {
     const { data, error } = await supabase
       .from('user_profiles')

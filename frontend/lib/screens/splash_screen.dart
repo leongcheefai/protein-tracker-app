@@ -43,6 +43,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
 
   void _startAnimations() async {
     await Future.delayed(const Duration(milliseconds: 500));
+    if (!mounted) return;
     _fadeController.forward();
     _scaleController.forward();
     
