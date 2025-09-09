@@ -89,6 +89,10 @@ class ApiService {
       final response = await _dio.get(endpoint, queryParameters: queryParameters);
       return _handleResponse<T>(response, fromJson);
     } catch (e) {
+      // Handle specific network profiling errors
+      if (e.toString().contains('network_profiling')) {
+        return ApiResponse.error(ApiError.network('Network profiling error - continuing with request'));
+      }
       return _handleError<T>(e);
     }
   }
@@ -106,6 +110,10 @@ class ApiService {
       final response = await _dio.post(endpoint, data: data);
       return _handleResponse<T>(response, fromJson);
     } catch (e) {
+      // Handle specific network profiling errors
+      if (e.toString().contains('network_profiling')) {
+        return ApiResponse.error(ApiError.network('Network profiling error - continuing with request'));
+      }
       return _handleError<T>(e);
     }
   }

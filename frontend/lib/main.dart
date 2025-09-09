@@ -64,6 +64,7 @@ void main() async {
     await Supabase.initialize(
       url: SupabaseConfig.validatedUrl,
       anonKey: SupabaseConfig.validatedAnonKey,
+      debug: kDebugMode,
     );
     
     if (kDebugMode) {
@@ -356,16 +357,28 @@ class ProteinPaceApp extends StatelessWidget {
   }
 
   Widget _buildHomeScreen(AuthProvider authProvider) {
+    print('🏠 Main: Building home screen with auth state: ${authProvider.state}');
+    
     switch (authProvider.state) {
       case AuthenticationState.unknown:
+        print('📱 Main: Showing SplashScreen (unknown state)');
         return const SplashScreen();
       case AuthenticationState.unauthenticated:
+        print('📱 Main: Showing AuthenticationWelcomeScreen');
         return const AuthenticationWelcomeScreen();
       case AuthenticationState.authenticating:
+        print('📱 Main: Showing SplashScreen (authenticating)');
         return const SplashScreen(); // or a loading screen
       case AuthenticationState.authenticated:
         // Check if user has complete profile, otherwise go to setup
+        print('📱 Main: User authenticated, checking profile completeness...');
+        print('📱 Main: Has complete profile: ${authProvider.hasCompleteProfile}');
+        print('📱 Main: User email: ${authProvider.currentUser?.email}');
+        print('📱 Main: Display name: ${authProvider.currentUser?.displayName}');
+        print('📱 Main: Daily protein goal: ${authProvider.dailyProteinGoal}');
+        
         if (authProvider.hasCompleteProfile) {
+          print('📱 Main: Profile complete, showing UserHomeScreen');
           return UserHomeScreen(
             height: authProvider.height ?? 170.0,
             weight: authProvider.weight ?? 70.0,
@@ -375,6 +388,7 @@ class ProteinPaceApp extends StatelessWidget {
             meals: const {}, // Will be populated by MealTrackingProvider
           );
         } else {
+          print('📱 Main: Profile incomplete, showing WelcomeScreen for setup');
           return const WelcomeScreen(); // Profile setup flow
         }
     }
