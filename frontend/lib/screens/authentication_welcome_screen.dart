@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:provider/provider.dart';
 import '../main.dart';
 import '../providers/auth_provider.dart' as auth_provider;
+import 'user_home_screen.dart';
+import 'welcome_screen.dart';
 
 class AuthenticationWelcomeScreen extends StatefulWidget {
   const AuthenticationWelcomeScreen({super.key});
@@ -332,14 +334,18 @@ class _AuthenticationWelcomeScreenState extends State<AuthenticationWelcomeScree
       final authProviderInstance = Provider.of<auth_provider.AuthProvider>(context, listen: false);
       final success = await authProviderInstance.signInWithGoogle();
       
-      if (!success) {
+      if (success) {
+        // Authentication successful - navigate to appropriate screen
+        if (mounted) {
+          _navigateAfterAuthentication(authProviderInstance);
+        }
+      } else {
         if (!mounted) return;
         setState(() {
           _errorMessage = authProviderInstance.errorMessage ?? 'Google sign in failed. Please try again.';
           _isLoading = false;
         });
       }
-      // If successful, AuthProvider will handle navigation
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -360,14 +366,18 @@ class _AuthenticationWelcomeScreenState extends State<AuthenticationWelcomeScree
       final authProviderInstance = Provider.of<auth_provider.AuthProvider>(context, listen: false);
       final success = await authProviderInstance.signInWithApple();
       
-      if (!success) {
+      if (success) {
+        // Authentication successful - navigate to appropriate screen
+        if (mounted) {
+          _navigateAfterAuthentication(authProviderInstance);
+        }
+      } else {
         if (!mounted) return;
         setState(() {
           _errorMessage = authProviderInstance.errorMessage ?? 'Apple sign in failed. Please try again.';
           _isLoading = false;
         });
       }
-      // If successful, AuthProvider will handle navigation
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -383,6 +393,33 @@ class _AuthenticationWelcomeScreenState extends State<AuthenticationWelcomeScree
 
   void _navigateToEmailLogin() {
     Navigator.of(context).pushNamed('/email-login');
+  }
+
+  void _navigateAfterAuthentication(auth_provider.AuthProvider authProvider) {
+    if (authProvider.hasCompleteProfile) {
+      // Profile is complete, go to main app
+      Navigator.of(context).pushAndRemoveUntil(
+        CupertinoPageRoute(
+          builder: (context) => UserHomeScreen(
+            height: authProvider.height ?? 170.0,
+            weight: authProvider.weight ?? 70.0,
+            trainingMultiplier: 1.8, // Default, can be made configurable later
+            goal: 'maintain', // Default, can be made configurable later
+            dailyProteinTarget: authProvider.dailyProteinGoal ?? 126.0,
+            meals: const {}, // Will be populated by MealTrackingProvider
+          ),
+        ),
+        (route) => false,
+      );
+    } else {
+      // Profile needs setup, go to welcome screen
+      Navigator.of(context).pushAndRemoveUntil(
+        CupertinoPageRoute(
+          builder: (context) => const WelcomeScreen(),
+        ),
+        (route) => false,
+      );
+    }
   }
 
   Widget _buildAppleLogo({double size = 24}) {

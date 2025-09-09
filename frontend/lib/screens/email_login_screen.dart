@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../main.dart';
 import '../providers/auth_provider.dart';
+import 'user_home_screen.dart';
+import 'welcome_screen.dart';
 
 class EmailLoginScreen extends StatefulWidget {
   const EmailLoginScreen({super.key});
@@ -312,12 +314,14 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
       );
       
       if (success) {
-        // Authentication successful - AuthProvider will handle navigation
-        // via the auth state listener in main.dart
+        // Authentication successful - navigate to appropriate screen
         if (mounted) {
           // Clear the form
           _emailController.clear();
           _passwordController.clear();
+          
+          // Navigate based on profile completeness
+          _navigateAfterAuthentication(authProvider);
         }
       } else {
         // Show error from AuthProvider
@@ -331,6 +335,33 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
         _errorMessage = 'An unexpected error occurred. Please try again.';
         _isLoading = false;
       });
+    }
+  }
+
+  void _navigateAfterAuthentication(AuthProvider authProvider) {
+    if (authProvider.hasCompleteProfile) {
+      // Profile is complete, go to main app
+      Navigator.of(context).pushAndRemoveUntil(
+        CupertinoPageRoute(
+          builder: (context) => UserHomeScreen(
+            height: authProvider.height ?? 170.0,
+            weight: authProvider.weight ?? 70.0,
+            trainingMultiplier: 1.8, // Default, can be made configurable later
+            goal: 'maintain', // Default, can be made configurable later
+            dailyProteinTarget: authProvider.dailyProteinGoal ?? 126.0,
+            meals: const {}, // Will be populated by MealTrackingProvider
+          ),
+        ),
+        (route) => false,
+      );
+    } else {
+      // Profile needs setup, go to welcome screen
+      Navigator.of(context).pushAndRemoveUntil(
+        CupertinoPageRoute(
+          builder: (context) => const WelcomeScreen(),
+        ),
+        (route) => false,
+      );
     }
   }
 
