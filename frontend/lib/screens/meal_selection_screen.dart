@@ -1,6 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../main.dart';
+import '../providers/auth_provider.dart';
+import 'user_home_screen.dart';
 
 class MealSelectionScreen extends StatefulWidget {
   final double height;
@@ -40,6 +43,13 @@ class _MealSelectionScreenState extends State<MealSelectionScreen> {
   double get _mealProteinTarget {
     final enabledMeals = _meals.values.where((enabled) => enabled).length;
     return widget.dailyProteinTarget / enabledMeals;
+  }
+
+  String get _activityLevelFromMultiplier {
+    if (widget.trainingMultiplier <= 1.2) return 'lightly_active';
+    if (widget.trainingMultiplier <= 1.4) return 'moderately_active';
+    if (widget.trainingMultiplier <= 1.6) return 'very_active';
+    return 'extra_active';
   }
 
   @override
@@ -292,7 +302,86 @@ class _MealSelectionScreenState extends State<MealSelectionScreen> {
     );
   }
 
-  void _showCompletionDialog(BuildContext context) {
+  void _showCompletionDialog(BuildContext context) async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    
+    // Show loading dialog first
+    showCupertinoDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return CupertinoAlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CupertinoActivityIndicator(),
+              const SizedBox(height: 16),
+              Text(
+                'Saving your profile...',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    try {
+      // Update the user profile with collected data
+      if (authProvider.currentUser != null) {
+        final updatedProfile = authProvider.currentUser!.copyWith(
+          height: widget.height,
+          weight: widget.weight,
+          dailyProteinGoal: widget.dailyProteinTarget,
+          activityLevel: _activityLevelFromMultiplier,
+        );
+
+        final success = await authProvider.updateUserProfile(updatedProfile);
+        
+        if (success) {
+          // Close loading dialog
+          if (Navigator.canPop(context)) Navigator.of(context).pop();
+          
+          // Navigate directly to home screen after successful profile save
+          _navigateToHomeScreen();
+        } else {
+          // Close loading dialog and show error
+          if (Navigator.canPop(context)) Navigator.of(context).pop();
+          _showErrorDialog(context, authProvider.errorMessage ?? 'Failed to save profile');
+        }
+      } else {
+        // Close loading dialog and show error
+        if (Navigator.canPop(context)) Navigator.of(context).pop();
+        _showErrorDialog(context, 'User not authenticated');
+      }
+    } catch (e) {
+      // Close loading dialog and show error
+      if (Navigator.canPop(context)) Navigator.of(context).pop();
+      _showErrorDialog(context, 'An unexpected error occurred: ${e.toString()}');
+    }
+  }
+
+  void _navigateToHomeScreen() {
+    // Navigate directly to home screen and clear navigation stack
+    Navigator.of(context).pushAndRemoveUntil(
+      CupertinoPageRoute(
+        builder: (context) => UserHomeScreen(
+          height: widget.height,
+          weight: widget.weight,
+          trainingMultiplier: widget.trainingMultiplier,
+          goal: widget.goal,
+          dailyProteinTarget: widget.dailyProteinTarget,
+          meals: _meals,
+        ),
+      ),
+      (route) => false,
+    );
+  }
+
+  void _showErrorDialog(BuildContext context, String errorMessage) {
     showCupertinoDialog(
       context: context,
       barrierDismissible: false,
@@ -301,13 +390,13 @@ class _MealSelectionScreenState extends State<MealSelectionScreen> {
           title: Row(
             children: [
               Icon(
-                CupertinoIcons.check_mark_circled,
-                color: AppColors.success,
+                CupertinoIcons.exclamationmark_triangle,
+                color: AppColors.error,
                 size: 28,
               ),
               const SizedBox(width: 12),
               Text(
-                'Setup Complete!',
+                'Setup Error',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
@@ -318,30 +407,20 @@ class _MealSelectionScreenState extends State<MealSelectionScreen> {
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Your protein tracking is now configured:',
+                'Failed to save your profile settings:',
                 style: TextStyle(
                   fontSize: 16,
                   color: AppColors.textSecondary,
                 ),
               ),
-              
-              const SizedBox(height: 16),
-              
-              _buildSummaryRow('Daily Target', '${widget.dailyProteinTarget.toStringAsFixed(0)}g'),
-              _buildSummaryRow('Goal', widget.goal),
-              _buildSummaryRow('Training Level', '${widget.trainingMultiplier.toStringAsFixed(1)}x'),
-              
-              const SizedBox(height: 16),
-              
+              const SizedBox(height: 8),
               Text(
-                'You\'re all set to start tracking your protein intake!',
+                errorMessage,
                 style: TextStyle(
                   fontSize: 14,
-                  color: AppColors.success,
-                  fontWeight: FontWeight.w600,
+                  color: AppColors.error,
                 ),
               ),
             ],
@@ -350,22 +429,19 @@ class _MealSelectionScreenState extends State<MealSelectionScreen> {
             CupertinoDialogAction(
               onPressed: () {
                 Navigator.of(context).pop();
-                // Navigate to user home screen to start tracking
-                Navigator.pushReplacementNamed(
-                  context,
-                  '/user-home',
-                  arguments: {
-                    'height': widget.height,
-                    'weight': widget.weight,
-                    'trainingMultiplier': widget.trainingMultiplier,
-                    'goal': widget.goal,
-                    'dailyProteinTarget': widget.dailyProteinTarget,
-                    'meals': _meals,
-                  },
-                );
+                // Try again
+                _showCompletionDialog(context);
               },
-              isDefaultAction: true,
-              child: const Text('Start Tracking'),
+              child: const Text('Try Again'),
+            ),
+            CupertinoDialogAction(
+              onPressed: () {
+                Navigator.of(context).pop();
+                // Continue without saving (temporary)
+                _navigateToHomeScreen();
+              },
+              isDestructiveAction: true,
+              child: const Text('Continue Anyway'),
             ),
           ],
         );

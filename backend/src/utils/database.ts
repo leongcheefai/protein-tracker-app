@@ -91,6 +91,32 @@ export class DatabaseService {
     return data;
   }
 
+  // Update user profile with user context (to bypass RLS)
+  static async updateUserProfileWithContext(userId: string, updates: Database['public']['Tables']['user_profiles']['Update'], userToken: string) {
+    const { createClient } = require('@supabase/supabase-js');
+    const supabaseUrl = process.env.SUPABASE_URL!;
+    const supabaseAnonKey = process.env.SUPABASE_ANON_KEY!;
+    
+    // Create a new client with the user's token
+    const userClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: {
+        headers: {
+          Authorization: `Bearer ${userToken}`
+        }
+      }
+    });
+
+    const { data, error } = await userClient
+      .from('user_profiles')
+      .update({ ...updates, updated_at: new Date().toISOString() })
+      .eq('id', userId)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+
   // Food operations
   static async searchFoods(query: string, limit = 20) {
     const { data, error } = await supabase

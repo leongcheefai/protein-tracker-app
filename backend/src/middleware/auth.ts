@@ -9,6 +9,7 @@ export interface AuthenticatedRequest extends Request {
     email: string;
     display_name?: string;
   };
+  userToken?: string;
 }
 
 export interface SupabaseJWTPayload {
@@ -109,6 +110,7 @@ export const authenticate = async (
       email: decoded.email || '',
       display_name: userProfile?.display_name || undefined,
     };
+    req.userToken = token;
     
     next();
   } catch (error) {

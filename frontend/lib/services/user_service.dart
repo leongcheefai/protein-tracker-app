@@ -9,14 +9,14 @@ class UserService {
 
   Future<ApiResponse<UserProfileDto>> getProfile() async {
     return await _apiService.get<UserProfileDto>(
-      '/users/profile',
+      '/auth/profile',
       fromJson: (json) => UserProfileDto.fromJson(json),
     );
   }
 
   Future<ApiResponse<UserProfileDto>> updateProfile(UserProfileDto profile) async {
     return await _apiService.put<UserProfileDto>(
-      '/users/profile',
+      '/auth/profile',
       profile.toJson(),
       fromJson: (json) => UserProfileDto.fromJson(json),
     );
@@ -24,33 +24,33 @@ class UserService {
 
   Future<ApiResponse<UserSettings>> getSettings() async {
     return await _apiService.get<UserSettings>(
-      '/users/settings',
+      '/user/settings',
       fromJson: (json) => UserSettings.fromJson(json),
     );
   }
 
   Future<ApiResponse<UserSettings>> updateSettings(UserSettings settings) async {
     return await _apiService.put<UserSettings>(
-      '/users/settings',
+      '/user/settings',
       settings.toJson(),
       fromJson: (json) => UserSettings.fromJson(json),
     );
   }
 
   Future<ApiResponse<void>> deleteAccount() async {
-    return await _apiService.delete<void>('/users/account');
+    return await _apiService.delete<void>('/auth/account');
   }
 
   Future<ApiResponse<UserGoals>> getGoals() async {
     return await _apiService.get<UserGoals>(
-      '/users/goals',
+      '/user/goals',
       fromJson: (json) => UserGoals.fromJson(json),
     );
   }
 
   Future<ApiResponse<UserGoals>> updateGoals(UserGoals goals) async {
     return await _apiService.put<UserGoals>(
-      '/users/goals',
+      '/user/goals',
       goals.toJson(),
       fromJson: (json) => UserGoals.fromJson(json),
     );

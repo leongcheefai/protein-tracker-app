@@ -127,12 +127,15 @@ export class AuthController {
   static async updateProfile(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.user!.id;
+      const userToken = req.userToken!;
       const updateData: UpdateUserProfile = req.body;
 
       // Remove id and timestamps from update data if present
       const { id, created_at, updated_at, ...safeUpdateData } = updateData;
 
-      const updatedProfile = await DatabaseService.updateUserProfile(userId, safeUpdateData);
+      console.log(`🔄 Updating profile for user: ${userId} with context`);
+      const updatedProfile = await DatabaseService.updateUserProfileWithContext(userId, safeUpdateData, userToken);
+      console.log(`✅ Profile updated successfully for user: ${userId}`);
 
       const response: ApiResponse = {
         success: true,
