@@ -8,7 +8,10 @@ import '../models/dto/user_profile_dto.dart';
 class AuthService {
   final ApiService _apiService;
   final SupabaseClient _supabase = Supabase.instance.client;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    // Extract the client ID from the reverse client ID
+    clientId: '845691816929-c8oh974l0b973fdd3l8rt97hje4afgqv.apps.googleusercontent.com',
+  );
 
   AuthService(this._apiService);
 

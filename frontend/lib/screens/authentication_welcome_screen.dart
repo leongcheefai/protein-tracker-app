@@ -322,6 +322,7 @@ class _AuthenticationWelcomeScreenState extends State<AuthenticationWelcomeScree
   }
 
   void _handleGoogleSignIn() async {
+    if (!mounted) return;
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -332,6 +333,7 @@ class _AuthenticationWelcomeScreenState extends State<AuthenticationWelcomeScree
       final success = await authProviderInstance.signInWithGoogle();
       
       if (!success) {
+        if (!mounted) return;
         setState(() {
           _errorMessage = authProviderInstance.errorMessage ?? 'Google sign in failed. Please try again.';
           _isLoading = false;
@@ -339,6 +341,7 @@ class _AuthenticationWelcomeScreenState extends State<AuthenticationWelcomeScree
       }
       // If successful, AuthProvider will handle navigation
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _errorMessage = 'An unexpected error occurred. Please try again.';
         _isLoading = false;
@@ -347,6 +350,7 @@ class _AuthenticationWelcomeScreenState extends State<AuthenticationWelcomeScree
   }
 
   void _handleAppleSignIn() async {
+    if (!mounted) return;
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -357,6 +361,7 @@ class _AuthenticationWelcomeScreenState extends State<AuthenticationWelcomeScree
       final success = await authProviderInstance.signInWithApple();
       
       if (!success) {
+        if (!mounted) return;
         setState(() {
           _errorMessage = authProviderInstance.errorMessage ?? 'Apple sign in failed. Please try again.';
           _isLoading = false;
@@ -364,6 +369,7 @@ class _AuthenticationWelcomeScreenState extends State<AuthenticationWelcomeScree
       }
       // If successful, AuthProvider will handle navigation
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _errorMessage = 'An unexpected error occurred. Please try again.';
         _isLoading = false;
