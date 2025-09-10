@@ -370,26 +370,34 @@ class ProteinPaceApp extends StatelessWidget {
         print('📱 Main: Showing SplashScreen (authenticating)');
         return const SplashScreen(); // or a loading screen
       case AuthenticationState.authenticated:
-        // Check if user has complete profile, otherwise go to setup
-        print('📱 Main: User authenticated, checking profile completeness...');
-        print('📱 Main: Has complete profile: ${authProvider.hasCompleteProfile}');
+        // For authenticated users, prioritize returning them to home screen
+        print('📱 Main: User authenticated, checking profile status...');
         print('📱 Main: User email: ${authProvider.currentUser?.email}');
         print('📱 Main: Display name: ${authProvider.currentUser?.displayName}');
         print('📱 Main: Daily protein goal: ${authProvider.dailyProteinGoal}');
+        print('📱 Main: Weight: ${authProvider.weight}');
+        print('📱 Main: Height: ${authProvider.height}');
+        print('📱 Main: Age: ${authProvider.age}');
+        print('📱 Main: Has complete profile: ${authProvider.hasCompleteProfile}');
         
-        if (authProvider.hasCompleteProfile) {
-          print('📱 Main: Profile complete, showing UserHomeScreen');
+        // Check if this is a completely new user (no profile data at all)
+        print('📱 Main: Is completely new user: ${authProvider.isCompletelyNewUser}');
+        print('📱 Main: Is returning user: ${authProvider.isReturningUser}');
+        
+        if (authProvider.isCompletelyNewUser) {
+          print('📱 Main: Completely new user, showing WelcomeScreen for initial setup');
+          return const WelcomeScreen(); // Initial profile setup flow
+        } else {
+          print('📱 Main: Returning authenticated user, showing UserHomeScreen with defaults for missing data');
+          // For returning users, provide sensible defaults for any missing profile data
           return UserHomeScreen(
-            height: authProvider.height ?? 170.0,
-            weight: authProvider.weight ?? 70.0,
-            trainingMultiplier: 1.8, // Default, can be made configurable later
-            goal: 'maintain', // Default, can be made configurable later
-            dailyProteinTarget: authProvider.dailyProteinGoal ?? 126.0,
+            height: authProvider.height ?? 170.0, // Default height in cm
+            weight: authProvider.weight ?? 70.0,   // Default weight in kg  
+            trainingMultiplier: 1.8, // Default moderate activity level
+            goal: 'maintain', // Default goal
+            dailyProteinTarget: authProvider.dailyProteinGoal ?? 126.0, // Default protein target
             meals: const {}, // Will be populated by MealTrackingProvider
           );
-        } else {
-          print('📱 Main: Profile incomplete, showing WelcomeScreen for setup');
-          return const WelcomeScreen(); // Profile setup flow
         }
     }
   }

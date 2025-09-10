@@ -293,6 +293,28 @@ class AuthProvider extends ChangeNotifier {
            _currentUser!.dailyProteinGoal != null;
   }
 
+  // More lenient check for returning users - has at least basic profile data
+  bool get isReturningUser {
+    if (_currentUser == null) return false;
+    // Consider user as "returning" if they have at least one piece of profile data beyond email
+    return _currentUser!.displayName != null ||
+           _currentUser!.age != null ||
+           _currentUser!.weight != null ||
+           _currentUser!.height != null ||
+           _currentUser!.dailyProteinGoal != null;
+  }
+
+  // Check if this is a completely new user with no profile setup at all
+  bool get isCompletelyNewUser {
+    if (_currentUser == null) return true;
+    return _currentUser!.email != null &&
+           _currentUser!.displayName == null &&
+           _currentUser!.age == null &&
+           _currentUser!.weight == null &&
+           _currentUser!.height == null &&
+           _currentUser!.dailyProteinGoal == null;
+  }
+
   // Quick access to common profile data
   double? get dailyProteinGoal => _currentUser?.dailyProteinGoal;
   double? get weight => _currentUser?.weight;
