@@ -23,15 +23,15 @@ class _AuthenticationWelcomeScreenState extends State<AuthenticationWelcomeScree
     return CupertinoPageScaffold(
       backgroundColor: AppColors.background,
       child: SafeArea(
-        child: Center(
+        child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(24.0),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-              // App Logo
-              Container(
+                // App Logo
+                Container(
                 width: 120,
                 height: 120,
                 decoration: BoxDecoration(
@@ -77,7 +77,7 @@ class _AuthenticationWelcomeScreenState extends State<AuthenticationWelcomeScree
                 textAlign: TextAlign.center,
               ),
               
-              const SizedBox(height: 48),
+              const SizedBox(height: 32),
               
               // Error Message
               if (_errorMessage != null)
@@ -111,112 +111,112 @@ class _AuthenticationWelcomeScreenState extends State<AuthenticationWelcomeScree
                   ),
                 ),
               
-              // Authentication Options
-              _buildAuthButton(
-                context,
-                icon: CupertinoIcons.mail,
-                title: 'Continue with Google',
-                subtitle: 'Sign in with your Google account',
-                backgroundColor: Colors.white,
-                textColor: AppColors.textPrimary,
-                borderColor: AppColors.neutral.withValues(alpha: 0.3),
-                onPressed: _isLoading ? null : _handleGoogleSignIn,
-                showGoogleIcon: true,
-              ),
-              
-              const SizedBox(height: 16),
-              
-              // Apple Sign In (iOS only)
-              if (Platform.isIOS)
+                // Authentication Options
                 _buildAuthButton(
                   context,
-                  icon: CupertinoIcons.app_badge,
-                  title: 'Continue with Apple',
-                  subtitle: 'Sign in with your Apple ID',
-                  backgroundColor: Colors.black,
-                  textColor: Colors.white,
-                  borderColor: Colors.black,
-                  onPressed: _isLoading ? null : _handleAppleSignIn,
-                  showAppleIcon: true,
+                  icon: CupertinoIcons.mail,
+                  title: 'Continue with Google',
+                  subtitle: 'Sign in with your Google account',
+                  backgroundColor: Colors.white,
+                  textColor: AppColors.textPrimary,
+                  borderColor: AppColors.neutral.withValues(alpha: 0.3),
+                  onPressed: _isLoading ? null : _handleGoogleSignIn,
+                  showGoogleIcon: true,
                 ),
-              
-              if (Platform.isIOS) const SizedBox(height: 16),
-              
-              // Email Signup
-              _buildAuthButton(
-                context,
-                icon: CupertinoIcons.mail,
-                title: 'Sign up with Email',
-                subtitle: 'Create account with email and password',
-                backgroundColor: AppColors.primary,
-                textColor: Colors.white,
-                borderColor: AppColors.primary,
-                onPressed: _isLoading ? null : _navigateToEmailSignup,
-              ),
-              
-              const SizedBox(height: 24),
-              
-              // Sign In Link
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Already have an account? ',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: AppColors.textSecondary,
-                    ),
+                
+                const SizedBox(height: 16),
+                
+                // Apple Sign In (iOS only)
+                if (Platform.isIOS)
+                  _buildAuthButton(
+                    context,
+                    icon: CupertinoIcons.app_badge,
+                    title: 'Continue with Apple',
+                    subtitle: 'Sign in with your Apple ID',
+                    backgroundColor: Colors.black,
+                    textColor: Colors.white,
+                    borderColor: Colors.black,
+                    onPressed: _isLoading ? null : _handleAppleSignIn,
+                    showAppleIcon: true,
                   ),
-                  GestureDetector(
-                    onTap: _isLoading ? null : _navigateToEmailLogin,
-                    child: Text(
-                      'Sign in',
+                
+                if (Platform.isIOS) const SizedBox(height: 16),
+                
+                // Email Signup
+                _buildAuthButton(
+                  context,
+                  icon: CupertinoIcons.mail,
+                  title: 'Sign up with Email',
+                  subtitle: 'Create account with email and password',
+                  backgroundColor: AppColors.primary,
+                  textColor: Colors.white,
+                  borderColor: AppColors.primary,
+                  onPressed: _isLoading ? null : _navigateToEmailSignup,
+                ),
+                
+                const SizedBox(height: 24),
+                
+                // Sign In Link
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Already have an account? ',
                       style: TextStyle(
                         fontSize: 14,
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w600,
+                        color: AppColors.textSecondary,
                       ),
                     ),
-                  ),
-                ],
-              ),
-              
-              const SizedBox(height: 32),
-              
-              // Privacy Note
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppColors.secondaryBackground,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.neutral.withValues(alpha: 0.2)),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      CupertinoIcons.shield,
-                      color: AppColors.success,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
+                    GestureDetector(
+                      onTap: _isLoading ? null : _navigateToEmailLogin,
                       child: Text(
-                        'Your data is secure and private',
+                        'Sign in',
                         style: TextStyle(
                           fontSize: 14,
-                          color: AppColors.textSecondary,
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
                   ],
                 ),
-              ),
-              
-              const SizedBox(height: 24),
-            ],
+                
+                const SizedBox(height: 24),
+                
+                // Privacy Note
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppColors.secondaryBackground,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.neutral.withValues(alpha: 0.2)),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        CupertinoIcons.shield,
+                        color: AppColors.success,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'Your data is secure and private',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                
+                const SizedBox(height: 24),
+              ],
+            ),
           ),
         ),
-      ),
       ),
     );
   }
