@@ -18,15 +18,17 @@ class EmptyStates extends StatelessWidget {
   }
 
   static Widget buildEmptyState(VoidCallback onTakePhotoPressed) {
-    return Container(
-      padding: const EdgeInsets.all(32),
-      decoration: BoxDecoration(
-        color: AppColors.secondaryBackground,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.neutral.withValues(alpha: 0.1)),
-      ),
-      child: Column(
-        children: [
+    return Center(
+      child: Container(
+        padding: const EdgeInsets.all(32),
+        decoration: BoxDecoration(
+          color: AppColors.secondaryBackground,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.neutral.withValues(alpha: 0.1)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
           const Icon(
             CupertinoIcons.house,
             size: 48,
@@ -77,20 +79,23 @@ class EmptyStates extends StatelessWidget {
             ),
           ),
         ],
+        ),
       ),
     );
   }
 
   static Widget buildNoResultsState(VoidCallback onClearFiltersPressed) {
-    return Container(
-      padding: const EdgeInsets.all(32),
-      decoration: BoxDecoration(
-        color: AppColors.secondaryBackground,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.neutral.withValues(alpha: 0.1)),
-      ),
-      child: Column(
-        children: [
+    return Center(
+      child: Container(
+        padding: const EdgeInsets.all(32),
+        decoration: BoxDecoration(
+          color: AppColors.secondaryBackground,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.neutral.withValues(alpha: 0.1)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
           const Icon(
             CupertinoIcons.search,
             size: 48,
@@ -141,6 +146,7 @@ class EmptyStates extends StatelessWidget {
             ),
           ),
         ],
+        ),
       ),
     );
   }
