@@ -20,13 +20,13 @@ class MealService {
       if (offset != null) 'offset': offset.toString(),
     };
 
-    final response = await _apiService.get<Map<String, dynamic>>(
+    final response = await _apiService.get<List<dynamic>>(
       '/meals',
       queryParameters: queryParams,
     );
 
     if (response.success && response.data != null) {
-      final meals = (response.data!['meals'] as List)
+      final meals = response.data!
           .map((m) => MealDto.fromJson(m))
           .toList();
       return ApiResponse.success(meals, message: response.message);

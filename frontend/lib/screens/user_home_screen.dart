@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../main.dart';
 import '../utils/meal_tracking_provider.dart';
+import '../models/dto/meal_dto.dart';
 import '../providers/progress_provider.dart';
 import '../widgets/user_home/enhanced_header.dart';
 import '../widgets/user_home/progress_visualization.dart';
@@ -50,61 +51,6 @@ class _UserHomeScreenState extends State<UserHomeScreen>
   final ImagePicker _imagePicker = ImagePicker();
   bool _isLoadingImage = false;
 
-  // Mock data for demonstration - in real app this would come from a database
-  final Map<String, double> _mealProgress = {
-    'Breakfast': 25.0,
-    'Lunch': 45.0,
-    'Dinner': 30.0,
-    'Snack': 15.0,
-  };
-
-  // Mock recent items data
-  final List<Map<String, dynamic>> _recentItems = [
-    {
-      'id': '1',
-      'name': 'Grilled Chicken Breast',
-      'portion': 150.0,
-      'protein': 46.5,
-      'meal': 'Lunch',
-      'time': '12:30 PM',
-      'image': 'assets/images/chicken.jpg',
-      'category': 'Protein',
-      'calories': 165,
-    },
-    {
-      'id': '2',
-      'name': 'Greek Yogurt',
-      'portion': 200.0,
-      'protein': 20.0,
-      'meal': 'Breakfast',
-      'time': '8:15 AM',
-      'image': 'assets/images/yogurt.jpg',
-      'category': 'Dairy',
-      'calories': 120,
-    },
-    {
-      'id': '3',
-      'name': 'Salmon Fillet',
-      'portion': 120.0,
-      'protein': 28.8,
-      'meal': 'Dinner',
-      'time': '7:45 PM',
-      'image': 'assets/images/salmon.jpg',
-      'category': 'Protein',
-      'calories': 180,
-    },
-    {
-      'id': '4',
-      'name': 'Quinoa Bowl',
-      'portion': 100.0,
-      'protein': 4.0,
-      'meal': 'Lunch',
-      'time': '1:15 PM',
-      'image': 'assets/images/quinoa.jpg',
-      'category': 'Carbohydrate',
-      'calories': 120,
-    },
-  ];
 
   // Search and filter state
   String _searchQuery = '';
@@ -115,41 +61,9 @@ class _UserHomeScreenState extends State<UserHomeScreen>
   String? _editingItemId;
   final Map<String, TextEditingController> _editControllers = {};
 
-  // Get filtered items
-  List<Map<String, dynamic>> get _filteredItems {
-    List<Map<String, dynamic>> items = _recentItems;
-    
-    // Apply search filter
-    if (_searchQuery.isNotEmpty) {
-      items = items.where((item) =>
-        item['name'].toString().toLowerCase().contains(_searchQuery.toLowerCase()) ||
-        item['category'].toString().toLowerCase().contains(_searchQuery.toLowerCase())
-      ).toList();
-    }
-    
-    // Apply meal filter
-    if (_selectedMealFilter != 'All') {
-      items = items.where((item) => item['meal'] == _selectedMealFilter).toList();
-    }
-    
-    return items;
-  }
 
-  // Get unique meals for filter
-  List<String> get _availableMeals {
-    final meals = _recentItems.map((item) => item['meal'] as String).toSet().toList();
-    meals.insert(0, 'All');
-    return meals;
-  }
 
-  double get _totalProgress {
-    return _mealProgress.values.fold(0.0, (sum, value) => sum + value);
-  }
 
-  double get _progressPercentage {
-    if (widget.dailyProteinTarget == 0) return 0.0;
-    return (_totalProgress / widget.dailyProteinTarget) * 100;
-  }
 
   @override
   void initState() {
@@ -188,7 +102,7 @@ class _UserHomeScreenState extends State<UserHomeScreen>
 
     _ringAnimation = Tween<double>(
       begin: 0.0,
-      end: _progressPercentage / 100,
+      end: 1.0, // Will be updated dynamically based on real progress
     ).animate(CurvedAnimation(
       parent: _ringController,
       curve: Curves.easeOutCubic,
@@ -204,11 +118,8 @@ class _UserHomeScreenState extends State<UserHomeScreen>
   }
 
   void _initializeEditControllers() {
-    for (final item in _recentItems) {
-      _editControllers[item['id']] = TextEditingController(
-        text: item['portion'].toString(),
-      );
-    }
+    // Initialize controllers when meals are loaded
+    // This will be updated in the provider listener
   }
 
   void _startAnimations() async {
@@ -234,21 +145,27 @@ class _UserHomeScreenState extends State<UserHomeScreen>
     });
   }
 
-  void _saveEdit(String itemId) {
+  Future<void> _saveEdit(String itemId) async {
     final controller = _editControllers[itemId];
+    // final mealProvider = Provider.of<MealTrackingProvider>(context, listen: false);
+    
     if (controller != null) {
       final newPortion = double.tryParse(controller.text);
       if (newPortion != null && newPortion > 0) {
+        // Find the meal to update (currently unused, would be used for complex updates)
+        // final meal = mealProvider.meals.firstWhere(
+        //   (m) => m.id == itemId,
+        //   orElse: () => throw Exception('Meal not found'),
+        // );
+        
+        // Update meal with new portion (this would need to be implemented in the meal structure)
+        // For now, we'll just close the edit mode
         setState(() {
-          final itemIndex = _recentItems.indexWhere((item) => item['id'] == itemId);
-          if (itemIndex != -1) {
-            _recentItems[itemIndex]['portion'] = newPortion;
-            // Recalculate protein based on portion
-            final proteinPer100g = _recentItems[itemIndex]['protein'] / _recentItems[itemIndex]['portion'] * 100;
-            _recentItems[itemIndex]['protein'] = (newPortion / 100) * proteinPer100g;
-          }
           _editingItemId = null;
         });
+        
+        // In a full implementation, you would update the meal's food portions
+        // and call mealProvider.updateMeal(itemId, updatedMeal)
       }
     }
   }
@@ -258,19 +175,29 @@ class _UserHomeScreenState extends State<UserHomeScreen>
       _editingItemId = null;
     });
     // Reset controllers to original values
-    for (final item in _recentItems) {
-      final controller = _editControllers[item['id']];
+    final mealProvider = Provider.of<MealTrackingProvider>(context, listen: false);
+    for (final meal in mealProvider.meals) {
+      final controller = _editControllers[meal.id];
       if (controller != null) {
-        controller.text = item['portion'].toString();
+        // Reset to original portion - this would need proper implementation
+        // based on the meal's food structure
+        controller.text = '100'; // Default value for now
       }
     }
   }
 
   // Delete functionality
-  void _deleteItem(String itemId) {
-    setState(() {
-      _recentItems.removeWhere((item) => item['id'] == itemId);
-    });
+  Future<void> _deleteItem(String itemId) async {
+    final mealProvider = Provider.of<MealTrackingProvider>(context, listen: false);
+    final success = await mealProvider.deleteMeal(itemId);
+    
+    if (success) {
+      // Remove controller for deleted meal
+      _editControllers.remove(itemId);
+    } else {
+      // Show error if deletion failed
+      _showErrorDialog(mealProvider.error ?? 'Failed to delete meal');
+    }
   }
 
   // Toggle search bar
@@ -284,6 +211,109 @@ class _UserHomeScreenState extends State<UserHomeScreen>
     });
   }
 
+  // Helper methods to get data from providers
+  Map<String, double> _getMealProgress(MealTrackingProvider mealProvider) {
+    // Safely handle null meal summary
+    final summary = mealProvider.mealSummary;
+    if (summary.isEmpty) {
+      return {
+        'Breakfast': 0.0,
+        'Lunch': 0.0,
+        'Dinner': 0.0,
+        'Snack': 0.0,
+      };
+    }
+    
+    return {
+      'Breakfast': summary['breakfast']?['protein']?.toDouble() ?? 0.0,
+      'Lunch': summary['lunch']?['protein']?.toDouble() ?? 0.0,
+      'Dinner': summary['dinner']?['protein']?.toDouble() ?? 0.0,
+      'Snack': summary['snack']?['protein']?.toDouble() ?? 0.0,
+    };
+  }
+  
+  List<Map<String, dynamic>> _getRecentItems(MealTrackingProvider mealProvider) {
+    // Safely handle null or empty meals list
+    final meals = mealProvider.todaysMeals;
+    if (meals.isEmpty) {
+      return [];
+    }
+    
+    return meals.map((meal) {
+      // Convert MealDto to the expected format for the UI
+      final totalProtein = meal.totalNutrition?.protein ?? 0.0;
+      final totalCalories = meal.totalNutrition?.calories ?? 0.0;
+      
+      return {
+        'id': meal.id,
+        'name': _getMealDisplayName(meal),
+        'portion': _getMealPortion(meal),
+        'protein': totalProtein,
+        'meal': _capitalizeFirst(meal.mealType),
+        'time': _formatTime(meal.timestamp),
+        'image': meal.photoUrl ?? 'assets/images/default_food.jpg',
+        'category': 'Mixed', // Default category
+        'calories': totalCalories.toInt(),
+      };
+    }).toList();
+  }
+  
+  // Get filtered items
+  List<Map<String, dynamic>> _getFilteredItems(List<Map<String, dynamic>> recentItems) {
+    List<Map<String, dynamic>> items = recentItems;
+    
+    // Apply search filter
+    if (_searchQuery.isNotEmpty) {
+      items = items.where((item) =>
+        item['name'].toString().toLowerCase().contains(_searchQuery.toLowerCase()) ||
+        item['category'].toString().toLowerCase().contains(_searchQuery.toLowerCase())
+      ).toList();
+    }
+    
+    // Apply meal filter
+    if (_selectedMealFilter != 'All') {
+      items = items.where((item) => item['meal'] == _selectedMealFilter).toList();
+    }
+    
+    return items;
+  }
+  
+  // Get unique meals for filter
+  List<String> _getAvailableMeals(List<Map<String, dynamic>> recentItems) {
+    final meals = recentItems.map((item) => item['meal'] as String).toSet().toList();
+    meals.insert(0, 'All');
+    return meals;
+  }
+  
+  // Helper methods for meal data conversion
+  String _getMealDisplayName(MealDto meal) {
+    if (meal.foods.isNotEmpty) {
+      // Use the first food's ID as the meal name (simplified)
+      return meal.foods.first.foodId;
+    }
+    return 'Mixed meal';
+  }
+  
+  double _getMealPortion(MealDto meal) {
+    if (meal.foods.isNotEmpty) {
+      return meal.foods.first.quantity;
+    }
+    return 100.0; // Default portion
+  }
+  
+  String _capitalizeFirst(String text) {
+    if (text.isEmpty) return text;
+    return text[0].toUpperCase() + text.substring(1).toLowerCase();
+  }
+  
+  String _formatTime(DateTime dateTime) {
+    final hour = dateTime.hour;
+    final minute = dateTime.minute;
+    final period = hour >= 12 ? 'PM' : 'AM';
+    final displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
+    return '${displayHour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')} $period';
+  }
+  
   // Calculate protein for editing
   double _calculateProtein(Map<String, dynamic> item) {
     final portion = double.tryParse(_editControllers[item['id']]?.text ?? '0') ?? 0.0;
@@ -405,38 +435,125 @@ class _UserHomeScreenState extends State<UserHomeScreen>
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      backgroundColor: AppColors.background,
-      navigationBar: CupertinoNavigationBar(
-        backgroundColor: AppColors.background,
-        border: null,
-        middle: const Text(
-          'Fuelie',
-          style: TextStyle(
-            color: AppColors.textPrimary,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
+    return Consumer2<MealTrackingProvider, ProgressProvider>(
+      builder: (context, mealProvider, progressProvider, child) {
+        // Initialize edit controllers for current meals
+        _updateEditControllers(mealProvider.todaysMeals);
+        
+        return CupertinoPageScaffold(
+          backgroundColor: AppColors.background,
+          navigationBar: CupertinoNavigationBar(
+            backgroundColor: AppColors.background,
+            border: null,
+            middle: const Text(
+              'Fuelie',
+              style: TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            trailing: CupertinoButton(
+              padding: EdgeInsets.zero,
+              onPressed: () => _showSettingsMenu(context),
+              child: Icon(
+                CupertinoIcons.settings,
+                color: AppColors.textPrimary,
+              ),
+            ),
           ),
+          child: _buildMainContent(mealProvider, progressProvider),
+        );
+      },
+    );
+  }
+  
+  void _updateEditControllers(List<MealDto> meals) {
+    // Update edit controllers when meals change
+    final existingIds = _editControllers.keys.toSet();
+    final currentIds = meals.map((m) => m.id).toSet();
+    
+    // Remove controllers for meals that no longer exist
+    for (final id in existingIds.difference(currentIds)) {
+      _editControllers[id]?.dispose();
+      _editControllers.remove(id);
+    }
+    
+    // Add controllers for new meals
+    for (final meal in meals) {
+      if (!_editControllers.containsKey(meal.id)) {
+        _editControllers[meal.id] = TextEditingController(
+          text: _getMealPortion(meal).toString(),
+        );
+      }
+    }
+  }
+  
+  Widget _buildMainContent(MealTrackingProvider mealProvider, ProgressProvider progressProvider) {
+    // Show loading state if data is still being fetched
+    if (mealProvider.isLoading && mealProvider.todaysSummary == null) {
+      return const Center(
+        child: CupertinoActivityIndicator(
+          radius: 20,
+          color: AppColors.primary,
         ),
-        trailing: CupertinoButton(
-          padding: EdgeInsets.zero,
-          onPressed: () => _showSettingsMenu(context),
-          child: Icon(
-            CupertinoIcons.settings,
-            color: AppColors.textPrimary,
-          ),
+      );
+    }
+    
+    // Show error state if there's an error and no data
+    if (mealProvider.error != null && mealProvider.todaysSummary == null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              CupertinoIcons.exclamationmark_triangle,
+              size: 48,
+              color: AppColors.textSecondary,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Unable to load meal data',
+              style: TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              mealProvider.error ?? 'Unknown error occurred',
+              style: TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 14,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            CupertinoButton.filled(
+              onPressed: () {
+                mealProvider.refreshAll();
+                if (progressProvider.needsRefresh) {
+                  progressProvider.loadProgressData();
+                }
+              },
+              child: const Text('Retry'),
+            ),
+          ],
         ),
-      ),
-      child: Column(
-        children: [
-          // Main Content
-          Expanded(
-            child: CustomScrollView(
-              slivers: [
-                // Enhanced Header
-                SliverToBoxAdapter(
-                  child: const EnhancedHeader(),
-                ),
+      );
+    }
+    
+    return Column(
+      children: [
+        // Main Content
+        Expanded(
+          child: CustomScrollView(
+            slivers: [
+              // Enhanced Header
+              SliverToBoxAdapter(
+                child: const EnhancedHeader(),
+              ),
                 
                 // Main Content
                 SliverToBoxAdapter(
@@ -449,8 +566,8 @@ class _UserHomeScreenState extends State<UserHomeScreen>
                         
                         // Advanced Progress Visualization
                         ProgressVisualization(
-                          totalProgress: _totalProgress,
-                          dailyProteinTarget: widget.dailyProteinTarget,
+                          totalProgress: mealProvider.todaysTotalProtein,
+                          dailyProteinTarget: mealProvider.dailyProteinGoal,
                           goal: widget.goal,
                           trainingMultiplier: widget.trainingMultiplier,
                           ringAnimation: _ringAnimation,
@@ -462,15 +579,15 @@ class _UserHomeScreenState extends State<UserHomeScreen>
                         // Per-meal Mini-rings
                         MealProgress(
                           meals: widget.meals,
-                          dailyProteinTarget: widget.dailyProteinTarget,
+                          dailyProteinTarget: mealProvider.dailyProteinGoal,
                         ),
                         
                         const SizedBox(height: 32),
                         
                         // Quick Stats Panel
                         QuickStats(
-                          totalProgress: _totalProgress,
-                          progressPercentage: _progressPercentage,
+                          totalProgress: mealProvider.todaysTotalProtein,
+                          progressPercentage: mealProvider.todaysProgress * 100,
                         ),
                         
                         const SizedBox(height: 32),
@@ -573,12 +690,12 @@ class _UserHomeScreenState extends State<UserHomeScreen>
                                           context,
                                           CupertinoPageRoute(
                                             builder: (context) => QuickAddScreen(
-                                              mealProgress: _mealProgress,
+                                              mealProgress: _getMealProgress(mealProvider),
                                               mealTargets: {
-                                                'Breakfast': widget.dailyProteinTarget / 4,
-                                                'Lunch': widget.dailyProteinTarget / 4,
-                                                'Dinner': widget.dailyProteinTarget / 4,
-                                                'Snack': widget.dailyProteinTarget / 4,
+                                                'Breakfast': mealProvider.dailyProteinGoal / 4,
+                                                'Lunch': mealProvider.dailyProteinGoal / 4,
+                                                'Dinner': mealProvider.dailyProteinGoal / 4,
+                                                'Snack': mealProvider.dailyProteinGoal / 4,
                                               },
                                               enabledMeals: widget.meals,
                                             ),
@@ -596,41 +713,49 @@ class _UserHomeScreenState extends State<UserHomeScreen>
                         const SizedBox(height: 32),
                         
                         // Recent Items List
-                        RecentItemsList(
-                          recentItems: _recentItems,
-                          filteredItems: _filteredItems,
-                          showSearchBar: _showSearchBar,
-                          searchQuery: _searchQuery,
-                          selectedMealFilter: _selectedMealFilter,
-                          availableMeals: _availableMeals,
-                          editingItemId: _editingItemId,
-                          editControllers: _editControllers,
-                          dailyProteinTarget: widget.dailyProteinTarget,
-                          meals: widget.meals,
-                          onToggleSearchBar: _toggleSearchBar,
-                          onSearchChanged: (value) {
-                            setState(() {
-                              _searchQuery = value;
-                            });
+                        Builder(
+                          builder: (context) {
+                            final recentItems = _getRecentItems(mealProvider);
+                            final filteredItems = _getFilteredItems(recentItems);
+                            final availableMeals = _getAvailableMeals(recentItems);
+                            
+                            return RecentItemsList(
+                              recentItems: recentItems,
+                              filteredItems: filteredItems,
+                              showSearchBar: _showSearchBar,
+                              searchQuery: _searchQuery,
+                              selectedMealFilter: _selectedMealFilter,
+                              availableMeals: availableMeals,
+                              editingItemId: _editingItemId,
+                              editControllers: _editControllers,
+                              dailyProteinTarget: mealProvider.dailyProteinGoal,
+                              meals: widget.meals,
+                              onToggleSearchBar: _toggleSearchBar,
+                              onSearchChanged: (value) {
+                                setState(() {
+                                  _searchQuery = value;
+                                });
+                              },
+                              onMealFilterChanged: (value) {
+                                setState(() {
+                                  _selectedMealFilter = value;
+                                });
+                              },
+                              onTakePhoto: () => _showCameraSettingsModal(context),
+                              onClearFilters: () {
+                                setState(() {
+                                  _searchQuery = '';
+                                  _selectedMealFilter = 'All';
+                                });
+                              },
+                              onStartEditing: _startEditing,
+                              onSaveEdit: (itemId) => _saveEdit(itemId),
+                              onCancelEdit: _cancelEdit,
+                              onDeleteItem: (itemId) => _deleteItem(itemId),
+                              onEditItem: _startEditing,
+                              calculateProtein: _calculateProtein,
+                            );
                           },
-                          onMealFilterChanged: (value) {
-                            setState(() {
-                              _selectedMealFilter = value;
-                            });
-                          },
-                          onTakePhoto: () => _showCameraSettingsModal(context),
-                          onClearFilters: () {
-                            setState(() {
-                              _searchQuery = '';
-                              _selectedMealFilter = 'All';
-                            });
-                          },
-                          onStartEditing: _startEditing,
-                          onSaveEdit: _saveEdit,
-                          onCancelEdit: _cancelEdit,
-                          onDeleteItem: _deleteItem,
-                          onEditItem: _startEditing,
-                          calculateProtein: _calculateProtein,
                         ),
                         
                         const SizedBox(height: 32), // Space for footer
@@ -642,41 +767,40 @@ class _UserHomeScreenState extends State<UserHomeScreen>
             ),
           ),
           
-          // Footer Action Bar
-          FooterActionBar(
-            onQuickAdd: () {
-              Navigator.push(
-                context,
-                CupertinoPageRoute(
-                  builder: (context) => QuickAddScreen(
-                    mealProgress: _mealProgress,
-                    mealTargets: {
-                      'Breakfast': widget.dailyProteinTarget / 4,
-                      'Lunch': widget.dailyProteinTarget / 4,
-                      'Dinner': widget.dailyProteinTarget / 4,
-                      'Snack': widget.dailyProteinTarget / 4,
-                    },
-                    enabledMeals: widget.meals,
+            // Footer Action Bar
+            FooterActionBar(
+              onQuickAdd: () {
+                Navigator.push(
+                  context,
+                  CupertinoPageRoute(
+                    builder: (context) => QuickAddScreen(
+                      mealProgress: _getMealProgress(mealProvider),
+                      mealTargets: {
+                        'Breakfast': mealProvider.dailyProteinGoal / 4,
+                        'Lunch': mealProvider.dailyProteinGoal / 4,
+                        'Dinner': mealProvider.dailyProteinGoal / 4,
+                        'Snack': mealProvider.dailyProteinGoal / 4,
+                      },
+                      enabledMeals: widget.meals,
+                    ),
                   ),
-                ),
-              );
-            },
-            onCamera: () => _showCameraSettingsModal(context),
-            onAnalytics: () {
-              Navigator.push(
-                context,
-                CupertinoPageRoute(
-                  builder: (context) => HistoryScreen(
-                    dailyProteinTarget: widget.dailyProteinTarget,
-                    meals: widget.meals,
+                );
+              },
+              onCamera: () => _showCameraSettingsModal(context),
+              onAnalytics: () {
+                Navigator.push(
+                  context,
+                  CupertinoPageRoute(
+                    builder: (context) => HistoryScreen(
+                      dailyProteinTarget: mealProvider.dailyProteinGoal,
+                      meals: widget.meals,
+                    ),
                   ),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-    );
+                );
+              },
+            ),
+          ],
+        );
   }
 
   Widget _buildQuickActionCard({
