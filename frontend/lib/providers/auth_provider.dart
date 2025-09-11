@@ -297,8 +297,8 @@ class AuthProvider extends ChangeNotifier {
   // Helper methods for UI
   String get displayName {
     return _currentUser?.displayName ?? 
-           _currentUser?.email ?? 
-           'User';
+          _currentUser?.email ?? 
+          'User';
   }
 
   String? get userEmail {
@@ -316,22 +316,20 @@ class AuthProvider extends ChangeNotifier {
   bool get isReturningUser {
     if (_currentUser == null) return false;
     // Consider user as "returning" if they have at least one piece of profile data beyond email
-    return _currentUser!.displayName != null ||
-           _currentUser!.age != null ||
-           _currentUser!.weight != null ||
-           _currentUser!.height != null ||
-           _currentUser!.dailyProteinGoal != null;
+    return _currentUser!.weight != null ||
+          _currentUser!.height != null ||
+          _currentUser!.dailyProteinGoal != null;
   }
 
   // Check if this is a completely new user with no profile setup at all
   bool get isCompletelyNewUser {
     if (_currentUser == null) return true;
     return _currentUser!.email != null &&
-           _currentUser!.displayName == null &&
-           _currentUser!.age == null &&
-           _currentUser!.weight == null &&
-           _currentUser!.height == null &&
-           _currentUser!.dailyProteinGoal == null;
+          _currentUser!.displayName == null &&
+          _currentUser!.age == null &&
+          _currentUser!.weight == null &&
+          _currentUser!.height == null &&
+          _currentUser!.dailyProteinGoal == null;
   }
 
   // Quick access to common profile data
