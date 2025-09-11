@@ -307,11 +307,9 @@ class AuthProvider extends ChangeNotifier {
 
   bool get hasCompleteProfile {
     if (_currentUser == null) return false;
-    return _currentUser!.displayName != null &&
-           _currentUser!.age != null &&
-           _currentUser!.weight != null &&
-           _currentUser!.height != null &&
-           _currentUser!.dailyProteinGoal != null;
+    return _currentUser!.weight != null &&
+          _currentUser!.height != null &&
+          _currentUser!.dailyProteinGoal != null;
   }
 
   // More lenient check for returning users - has at least basic profile data
