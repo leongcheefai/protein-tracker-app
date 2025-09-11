@@ -50,7 +50,7 @@ flutter analyze       # Static analysis
 - **State Management**: Provider pattern (`provider: ^6.1.1`)
 - **Navigation**: CupertinoPageRoute with comprehensive routing in main.dart
 - **Design System**: iOS-focused with Cupertino widgets
-- **Authentication**: Firebase Auth with Google Sign-In and Sign in with Apple
+- **Authentication**: Supabase Auth with Google Sign-In, Sign in with Apple and email
 - **Camera Integration**: Custom camera functionality for food photo capture
 
 ### Core User Flows

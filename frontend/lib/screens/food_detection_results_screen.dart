@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'dart:io';
 import '../main.dart';
 import '../providers/food_provider.dart';
-import '../models/dto/food_dto.dart';
 
 class FoodDetectionResultsScreen extends StatefulWidget {
   final String imagePath;
