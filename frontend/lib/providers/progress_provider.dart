@@ -53,21 +53,19 @@ class ProgressProvider extends ChangeNotifier {
   // Main data loading methods
   Future<void> loadProgressData() async {
     _setLoading(true);
-    try {
-      await Future.wait([
-        loadTodaysStats(),
-        loadWeeklyStats(),
-        loadInsights(),
-        loadStreaks(),
-        loadBadges(),
-      ]);
-      _lastUpdated = DateTime.now();
-      _error = null;
-    } catch (e) {
-      _error = e.toString();
-    } finally {
-      _setLoading(false);
-    }
+    
+    // Load each data source independently - don't let one failure break everything
+    await Future.wait([
+      loadTodaysStats().catchError((e) => debugPrint('Today\'s stats failed: $e')),
+      loadWeeklyStats().catchError((e) => debugPrint('Weekly stats failed: $e')),
+      loadInsights().catchError((e) => debugPrint('Insights failed: $e')),
+      loadStreaks().catchError((e) => debugPrint('Streaks failed: $e')),
+      loadBadges().catchError((e) => debugPrint('Badges failed: $e')),
+    ], eagerError: false);
+    
+    _lastUpdated = DateTime.now();
+    _error = null; // Clear any previous errors since we handle them individually
+    _setLoading(false);
   }
 
   Future<void> refreshStats() async {

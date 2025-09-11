@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import '../services/api_service.dart';
 
 class DailyStats {
   final String date;
@@ -465,7 +466,7 @@ class ChangeData {
 }
 
 class AnalyticsService {
-  static const String baseUrl = 'http://localhost:3000/api/analytics';
+  static String get baseUrl => '${ApiService.baseUrl}/analytics';
   static String? _authToken;
 
   static void setAuthToken(String token) {

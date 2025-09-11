@@ -384,18 +384,19 @@ class ProteinPaceApp extends StatelessWidget {
         print('📱 Main: Is completely new user: ${authProvider.isCompletelyNewUser}');
         print('📱 Main: Is returning user: ${authProvider.isReturningUser}');
         
-        if (authProvider.isCompletelyNewUser) {
-          print('📱 Main: Completely new user, showing WelcomeScreen for initial setup');
-          return const WelcomeScreen(); // Initial profile setup flow
+        // Check if user has completed essential profile setup (dailyProteinGoal)
+        if (authProvider.dailyProteinGoal == null) {
+          print('📱 Main: User missing daily protein goal, showing WelcomeScreen for profile setup');
+          return const WelcomeScreen(); // Redirect to profile setup flow
         } else {
-          print('📱 Main: Returning authenticated user, showing UserHomeScreen with defaults for missing data');
-          // For returning users, provide sensible defaults for any missing profile data
+          print('📱 Main: User has complete profile setup, showing UserHomeScreen');
+          // For users with completed profile setup, provide sensible defaults for any missing data
           return UserHomeScreen(
             height: authProvider.height ?? 170.0, // Default height in cm
             weight: authProvider.weight ?? 70.0,   // Default weight in kg  
             trainingMultiplier: 1.8, // Default moderate activity level
             goal: 'maintain', // Default goal
-            dailyProteinTarget: authProvider.dailyProteinGoal ?? 126.0, // Default protein target
+            dailyProteinTarget: authProvider.dailyProteinGoal!, // Use existing protein target
             meals: const {}, // Will be populated by MealTrackingProvider
           );
         }

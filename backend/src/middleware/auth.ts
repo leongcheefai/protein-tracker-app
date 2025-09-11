@@ -93,15 +93,29 @@ export const authenticate = async (
     let userProfile = await SupabaseAuthService.getUserProfile(decoded.sub);
     
     if (!userProfile && decoded.email) {
-      // Auto-create user profile if it doesn't exist
+      // Auto-create user profile if it doesn't exist, using user context
       try {
-        userProfile = await DatabaseService.createUserProfile({
+        const profileData = {
           id: decoded.sub,
           email: decoded.email,
           display_name: decoded.email.split('@')[0] // Default display name
-        });
-      } catch (createError) {
-        console.error('Failed to create user profile:', createError);
+        };
+        
+        // Try to create with user context first (for RLS compliance)
+        userProfile = await DatabaseService.createUserProfileWithContext(profileData, token);
+      } catch (createError: any) {
+        console.error('Failed to create user profile with context:', createError);
+        
+        // Fallback to service account creation if user context fails
+        try {
+          userProfile = await DatabaseService.createUserProfile({
+            id: decoded.sub,
+            email: decoded.email,
+            display_name: decoded.email.split('@')[0]
+          });
+        } catch (fallbackError) {
+          console.error('Failed to create user profile with service account:', fallbackError);
+        }
       }
     }
 

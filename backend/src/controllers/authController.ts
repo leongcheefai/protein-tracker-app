@@ -3,7 +3,7 @@ import { DatabaseService, supabase } from '../utils/database';
 import { SupabaseAuthService, AuthenticatedRequest } from '../middleware/auth';
 import { AppError } from '../middleware/errorHandler';
 import { ApiResponse } from '../types';
-import { InsertUserProfile, UpdateUserProfile } from '../types/supabase';
+import { InsertUserProfile, UpdateUserProfile, Database } from '../types/supabase';
 
 export class AuthController {
   // Verify Supabase token and ensure user profile exists
@@ -89,12 +89,29 @@ export class AuthController {
   static async getProfile(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.user!.id;
+      const userToken = req.userToken!;
 
-      const userProfile = await DatabaseService.getUserProfile(userId);
+      console.log(`🔍 Getting profile for user: ${userId}`);
+      
+      // Try to get user profile with service account first
+      let userProfile: Database['public']['Tables']['user_profiles']['Row'] | null = await DatabaseService.getUserProfile(userId);
+
+      // If no profile found with service account, try with user context (for RLS)
+      if (!userProfile) {
+        console.log(`🔄 No profile found with service account, trying with user context for user: ${userId}`);
+        try {
+          userProfile = await DatabaseService.getUserProfileWithContext(userId, userToken);
+        } catch (contextError: any) {
+          console.log(`❌ Failed to get profile with user context: ${contextError.message}`);
+        }
+      }
 
       if (!userProfile) {
+        console.log(`❌ User profile not found for user: ${userId}`);
         throw new AppError('User profile not found', 404);
       }
+
+      console.log(`✅ Found user profile for: ${userProfile.email}`);
 
       const response: ApiResponse = {
         success: true,
@@ -119,6 +136,7 @@ export class AuthController {
 
       res.status(200).json(response);
     } catch (error) {
+      console.log(`❌ Error in getProfile: ${error instanceof Error ? error.message : 'Unknown error'}`);
       next(error);
     }
   }

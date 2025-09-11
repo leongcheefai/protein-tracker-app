@@ -2,10 +2,33 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter/foundation.dart';
 import '../models/api_response.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://localhost:3000/api';
+  static String get baseUrl {
+    // Try to get from environment variable first
+    final envUrl = dotenv.env['API_BASE_URL'];
+    if (envUrl != null && envUrl.isNotEmpty) {
+      return envUrl;
+    }
+    
+    // Platform-specific defaults
+    if (kIsWeb) {
+      return 'http://localhost:3000/api';
+    } else if (Platform.isIOS) {
+      // For iOS Simulator, use 127.0.0.1 instead of localhost
+      return 'http://127.0.0.1:3000/api';
+    } else if (Platform.isAndroid) {
+      // For Android emulator, use 10.0.2.2 to reach host machine
+      return 'http://10.0.2.2:3000/api';
+    } else {
+      // Default for other platforms
+      return 'http://localhost:3000/api';
+    }
+  }
+  
   static const String _tokenKey = 'auth_token';
   
   late final Dio _dio;
@@ -25,6 +48,18 @@ class ApiService {
     ));
     
     _setupInterceptors();
+    
+    // Load any existing auth token from secure storage
+    _initializeToken();
+  }
+  
+  Future<void> _initializeToken() async {
+    try {
+      await loadAuthToken();
+    } catch (e) {
+      // If loading token fails, continue without it
+      print('Failed to load stored auth token: $e');
+    }
   }
   
   void _setupInterceptors() {
@@ -65,6 +100,12 @@ class ApiService {
   Future<void> loadAuthToken() async {
     _authToken = await _storage.read(key: _tokenKey);
   }
+  
+  Future<String?> getStoredToken() async {
+    return await _storage.read(key: _tokenKey);
+  }
+  
+  String? get currentToken => _authToken;
   
   Future<void> clearAuthToken() async {
     _authToken = null;

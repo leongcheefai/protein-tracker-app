@@ -40,10 +40,13 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> _initializeAuth() async {
     try {
-      // Check if user is already authenticated
+      // First, load any stored auth token from secure storage
+      await ServiceLocator().apiService.loadAuthToken();
+      
+      // Check if user is already authenticated in Supabase
       final supabaseUser = _authService.currentUser;
       if (supabaseUser != null) {
-        // Try to load existing backend token and verify
+        // Try to refresh the Supabase token and sync with backend
         await _authService.refreshToken();
         
         // If token refresh succeeds, get user profile
@@ -56,6 +59,24 @@ class AuthProvider extends ChangeNotifier {
           await _signOutInternal();
         }
       } else {
+        // No Supabase user, but check if we have a stored token
+        // This handles cases where Supabase session expired but we have a backend token
+        final storedToken = await ServiceLocator().apiService.getStoredToken();
+        if (storedToken != null) {
+          // Try to validate the stored token with backend
+          try {
+            final profileResponse = await ServiceLocator().userService.getProfile();
+            if (profileResponse.success && profileResponse.data != null) {
+              _currentUser = profileResponse.data;
+              _setState(AuthenticationState.authenticated);
+              return;
+            }
+          } catch (e) {
+            // Stored token is invalid, clear it
+            await ServiceLocator().apiService.clearAuthToken();
+          }
+        }
+        
         _setState(AuthenticationState.unauthenticated);
       }
     } catch (e) {

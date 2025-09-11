@@ -12,10 +12,10 @@ export class DatabaseService {
       .from('user_profiles')
       .select('*')
       .eq('id', userId)
-      .single();
+      .maybeSingle();
     
     if (error) throw error;
-    return data;
+    return data; // Will be null if no profile found, instead of throwing PGRST116
   }
 
   static async createUserProfile(profile: Database['public']['Tables']['user_profiles']['Insert']) {
