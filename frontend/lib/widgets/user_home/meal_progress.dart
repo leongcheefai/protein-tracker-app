@@ -45,8 +45,8 @@ class MealProgress extends StatelessWidget {
                   
                   // Get real progress from provider
                   final mealSummary = mealProvider.mealSummary;
-                  final progress = (mealSummary[mealName]?['protein'] ?? 0.0).toDouble();
-                  final target = (mealSummary[mealName]?['target'] ?? (dailyProteinTarget / 4)).toDouble();
+                  final progress = (mealSummary[mealName.toLowerCase()]?['protein'] ?? 0.0).toDouble();
+                  final target = (mealSummary[mealName.toLowerCase()]?['target'] ?? (dailyProteinTarget / 4)).toDouble();
                   final mealPercentage = target > 0 ? (progress / target) : 0.0;
               
               return Container(
@@ -68,16 +68,16 @@ class MealProgress extends StatelessWidget {
                             valueColor: const AlwaysStoppedAnimation<Color>(Colors.transparent),
                           ),
                           CircularProgressIndicator(
-                            value: isEnabled ? (mealPercentage / 100).clamp(0.0, 1.0) : 0.0,
+                            value: isEnabled ? mealPercentage.clamp(0.0, 1.0) : 0.0,
                             strokeWidth: 4,
                             backgroundColor: Colors.transparent,
                             valueColor: AlwaysStoppedAnimation<Color>(
-                              isEnabled ? ProgressUtils.getProgressColor(mealPercentage) : AppColors.neutral.withValues(alpha: 0.3),
+                              isEnabled ? ProgressUtils.getProgressColor(mealPercentage * 100) : AppColors.neutral.withValues(alpha: 0.3),
                             ),
                           ),
                           Icon(
                             MealUtils.getMealIcon(mealName),
-                            color: isEnabled ? ProgressUtils.getProgressColor(mealPercentage) : AppColors.neutral.withValues(alpha: 0.3),
+                            color: isEnabled ? ProgressUtils.getProgressColor(mealPercentage * 100) : AppColors.neutral.withValues(alpha: 0.3),
                             size: 20,
                           ),
                         ],
