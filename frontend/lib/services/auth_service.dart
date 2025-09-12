@@ -10,7 +10,7 @@ class AuthService {
   final SupabaseClient _supabase = Supabase.instance.client;
   final GoogleSignIn _googleSignIn = GoogleSignIn(
     scopes: ['email', 'profile'],
-    serverClientId: '845691816929-c8oh974l0b973fdd3l8rt97hje4afgqv.apps.googleusercontent.com',
+    serverClientId: '845691816929-o1rnnsabq3ha3ehmucvb6di6gs2r2vt6.apps.googleusercontent.com',
   );
 
   AuthService(this._apiService);
