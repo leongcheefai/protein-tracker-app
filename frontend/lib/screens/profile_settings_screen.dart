@@ -7,7 +7,6 @@ import '../providers/auth_provider.dart';
 import '../widgets/profile_settings/profile_photo_section.dart';
 import '../widgets/profile_settings/login_details_section.dart';
 import '../widgets/profile_settings/body_metrics_section.dart';
-import '../widgets/profile_settings/training_goal_section.dart';
 import '../utils/profile_settings_helpers.dart';
 
 class ProfileSettingsScreen extends StatefulWidget {
@@ -273,8 +272,15 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
   Widget _buildPersonalInfoSection() {
     return Container(
       decoration: BoxDecoration(
-        color: CupertinoColors.systemGrey6,
-        borderRadius: BorderRadius.circular(10),
+        color: CupertinoColors.white,
+        borderRadius: BorderRadius.circular(16.0),
+        boxShadow: [
+          BoxShadow(
+            color: CupertinoColors.black.withValues(alpha: 0.05),
+            blurRadius: 10.0,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -332,8 +338,15 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
     
     return Container(
       decoration: BoxDecoration(
-        color: CupertinoColors.systemGrey6,
-        borderRadius: BorderRadius.circular(10),
+        color: CupertinoColors.white,
+        borderRadius: BorderRadius.circular(16.0),
+        boxShadow: [
+          BoxShadow(
+            color: CupertinoColors.black.withValues(alpha: 0.05),
+            blurRadius: 10.0,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
