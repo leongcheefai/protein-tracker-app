@@ -115,7 +115,6 @@ class AuthProvider extends ChangeNotifier {
 
   Future<bool> _performAuth(Future<ApiResponse<UserProfileDto>> Function() authFunction) async {
     try {
-      print('🔄 Auth Provider: Starting authentication...');
       _setLoading(true);
       _clearError();
       _setState(AuthenticationState.authenticating);
@@ -123,9 +122,6 @@ class AuthProvider extends ChangeNotifier {
       final response = await authFunction();
       
       if (response.success && response.data != null) {
-        print('✅ Auth Provider: Authentication successful, user: ${response.data?.email}');
-        print('✅ Auth Provider: User has complete profile: ${response.data?.displayName != null && response.data?.age != null && response.data?.weight != null && response.data?.height != null && response.data?.dailyProteinGoal != null}');
-        
         // Check if this is an email verification pending case
         if (response.message?.contains('verification') == true || response.message?.contains('check your email') == true) {
           // Email verification required - show message but don't authenticate yet
@@ -140,14 +136,12 @@ class AuthProvider extends ChangeNotifier {
         _setLoading(false);
         return true;
       } else {
-        print('❌ Auth Provider: Authentication failed: ${response.error?.message}');
         _setError(response.error?.message ?? 'Authentication failed');
         _setState(AuthenticationState.unauthenticated);
         _setLoading(false);
         return false;
       }
     } catch (e) {
-      print('❌ Auth Provider: Authentication error: ${e.toString()}');
       _setError(e.toString());
       _setState(AuthenticationState.unauthenticated);
       _setLoading(false);

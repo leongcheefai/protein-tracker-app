@@ -369,7 +369,7 @@ class FoodProvider extends ChangeNotifier {
     if (_selectedDetectedFood != null) {
       // Create a FoodDto from the detected food for consistency
       return FoodDto(
-        id: 'detected_${_selectedDetectionIndex}',
+        id: 'detected_$_selectedDetectionIndex',
         name: _selectedDetectedFood!.name,
         category: _selectedDetectedFood!.category,
         nutritionPer100g: _selectedDetectedFood!.estimatedNutrition ?? 

@@ -66,18 +66,7 @@ void main() async {
       anonKey: SupabaseConfig.validatedAnonKey,
       debug: kDebugMode,
     );
-    
-    if (kDebugMode) {
-      print('✅ Supabase initialized successfully');
-    }
   } catch (e) {
-    if (kDebugMode) {
-      print('❌ Supabase initialization failed: $e');
-      if (!SupabaseConfig.isConfigured) {
-        print(SupabaseConfig.configurationStatus);
-      }
-    }
-    
     // Re-throw the error so the app doesn't start with invalid config
     rethrow;
   }
@@ -357,39 +346,18 @@ class ProteinPaceApp extends StatelessWidget {
   }
 
   Widget _buildHomeScreen(AuthProvider authProvider) {
-    print('🏠 Main: Building home screen with auth state: ${authProvider.state}');
-    
     switch (authProvider.state) {
       case AuthenticationState.unknown:
-        print('📱 Main: Showing SplashScreen (unknown state)');
         return const SplashScreen();
       case AuthenticationState.unauthenticated:
-        print('📱 Main: Showing AuthenticationWelcomeScreen');
         return const AuthenticationWelcomeScreen();
       case AuthenticationState.authenticating:
-        print('📱 Main: Showing SplashScreen (authenticating)');
         return const SplashScreen(); // or a loading screen
       case AuthenticationState.authenticated:
-        // For authenticated users, prioritize returning them to home screen
-        print('📱 Main: User authenticated, checking profile status...');
-        print('📱 Main: User email: ${authProvider.currentUser?.email}');
-        print('📱 Main: Display name: ${authProvider.currentUser?.displayName}');
-        print('📱 Main: Daily protein goal: ${authProvider.dailyProteinGoal}');
-        print('📱 Main: Weight: ${authProvider.weight}');
-        print('📱 Main: Height: ${authProvider.height}');
-        print('📱 Main: Age: ${authProvider.age}');
-        print('📱 Main: Has complete profile: ${authProvider.hasCompleteProfile}');
-        
-        // Check if this is a completely new user (no profile data at all)
-        print('📱 Main: Is completely new user: ${authProvider.isCompletelyNewUser}');
-        print('📱 Main: Is returning user: ${authProvider.isReturningUser}');
-        
         // Check if user has completed essential profile setup (dailyProteinGoal)
         if (authProvider.dailyProteinGoal == null) {
-          print('📱 Main: User missing daily protein goal, showing WelcomeScreen for profile setup');
           return const WelcomeScreen(); // Redirect to profile setup flow
         } else {
-          print('📱 Main: User has complete profile setup, showing UserHomeScreen');
           // For users with completed profile setup, provide sensible defaults for any missing data
           return UserHomeScreen(
             height: authProvider.height ?? 170.0, // Default height in cm

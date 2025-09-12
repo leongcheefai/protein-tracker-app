@@ -18,12 +18,8 @@ Future<void> main() async {
       url: SupabaseConfig.validatedUrl,
       anonKey: SupabaseConfig.validatedAnonKey,
     );
-    print('✅ Supabase initialized successfully');
   } catch (e) {
-    print('❌ Supabase initialization failed: $e');
-    if (!SupabaseConfig.isConfigured) {
-      print(SupabaseConfig.configurationStatus);
-    }
+    if (!SupabaseConfig.isConfigured) {}
   }
   
   // Initialize our service locator

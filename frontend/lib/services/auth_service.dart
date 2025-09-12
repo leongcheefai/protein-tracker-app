@@ -58,18 +58,13 @@ class AuthService {
     String password,
   ) async {
     try {
-      print('🔄 Starting email sign up for: $email');
-      
       // Create user with Supabase
       final response = await _supabase.auth.signUp(
         email: email,
         password: password,
       );
 
-      print('📧 Supabase signUp response - user: ${response.user?.id}, session: ${response.session?.accessToken != null}');
-
       if (response.user == null) {
-        print('❌ No user returned from Supabase');
         return ApiResponse.error(
           ApiError.authentication('Sign up failed'),
         );
@@ -78,23 +73,18 @@ class AuthService {
       // Get Supabase access token
       final accessToken = response.session?.accessToken;
       if (accessToken == null) {
-        print('❌ No access token - email confirmation may be required');
         return ApiResponse.error(
           ApiError.authentication('Account created but email verification required. Please check your email and try signing in after verification.'),
         );
       }
-
-      print('✅ Got access token, verifying with backend...');
       
       // Verify with backend and create user profile
       return await _verifyTokenWithBackend(accessToken);
     } on AuthException catch (e) {
-      print('❌ Supabase AuthException: ${e.message}');
       return ApiResponse.error(
         ApiError.authentication(e.message),
       );
     } catch (e) {
-      print('❌ Sign up error: $e');
       return ApiResponse.error(
         ApiError.authentication(e.toString()),
       );
@@ -103,35 +93,26 @@ class AuthService {
 
   Future<ApiResponse<UserProfileDto>> signInWithGoogle() async {
     try {
-      print('🔄 Starting Google Sign-In process...');
-      
       // Sign out from previous session
       await _googleSignIn.signOut();
       
       // Trigger the authentication flow
-      print('🔄 Triggering Google Sign-In flow...');
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       
       if (googleUser == null) {
-        print('❌ Google sign in cancelled by user');
         return ApiResponse.error(
           ApiError.authentication('Google sign in cancelled'),
         );
       }
 
-      print('✅ Google user signed in: ${googleUser.email}');
-
       // Obtain the auth details from the request
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
 
       if (googleAuth.idToken == null || googleAuth.accessToken == null) {
-        print('❌ Failed to get Google tokens');
         return ApiResponse.error(
           ApiError.authentication('Failed to get Google tokens'),
         );
       }
-
-      print('✅ Got Google tokens, signing in to Supabase...');
 
       // Sign in to Supabase with Google credential
       final response = await _supabase.auth.signInWithIdToken(
@@ -141,37 +122,25 @@ class AuthService {
       );
 
       if (response.user == null) {
-        print('❌ Supabase Google sign in failed');
         return ApiResponse.error(
           ApiError.authentication('Google sign in failed'),
         );
       }
 
-      print('✅ Supabase sign in successful: ${response.user?.email}');
-
       // Get Supabase access token
       final accessToken = response.session?.accessToken;
       if (accessToken == null) {
-        print('❌ Failed to get Supabase access token');
         return ApiResponse.error(
           ApiError.authentication('Failed to get authentication token'),
         );
       }
       
-      print('✅ Got Supabase access token, verifying with backend...');
       
       // Verify with backend
       final backendResponse = await _verifyTokenWithBackend(accessToken);
       
-      if (backendResponse.success) {
-        print('✅ Backend verification successful');
-      } else {
-        print('❌ Backend verification failed: ${backendResponse.error?.message}');
-      }
-      
       return backendResponse;
     } catch (e) {
-      print('❌ Google sign in error: ${e.toString()}');
       return ApiResponse.error(
         ApiError.authentication('Google sign in error: ${e.toString()}'),
       );

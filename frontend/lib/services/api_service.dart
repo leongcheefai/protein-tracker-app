@@ -58,7 +58,6 @@ class ApiService {
       await loadAuthToken();
     } catch (e) {
       // If loading token fails, continue without it
-      print('Failed to load stored auth token: $e');
     }
   }
   
