@@ -87,9 +87,7 @@ class _ServiceStatusList extends StatelessWidget {
   const _ServiceStatusList();
 
   @override
-  Widget build(BuildContext context) {
-    final services = ServiceLocator();
-    
+  Widget build(BuildContext context) {    
     return Column(
       children: [
         _buildServiceStatus('API Service', true),

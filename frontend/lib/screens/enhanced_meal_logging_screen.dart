@@ -160,25 +160,6 @@ class _EnhancedMealLoggingScreenState extends State<EnhancedMealLoggingScreen> {
     });
   }
 
-  void _updateFoodQuantity(int index, double newQuantity) {
-    final mealFood = _selectedFoods[index];
-    final newNutrition = NutritionService.calculateNutritionForQuantity(
-      mealFood.food.nutritionPer100g,
-      newQuantity,
-      mealFood.unit,
-    );
-
-    setState(() {
-      _selectedFoods[index] = MealFood(
-        id: mealFood.id,
-        food: mealFood.food,
-        quantity: newQuantity,
-        unit: mealFood.unit,
-        nutritionData: newNutrition,
-      );
-    });
-  }
-
   NutritionData get _totalNutrition {
     return _selectedFoods.fold<NutritionData>(
       NutritionData(calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, sugar: 0, sodium: 0),
@@ -263,9 +244,7 @@ class _EnhancedMealLoggingScreenState extends State<EnhancedMealLoggingScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final mealTracker = Provider.of<MealTrackingProvider>(context);
-    
+  Widget build(BuildContext context) {    
     return CupertinoPageScaffold(
       backgroundColor: CupertinoColors.systemBackground,
       navigationBar: CupertinoNavigationBar(

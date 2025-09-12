@@ -1,9 +1,6 @@
 import 'package:flutter/cupertino.dart';
-import 'package:provider/provider.dart';
 import '../main.dart';
 import '../utils/nutrition_service.dart';
-import '../utils/meal_tracking_provider.dart';
-
 class MealSuccessScreen extends StatelessWidget {
   final Meal meal;
   final NutritionData nutrition;
@@ -15,9 +12,7 @@ class MealSuccessScreen extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final mealTracker = Provider.of<MealTrackingProvider>(context);
-    
+  Widget build(BuildContext context) {    
     return CupertinoPageScaffold(
       backgroundColor: AppColors.background,
       navigationBar: CupertinoNavigationBar(
