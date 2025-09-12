@@ -183,10 +183,42 @@ class NutritionSummaryDto {
     required this.mealCount,
   });
 
-  factory NutritionSummaryDto.fromJson(Map<String, dynamic> json) {
+  factory NutritionSummaryDto.fromJson(Map<String, dynamic>? json) {
+    if (json == null) {
+      // Return default values when json is null
+      return NutritionSummaryDto(
+        date: DateTime.now(),
+        totalNutrition: NutritionDataDto(
+          calories: 0,
+          protein: 0,
+          carbs: 0,
+          fat: 0,
+          fiber: 0,
+          sugar: 0,
+          sodium: 0,
+        ),
+        mealBreakdown: {},
+        proteinGoal: 0.0,
+        proteinProgress: 0.0,
+        mealCount: 0,
+      );
+    }
+
     return NutritionSummaryDto(
-      date: DateTime.parse(json['date']),
-      totalNutrition: NutritionDataDto.fromJson(json['total_nutrition']),
+      date: json['date'] != null 
+          ? DateTime.parse(json['date']) 
+          : DateTime.now(),
+      totalNutrition: json['total_nutrition'] != null 
+          ? NutritionDataDto.fromJson(json['total_nutrition'])
+          : NutritionDataDto(
+              calories: 0,
+              protein: 0,
+              carbs: 0,
+              fat: 0,
+              fiber: 0,
+              sugar: 0,
+              sodium: 0,
+            ),
       mealBreakdown: json['meal_breakdown'] != null
           ? Map<String, NutritionDataDto>.from(
               json['meal_breakdown'].map(

@@ -88,14 +88,19 @@ class MealTrackingProvider extends ChangeNotifier {
     _setLoading(true);
     try {
       final response = await _mealService.getTodaysSummary();
-      if (response.success && response.data != null) {
-        _todaysSummary = response.data!;
+      if (response.success) {
+        // Always set the summary, even if it has default/empty values
+        _todaysSummary = response.data;
         _error = null;
       } else {
+        // For API errors, create a default summary to prevent null errors
+        _todaysSummary = NutritionSummaryDto.fromJson(null);
         _error = response.error?.message ?? 'Failed to load today\'s summary';
       }
       notifyListeners();
     } catch (e) {
+      // For unexpected errors, create a default summary to prevent null errors
+      _todaysSummary = NutritionSummaryDto.fromJson(null);
       _error = e.toString();
       notifyListeners();
     } finally {
@@ -245,18 +250,20 @@ class MealTrackingProvider extends ChangeNotifier {
     _setLoading(true);
     try {
       final response = await _mealService.getDateSummary(date);
-      if (response.success && response.data != null) {
+      if (response.success) {
         _error = null;
-        return response.data!;
+        return response.data ?? NutritionSummaryDto.fromJson(null);
       } else {
         _error = response.error?.message ?? 'Failed to load meals for date';
         notifyListeners();
-        return null;
+        // Return default summary instead of null to prevent downstream null errors
+        return NutritionSummaryDto.fromJson(null);
       }
     } catch (e) {
       _error = e.toString();
       notifyListeners();
-      return null;
+      // Return default summary instead of null to prevent downstream null errors
+      return NutritionSummaryDto.fromJson(null);
     } finally {
       _setLoading(false);
     }

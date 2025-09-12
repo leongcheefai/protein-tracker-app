@@ -58,18 +58,40 @@ class MealService {
   }
 
   Future<ApiResponse<NutritionSummaryDto>> getTodaysSummary() async {
-    return await _apiService.get<NutritionSummaryDto>(
+    final response = await _apiService.get<NutritionSummaryDto>(
       '/meals/today/summary',
       fromJson: (json) => NutritionSummaryDto.fromJson(json),
     );
+    
+    // If API returns "No data available" error, return a default summary instead of error
+    if (!response.success && 
+        response.error?.message == 'No data available') {
+      return ApiResponse.success(
+        NutritionSummaryDto.fromJson(null), // This will use default values
+        message: 'No meal data found for today',
+      );
+    }
+    
+    return response;
   }
 
   Future<ApiResponse<NutritionSummaryDto>> getDateSummary(DateTime date) async {
     final dateString = date.toIso8601String().split('T')[0];
-    return await _apiService.get<NutritionSummaryDto>(
+    final response = await _apiService.get<NutritionSummaryDto>(
       '/meals/date/$dateString',
       fromJson: (json) => NutritionSummaryDto.fromJson(json),
     );
+    
+    // If API returns "No data available" error, return a default summary instead of error
+    if (!response.success && 
+        response.error?.message == 'No data available') {
+      return ApiResponse.success(
+        NutritionSummaryDto.fromJson(null), // This will use default values
+        message: 'No meal data found for this date',
+      );
+    }
+    
+    return response;
   }
 
   Future<ApiResponse<MealDto>> addFoodToMeal(

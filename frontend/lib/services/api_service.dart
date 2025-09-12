@@ -240,8 +240,16 @@ class ApiService {
     if (data is Map<String, dynamic>) {
       if (data['success'] == true) {
         if (fromJson != null && data['data'] != null) {
-          final parsedData = fromJson(data['data']);
-          return ApiResponse.success(parsedData, message: data['message']);
+          // Ensure data['data'] is a Map before passing to fromJson
+          if (data['data'] is Map<String, dynamic>) {
+            final parsedData = fromJson(data['data']);
+            return ApiResponse.success(parsedData, message: data['message']);
+          } else {
+            return ApiResponse.error(ApiError.server('Invalid data format in response'));
+          }
+        } else if (fromJson != null && data['data'] == null) {
+          // Handle null data when fromJson is expected
+          return ApiResponse.error(ApiError.server('No data available'));
         } else {
           return ApiResponse.success(data['data'] as T, message: data['message']);
         }
