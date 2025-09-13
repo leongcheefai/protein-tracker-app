@@ -238,8 +238,6 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                   
                   const SizedBox(height: 24),
                   
-                  const SizedBox(height: 32),
-                  
                   // Save Button
                   _buildSaveButton(),
                   
