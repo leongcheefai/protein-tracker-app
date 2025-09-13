@@ -47,7 +47,7 @@ class QuickStats extends StatelessWidget {
               Expanded(
                 child: _buildStatItem(
                   'Goal Hit Rate',
-                  '${progressPercentage >= 100 ? 100 : progressPercentage.toInt()}%',
+                  '${_safePercentageToInt(progressPercentage)}%',
                   CupertinoIcons.flag,
                   AppColors.primary,
                 ),
@@ -106,5 +106,12 @@ class QuickStats extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  int _safePercentageToInt(double percentage) {
+    if (percentage.isNaN || percentage.isInfinite) {
+      return 0;
+    }
+    return percentage.clamp(0.0, 100.0).toInt();
   }
 }

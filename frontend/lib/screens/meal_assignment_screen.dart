@@ -74,6 +74,13 @@ class _MealAssignmentScreenState extends State<MealAssignmentScreen> {
     });
   }
 
+  int _safePercentageToInt(double percentage) {
+    if (percentage.isNaN || percentage.isInfinite) {
+      return 0;
+    }
+    return (percentage * 100).clamp(0.0, double.maxFinite).toInt();
+  }
+
   void _save() async {
     final mealProvider = Provider.of<MealTrackingProvider>(context, listen: false);
     final selectedFood = widget.detectedFoods[widget.selectedFoodIndex];
@@ -320,7 +327,7 @@ class _MealAssignmentScreenState extends State<MealAssignmentScreen> {
                                         // Percentage text
                                         Center(
                                           child: Text(
-                                            '${(progressPercentage * 100).toInt()}%',
+                                            '${_safePercentageToInt(progressPercentage)}%',
                                             style: TextStyle(
                                               fontSize: 10,
                                               fontWeight: FontWeight.w600,

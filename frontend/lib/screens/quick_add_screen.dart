@@ -134,9 +134,14 @@ class _QuickAddScreenState extends State<QuickAddScreen>
 
   void _updateCustomPortion(String value) {
     final portion = double.tryParse(value);
-    if (portion != null && portion > 0 && portion <= 1000) {
+    if (portion != null && portion >= 0.1 && portion <= 1000) {
       setState(() {
         _selectedPortion = portion;
+      });
+    } else if (value.isEmpty) {
+      // Allow empty input during typing
+      setState(() {
+        _selectedPortion = 0.0;
       });
     }
   }
@@ -145,17 +150,28 @@ class _QuickAddScreenState extends State<QuickAddScreen>
     return double.tryParse(_proteinController.text) ?? 0.0;
   }
 
+  int _safePercentageToInt(double percentage) {
+    if (percentage.isNaN || percentage.isInfinite) {
+      return 0;
+    }
+    return (percentage * 100).clamp(0.0, double.maxFinite).toInt();
+  }
+
   bool get _canSubmit {
     return _proteinAmount > 0 && 
-           _foodNameController.text.trim().isNotEmpty &&
-           widget.enabledMeals[_selectedMeal] == true;
+          _selectedPortion > 0 &&
+          _foodNameController.text.trim().isNotEmpty &&
+          widget.enabledMeals[_selectedMeal] == true;
   }
 
   void _submit() {
     if (!_canSubmit) return;
 
     // Calculate protein per 100g for consistency with other screens
-    final proteinPer100g = (_proteinAmount / _selectedPortion) * 100;
+    // Add safety check to prevent division by zero
+    final proteinPer100g = _selectedPortion > 0 
+        ? (_proteinAmount / _selectedPortion) * 100 
+        : 0.0;
     
     // Navigate to confirmation with the quick add data
     Navigator.pushNamed(
@@ -632,7 +648,7 @@ class _QuickAddScreenState extends State<QuickAddScreen>
                             ),
                             Center(
                               child: Text(
-                                '${(progressPercentage * 100).toInt()}%',
+                                '${_safePercentageToInt(progressPercentage)}%',
                                 style: TextStyle(
                                   fontSize: 10,
                                   fontWeight: FontWeight.w600,

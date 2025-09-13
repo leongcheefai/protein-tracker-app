@@ -130,6 +130,13 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
     }
   }
 
+  int _safePercentageToInt(double percentage) {
+    if (percentage.isNaN || percentage.isInfinite) {
+      return 0;
+    }
+    return (percentage * 100).clamp(0.0, double.maxFinite).toInt();
+  }
+
   Color _getProgressColor(double percentage) {
     if (percentage >= 1.0) return CupertinoColors.systemGreen;
     if (percentage >= 0.8) return CupertinoColors.systemOrange;
@@ -309,7 +316,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
                       ),
                       const SizedBox(width: 16),
                       Text(
-                        '${(progressPercentage * 100).toInt()}%',
+                        '${_safePercentageToInt(progressPercentage)}%',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
