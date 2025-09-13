@@ -1,12 +1,12 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show Divider;
 import 'package:provider/provider.dart';
 import 'dart:io';
 import '../providers/user_profile_provider.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/profile_settings/profile_photo_section.dart';
 import '../widgets/profile_settings/login_details_section.dart';
-import '../widgets/profile_settings/body_metrics_section.dart';
+import '../widgets/profile_settings/personal_info_section.dart';
+import '../widgets/profile_settings/activity_goals_section.dart';
 import '../utils/profile_settings_helpers.dart';
 
 class ProfileSettingsScreen extends StatefulWidget {
@@ -227,21 +227,16 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                   const SizedBox(height: 24),
                   
                   // Personal Information Section
-                  _buildPersonalInfoSection(),
-                  
-                  const SizedBox(height: 24),
-                  
-                  // Body Metrics Section
-                  BodyMetricsSection(
+                  PersonalInfoSection(
+                    ageController: _ageController,
                     heightController: _heightController,
                     weightController: _weightController,
-                    onChanged: () => setState(() {}), // Trigger rebuild to update protein target
+                    selectedActivityLevel: _selectedActivityLevel,
+                    onActivityLevelTap: _showActivityLevelPicker,
+                    onChanged: () => setState(() {}),
                   ),
                   
                   const SizedBox(height: 24),
-                  
-                  // Activity & Nutrition Goals Section
-                  _buildActivityGoalsSection(),
                   
                   const SizedBox(height: 32),
                   
@@ -269,159 +264,8 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
     );
   }
 
-  Widget _buildPersonalInfoSection() {
-    return Container(
-      decoration: BoxDecoration(
-        color: CupertinoColors.white,
-        borderRadius: BorderRadius.circular(16.0),
-        boxShadow: [
-          BoxShadow(
-            color: CupertinoColors.black.withValues(alpha: 0.05),
-            blurRadius: 10.0,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Text(
-              'Personal Information',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          CupertinoListTile(
-            title: const Text('Age'),
-            trailing: SizedBox(
-              width: 80,
-              child: CupertinoTextField(
-                controller: _ageController,
-                placeholder: 'Age',
-                keyboardType: TextInputType.number,
-                textAlign: TextAlign.end,
-                decoration: const BoxDecoration(),
-                style: const TextStyle(fontSize: 16),
-              ),
-            ),
-          ),
-          const Divider(height: 1, color: CupertinoColors.systemGrey4),
-          CupertinoListTile(
-            title: const Text('Units'),
-            trailing: CupertinoButton(
-              padding: EdgeInsets.zero,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(_units == 'metric' ? 'Metric' : 'Imperial'),
-                  const Icon(CupertinoIcons.chevron_right, size: 16),
-                ],
-              ),
-              onPressed: () {
-                setState(() {
-                  _units = _units == 'metric' ? 'imperial' : 'metric';
-                });
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
-  Widget _buildActivityGoalsSection() {
-    final dailyProteinGoal = _calculateDailyProteinTarget();
-    
-    return Container(
-      decoration: BoxDecoration(
-        color: CupertinoColors.white,
-        borderRadius: BorderRadius.circular(16.0),
-        boxShadow: [
-          BoxShadow(
-            color: CupertinoColors.black.withValues(alpha: 0.05),
-            blurRadius: 10.0,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Text(
-              'Activity & Nutrition Goals',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          CupertinoListTile(
-            title: const Text('Activity Level'),
-            trailing: CupertinoButton(
-              padding: EdgeInsets.zero,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(_getActivityLevelName(_selectedActivityLevel)),
-                  const Icon(CupertinoIcons.chevron_right, size: 16),
-                ],
-              ),
-              onPressed: () => _showActivityLevelPicker(),
-            ),
-          ),
-          const Divider(height: 1, color: CupertinoColors.systemGrey4),
-          CupertinoListTile(
-            title: const Text('Daily Protein Goal'),
-            trailing: Text(
-              '${dailyProteinGoal.toStringAsFixed(0)}g',
-              style: const TextStyle(
-                color: CupertinoColors.systemGrey,
-                fontSize: 16,
-              ),
-            ),
-          ),
-          const Divider(height: 1, color: CupertinoColors.systemGrey4),
-          CupertinoListTile(
-            title: const Text('Dietary Restrictions'),
-            trailing: CupertinoButton(
-              padding: EdgeInsets.zero,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(_dietaryRestrictions.isEmpty ? 'None' : '${_dietaryRestrictions.length} selected'),
-                  const Icon(CupertinoIcons.chevron_right, size: 16),
-                ],
-              ),
-              onPressed: () => _showDietaryRestrictionsPicker(),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
-  String _getActivityLevelName(String level) {
-    switch (level) {
-      case 'sedentary':
-        return 'Sedentary';
-      case 'lightly_active':
-        return 'Lightly Active';
-      case 'moderately_active':
-        return 'Moderately Active';
-      case 'very_active':
-        return 'Very Active';
-      case 'extra_active':
-        return 'Extra Active';
-      default:
-        return 'Unknown';
-    }
-  }
 
   void _showActivityLevelPicker() {
     showCupertinoModalPopup(
