@@ -69,11 +69,10 @@ class MealProgressRings extends StatelessWidget {
             
             SizedBox(
               height: 120,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: mealTypes.length,
-                itemBuilder: (context, index) {
-                  final mealType = mealTypes[index];
+              child: Row(
+                children: mealTypes.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final mealType = entry.value;
                   
                   // Get real progress from provider
                   final mealSummary = mealProvider.mealSummary;
@@ -81,75 +80,76 @@ class MealProgressRings extends StatelessWidget {
                   final target = (mealSummary[mealType.id.toLowerCase()]?['target'] ?? (dailyProteinTarget / 4)).toDouble();
                   final mealPercentage = target > 0 ? (progress / target) : 0.0;
               
-                  return Container(
-                    width: 90,
-                    margin: EdgeInsets.only(right: index == mealTypes.length - 1 ? 0 : 16),
-                    child: Column(
-                      children: [
-                        // Progress Ring
-                        SizedBox(
-                          width: ringSize,
-                          height: ringSize,
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              // Background ring
-                              CircularProgressIndicator(
-                                value: 1.0,
-                                strokeWidth: strokeWidth,
-                                backgroundColor: AppColors.neutral.withValues(alpha: 0.1),
-                                valueColor: const AlwaysStoppedAnimation<Color>(Colors.transparent),
-                              ),
-                              // Progress ring
-                              CircularProgressIndicator(
-                                value: mealPercentage.clamp(0.0, 1.0),
-                                strokeWidth: strokeWidth,
-                                backgroundColor: Colors.transparent,
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  ProgressUtils.getProgressColor(mealPercentage * 100),
+                  return Expanded(
+                    child: Container(
+                      margin: EdgeInsets.only(right: index < mealTypes.length - 1 ? 8 : 0),
+                      child: Column(
+                        children: [
+                          // Progress Ring
+                          SizedBox(
+                            width: ringSize,
+                            height: ringSize,
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                // Background ring
+                                CircularProgressIndicator(
+                                  value: 1.0,
+                                  strokeWidth: strokeWidth,
+                                  backgroundColor: AppColors.neutral.withValues(alpha: 0.1),
+                                  valueColor: const AlwaysStoppedAnimation<Color>(Colors.transparent),
                                 ),
-                              ),
-                              // Center icon (optional)
-                              if (showIconsInCenter)
-                                Icon(
-                                  mealType.icon,
-                                  color: ProgressUtils.getProgressColor(mealPercentage * 100),
-                                  size: 20,
+                                // Progress ring
+                                CircularProgressIndicator(
+                                  value: mealPercentage.clamp(0.0, 1.0),
+                                  strokeWidth: strokeWidth,
+                                  backgroundColor: Colors.transparent,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    ProgressUtils.getProgressColor(mealPercentage * 100),
+                                  ),
                                 ),
-                            ],
+                                // Center icon (optional)
+                                if (showIconsInCenter)
+                                  Icon(
+                                    mealType.icon,
+                                    color: ProgressUtils.getProgressColor(mealPercentage * 100),
+                                    size: 20,
+                                  ),
+                              ],
+                            ),
                           ),
-                        ),
-                        
-                        const SizedBox(height: 8),
-                        
-                        // Meal name
-                        Text(
-                          mealType.displayName,
-                          style: const TextStyle(
-                            color: AppColors.textPrimary,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
+                          
+                          const SizedBox(height: 8),
+                          
+                          // Meal name
+                          Text(
+                            mealType.displayName,
+                            style: const TextStyle(
+                              color: AppColors.textPrimary,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            textAlign: TextAlign.center,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
                           ),
-                          textAlign: TextAlign.center,
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                        ),
-                        
-                        // Progress amount
-                        Text(
-                          '${progress.toStringAsFixed(0)}g',
-                          style: const TextStyle(
-                            color: AppColors.textSecondary,
-                            fontSize: 14,
+                          
+                          // Progress amount
+                          Text(
+                            '${progress.toStringAsFixed(0)}g',
+                            style: const TextStyle(
+                              color: AppColors.textSecondary,
+                              fontSize: 14,
+                            ),
+                            textAlign: TextAlign.center,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
                           ),
-                          textAlign: TextAlign.center,
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   );
-                },
+                }).toList(),
               ),
             ),
           ],
@@ -208,7 +208,6 @@ class CompactMealProgressRings extends StatelessWidget {
         }
 
         return Row(
-          mainAxisSize: MainAxisSize.min,
           children: mealTypes.asMap().entries.map((entry) {
             final index = entry.key;
             final mealType = entry.value;
@@ -219,37 +218,40 @@ class CompactMealProgressRings extends StatelessWidget {
             final target = (mealSummary[mealType.id.toLowerCase()]?['target'] ?? (dailyProteinTarget / 4)).toDouble();
             final mealPercentage = target > 0 ? (progress / target) : 0.0;
             
-            return Padding(
-              padding: EdgeInsets.only(right: index < mealTypes.length - 1 ? 12.0 : 0),
-              child: SizedBox(
-                width: ringSize,
-                height: ringSize,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    // Background ring
-                    CircularProgressIndicator(
-                      value: 1.0,
-                      strokeWidth: strokeWidth,
-                      backgroundColor: AppColors.neutral.withValues(alpha: 0.1),
-                      valueColor: const AlwaysStoppedAnimation<Color>(Colors.transparent),
-                    ),
-                    // Progress ring
-                    CircularProgressIndicator(
-                      value: mealPercentage.clamp(0.0, 1.0),
-                      strokeWidth: strokeWidth,
-                      backgroundColor: Colors.transparent,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        ProgressUtils.getProgressColor(mealPercentage * 100),
+            return Expanded(
+              child: Container(
+                margin: EdgeInsets.only(right: index < mealTypes.length - 1 ? 8 : 0),
+                alignment: Alignment.center,
+                child: SizedBox(
+                  width: ringSize,
+                  height: ringSize,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      // Background ring
+                      CircularProgressIndicator(
+                        value: 1.0,
+                        strokeWidth: strokeWidth,
+                        backgroundColor: AppColors.neutral.withValues(alpha: 0.1),
+                        valueColor: const AlwaysStoppedAnimation<Color>(Colors.transparent),
                       ),
-                    ),
-                    // Center icon
-                    Icon(
-                      mealType.icon,
-                      color: ProgressUtils.getProgressColor(mealPercentage * 100),
-                      size: 16,
-                    ),
-                  ],
+                      // Progress ring
+                      CircularProgressIndicator(
+                        value: mealPercentage.clamp(0.0, 1.0),
+                        strokeWidth: strokeWidth,
+                        backgroundColor: Colors.transparent,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          ProgressUtils.getProgressColor(mealPercentage * 100),
+                        ),
+                      ),
+                      // Center icon
+                      Icon(
+                        mealType.icon,
+                        color: ProgressUtils.getProgressColor(mealPercentage * 100),
+                        size: 16,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             );

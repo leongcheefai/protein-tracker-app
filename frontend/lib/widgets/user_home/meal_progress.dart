@@ -35,11 +35,8 @@ class MealProgress extends StatelessWidget {
             
             SizedBox(
               height: 120,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: meals.entries.length,
-                itemBuilder: (context, index) {
-                  final mealEntry = meals.entries.elementAt(index);
+              child: Row(
+                children: meals.entries.map((mealEntry) {
                   final mealName = mealEntry.key;
                   final isEnabled = mealEntry.value;
                   
@@ -49,71 +46,72 @@ class MealProgress extends StatelessWidget {
                   final target = (mealSummary[mealName.toLowerCase()]?['target'] ?? (dailyProteinTarget / 4)).toDouble();
                   final mealPercentage = target > 0 ? (progress / target) : 0.0;
               
-              return Container(
-                width: 90,
-                margin: EdgeInsets.only(right: index == meals.entries.length - 1 ? 0 : 16),
-                child: Column(
-                  children: [
-                    // Mini Progress Ring
-                    SizedBox(
-                      width: 60,
-                      height: 60,
-                      child: Stack(
-                        alignment: Alignment.center,
+                  return Expanded(
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                      child: Column(
                         children: [
-                          CircularProgressIndicator(
-                            value: 1.0,
-                            strokeWidth: 4,
-                            backgroundColor: AppColors.neutral.withValues(alpha: 0.1),
-                            valueColor: const AlwaysStoppedAnimation<Color>(Colors.transparent),
-                          ),
-                          CircularProgressIndicator(
-                            value: isEnabled ? mealPercentage.clamp(0.0, 1.0) : 0.0,
-                            strokeWidth: 4,
-                            backgroundColor: Colors.transparent,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              isEnabled ? ProgressUtils.getProgressColor(mealPercentage * 100) : AppColors.neutral.withValues(alpha: 0.3),
+                          // Mini Progress Ring
+                          SizedBox(
+                            width: 60,
+                            height: 60,
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                CircularProgressIndicator(
+                                  value: 1.0,
+                                  strokeWidth: 4,
+                                  backgroundColor: AppColors.neutral.withValues(alpha: 0.1),
+                                  valueColor: const AlwaysStoppedAnimation<Color>(Colors.transparent),
+                                ),
+                                CircularProgressIndicator(
+                                  value: isEnabled ? mealPercentage.clamp(0.0, 1.0) : 0.0,
+                                  strokeWidth: 4,
+                                  backgroundColor: Colors.transparent,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    isEnabled ? ProgressUtils.getProgressColor(mealPercentage * 100) : AppColors.neutral.withValues(alpha: 0.3),
+                                  ),
+                                ),
+                                Icon(
+                                  MealUtils.getMealIcon(mealName),
+                                  color: isEnabled ? ProgressUtils.getProgressColor(mealPercentage * 100) : AppColors.neutral.withValues(alpha: 0.3),
+                                  size: 20,
+                                ),
+                              ],
                             ),
                           ),
-                          Icon(
-                            MealUtils.getMealIcon(mealName),
-                            color: isEnabled ? ProgressUtils.getProgressColor(mealPercentage * 100) : AppColors.neutral.withValues(alpha: 0.3),
-                            size: 20,
+                          
+                          const SizedBox(height: 8),
+                          
+                          Text(
+                            mealName,
+                            style: TextStyle(
+                              color: isEnabled ? AppColors.textPrimary : AppColors.neutral.withValues(alpha: 0.3),
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            textAlign: TextAlign.center,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                          
+                          Text(
+                            isEnabled ? '${progress.toStringAsFixed(0)}g' : '0g',
+                            style: TextStyle(
+                              color: isEnabled ? AppColors.textSecondary : AppColors.neutral.withValues(alpha: 0.3),
+                              fontSize: 14,
+                            ),
+                            textAlign: TextAlign.center,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
                           ),
                         ],
                       ),
                     ),
-                    
-                    const SizedBox(height: 8),
-                    
-                    Text(
-                      mealName,
-                      style: TextStyle(
-                        color: isEnabled ? AppColors.textPrimary : AppColors.neutral.withValues(alpha: 0.3),
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      textAlign: TextAlign.center,
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                    ),
-                    
-                    Text(
-                      isEnabled ? '${progress.toStringAsFixed(0)}g' : '0g',
-                      style: TextStyle(
-                        color: isEnabled ? AppColors.textSecondary : AppColors.neutral.withValues(alpha: 0.3),
-                        fontSize: 14,
-                      ),
-                      textAlign: TextAlign.center,
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-        ),
+                  );
+                }).toList(),
+              ),
+            ),
         ],
       );
       },
