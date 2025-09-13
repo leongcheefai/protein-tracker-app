@@ -4,15 +4,17 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../main.dart';
 import '../utils/meal_tracking_provider.dart';
+import '../utils/meal_utils.dart';
 import '../models/dto/meal_dto.dart';
 import '../providers/progress_provider.dart';
 import '../widgets/user_home/enhanced_header.dart';
 import '../widgets/user_home/progress_visualization.dart';
-import '../widgets/user_home/meal_progress.dart';
+import '../widgets/user_home/meal_progress_rings.dart';
 import '../widgets/user_home/quick_stats.dart';
 import '../widgets/user_home/recent_items_list.dart';
 import '../widgets/user_home/camera_modal.dart';
 import '../widgets/user_home/footer_action_bar.dart';
+import '../utils/user_settings_provider.dart';
 import 'history_screen.dart';
 import 'quick_add_screen.dart';
 import 'pricing_plans_screen.dart' as pricing;
@@ -24,7 +26,6 @@ class UserHomeScreen extends StatefulWidget {
   final double trainingMultiplier;
   final String goal;
   final double dailyProteinTarget;
-  final Map<String, bool> meals;
 
   const UserHomeScreen({
     super.key,
@@ -33,7 +34,6 @@ class UserHomeScreen extends StatefulWidget {
     required this.trainingMultiplier,
     required this.goal,
     required this.dailyProteinTarget,
-    required this.meals,
   });
 
   @override
@@ -314,6 +314,11 @@ class _UserHomeScreenState extends State<UserHomeScreen>
     return '${displayHour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')} $period';
   }
   
+  // Helper method to convert enabled meal types to the legacy format
+  Map<String, bool> _getMealsMap(UserSettingsProvider userSettings) {
+    return MealUtils.convertMealIdsToLegacy(userSettings.enabledMealTypes);
+  }
+  
   // Calculate protein for editing
   double _calculateProtein(Map<String, dynamic> item) {
     final portion = double.tryParse(_editControllers[item['id']]?.text ?? '0') ?? 0.0;
@@ -440,6 +445,9 @@ class _UserHomeScreenState extends State<UserHomeScreen>
         // Initialize edit controllers for current meals
         _updateEditControllers(mealProvider.todaysMeals);
         
+        // Get user settings
+        final userSettings = context.watch<UserSettingsProvider>();
+        
         return CupertinoPageScaffold(
           backgroundColor: AppColors.background,
           navigationBar: CupertinoNavigationBar(
@@ -462,7 +470,7 @@ class _UserHomeScreenState extends State<UserHomeScreen>
               ),
             ),
           ),
-          child: _buildMainContent(mealProvider, progressProvider),
+          child: _buildMainContent(mealProvider, progressProvider, userSettings),
         );
       },
     );
@@ -489,7 +497,7 @@ class _UserHomeScreenState extends State<UserHomeScreen>
     }
   }
   
-  Widget _buildMainContent(MealTrackingProvider mealProvider, ProgressProvider progressProvider) {
+  Widget _buildMainContent(MealTrackingProvider mealProvider, ProgressProvider progressProvider, UserSettingsProvider userSettings) {
     // Show loading state if data is still being fetched
     if (mealProvider.isLoading && mealProvider.todaysSummary == null) {
       return const Center(
@@ -577,8 +585,8 @@ class _UserHomeScreenState extends State<UserHomeScreen>
                         const SizedBox(height: 32),
                         
                         // Per-meal Mini-rings
-                        MealProgress(
-                          meals: widget.meals,
+                        MealProgressRings(
+                          enabledMealTypes: userSettings.enabledMealTypes,
                           dailyProteinTarget: mealProvider.dailyProteinGoal,
                         ),
                         
@@ -640,7 +648,7 @@ class _UserHomeScreenState extends State<UserHomeScreen>
                                           CupertinoPageRoute(
                                             builder: (context) => HistoryScreen(
                                               dailyProteinTarget: widget.dailyProteinTarget,
-                                              meals: widget.meals,
+                                              meals: _getMealsMap(userSettings),
                                             ),
                                           ),
                                         );
@@ -697,7 +705,7 @@ class _UserHomeScreenState extends State<UserHomeScreen>
                                                 'Dinner': mealProvider.dailyProteinGoal / 4,
                                                 'Snack': mealProvider.dailyProteinGoal / 4,
                                               },
-                                              enabledMeals: widget.meals,
+                                              enabledMeals: _getMealsMap(userSettings),
                                             ),
                                           ),
                                         );
@@ -729,7 +737,7 @@ class _UserHomeScreenState extends State<UserHomeScreen>
                               editingItemId: _editingItemId,
                               editControllers: _editControllers,
                               dailyProteinTarget: mealProvider.dailyProteinGoal,
-                              meals: widget.meals,
+                              meals: _getMealsMap(userSettings),
                               onToggleSearchBar: _toggleSearchBar,
                               onSearchChanged: (value) {
                                 setState(() {
@@ -781,7 +789,7 @@ class _UserHomeScreenState extends State<UserHomeScreen>
                         'Dinner': mealProvider.dailyProteinGoal / 4,
                         'Snack': mealProvider.dailyProteinGoal / 4,
                       },
-                      enabledMeals: widget.meals,
+                      enabledMeals: _getMealsMap(userSettings),
                     ),
                   ),
                 );
@@ -793,7 +801,7 @@ class _UserHomeScreenState extends State<UserHomeScreen>
                   CupertinoPageRoute(
                     builder: (context) => HistoryScreen(
                       dailyProteinTarget: mealProvider.dailyProteinGoal,
-                      meals: widget.meals,
+                      meals: _getMealsMap(userSettings),
                     ),
                   ),
                 );

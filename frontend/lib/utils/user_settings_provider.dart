@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import '../services/service_locator.dart';
 import '../models/dto/user_profile_dto.dart';
 import '../services/user_service.dart';
+import '../models/meal_config.dart';
 
 class UserSettingsProvider with ChangeNotifier {
   final UserService _userService = ServiceLocator().userService;
@@ -17,6 +18,9 @@ class UserSettingsProvider with ChangeNotifier {
   String _activityLevel = 'moderately_active';
   List<String> _dietaryRestrictions = [];
   String _units = 'metric';
+
+  // Meal preferences - which meal types are enabled for the user
+  List<String> _enabledMealTypes = List<String>.from(MealConfig.defaultEnabledMeals);
 
   // Notification settings - synced with backend
   bool _notificationsEnabled = true;
@@ -53,6 +57,11 @@ class UserSettingsProvider with ChangeNotifier {
   String get activityLevel => _activityLevel;
   List<String> get dietaryRestrictions => _dietaryRestrictions;
   String get units => _units;
+  
+  // Getters - Meal preferences
+  List<String> get enabledMealTypes => _enabledMealTypes;
+  List<MealType> get enabledMealTypeObjects => MealConfig.getEnabledMealTypes(_enabledMealTypes);
+  bool isMealTypeEnabled(String mealTypeId) => _enabledMealTypes.contains(mealTypeId);
   
   // Getters - Settings
   bool get notificationsEnabled => _notificationsEnabled;
@@ -205,6 +214,40 @@ class UserSettingsProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  // Meal preference management
+  void enableMealType(String mealTypeId) {
+    if (MealConfig.isValidMealId(mealTypeId) && !_enabledMealTypes.contains(mealTypeId)) {
+      _enabledMealTypes.add(mealTypeId);
+      notifyListeners();
+    }
+  }
+  
+  void disableMealType(String mealTypeId) {
+    if (_enabledMealTypes.contains(mealTypeId)) {
+      _enabledMealTypes.remove(mealTypeId);
+      notifyListeners();
+    }
+  }
+  
+  void setEnabledMealTypes(List<String> mealTypeIds) {
+    final validIds = mealTypeIds.where(MealConfig.isValidMealId).toList();
+    _enabledMealTypes = validIds;
+    notifyListeners();
+  }
+  
+  void toggleMealType(String mealTypeId) {
+    if (_enabledMealTypes.contains(mealTypeId)) {
+      disableMealType(mealTypeId);
+    } else {
+      enableMealType(mealTypeId);
+    }
+  }
+  
+  void resetMealTypesToDefault() {
+    _enabledMealTypes = List<String>.from(MealConfig.defaultEnabledMeals);
+    notifyListeners();
+  }
+
   // Calculate daily protein target based on current settings
   void recalculateDailyTarget() {
     _dailyProteinTarget = _weight * _trainingMultiplier;
@@ -286,6 +329,9 @@ class UserSettingsProvider with ChangeNotifier {
     _activityLevel = 'moderately_active';
     _dietaryRestrictions = [];
     _units = 'metric';
+    
+    // Reset meal preferences
+    _enabledMealTypes = List<String>.from(MealConfig.defaultEnabledMeals);
     
     _notificationsEnabled = true;
     _emailNotifications = true;

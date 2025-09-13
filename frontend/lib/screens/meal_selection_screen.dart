@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../main.dart';
 import '../providers/auth_provider.dart';
+import '../utils/user_settings_provider.dart';
 import 'user_home_screen.dart';
 
 class MealSelectionScreen extends StatefulWidget {
@@ -365,6 +366,14 @@ class _MealSelectionScreenState extends State<MealSelectionScreen> {
   }
 
   void _navigateToHomeScreen() {
+    // Save meal preferences to UserSettingsProvider
+    final userSettings = Provider.of<UserSettingsProvider>(context, listen: false);
+    final enabledMealIds = _meals.entries
+        .where((entry) => entry.value) // Only enabled meals
+        .map((entry) => entry.key.toLowerCase()) // Convert to lowercase IDs
+        .toList();
+    userSettings.setEnabledMealTypes(enabledMealIds);
+    
     // Navigate directly to home screen and clear navigation stack
     Navigator.of(context).pushAndRemoveUntil(
       CupertinoPageRoute(
@@ -374,7 +383,6 @@ class _MealSelectionScreenState extends State<MealSelectionScreen> {
           trainingMultiplier: widget.trainingMultiplier,
           goal: widget.goal,
           dailyProteinTarget: widget.dailyProteinTarget,
-          meals: _meals,
         ),
       ),
       (route) => false,

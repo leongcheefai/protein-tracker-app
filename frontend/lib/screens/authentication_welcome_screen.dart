@@ -406,7 +406,6 @@ class _AuthenticationWelcomeScreenState extends State<AuthenticationWelcomeScree
             trainingMultiplier: 1.8, // Default, can be made configurable later
             goal: 'maintain', // Default, can be made configurable later
             dailyProteinTarget: authProvider.dailyProteinGoal ?? 126.0,
-            meals: const {}, // Will be populated by MealTrackingProvider
           ),
         ),
         (route) => false,

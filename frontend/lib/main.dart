@@ -189,7 +189,6 @@ class ProteinPaceApp extends StatelessWidget {
               trainingMultiplier: args['trainingMultiplier'] as double?,
               goal: args['goal'] as String?,
               dailyProteinTarget: args['dailyProteinTarget'] as double?,
-              meals: args['meals'] as Map<String, bool>?,
             );
           },
           '/user-home': (context) {
@@ -200,7 +199,6 @@ class ProteinPaceApp extends StatelessWidget {
               trainingMultiplier: args['trainingMultiplier'] as double,
               goal: args['goal'] as String,
               dailyProteinTarget: args['dailyProteinTarget'] as double,
-              meals: args['meals'] as Map<String, bool>,
             );
           },
           '/history': (context) {
@@ -365,7 +363,6 @@ class ProteinPaceApp extends StatelessWidget {
             trainingMultiplier: 1.8, // Default moderate activity level
             goal: 'maintain', // Default goal
             dailyProteinTarget: authProvider.dailyProteinGoal!, // Use existing protein target
-            meals: const {}, // Will be populated by MealTrackingProvider
           );
         }
     }

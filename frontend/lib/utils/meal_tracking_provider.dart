@@ -69,8 +69,8 @@ class MealTrackingProvider extends ChangeNotifier {
     final today = DateTime.now();
     return _meals.where((meal) {
       return meal.timestamp.year == today.year &&
-             meal.timestamp.month == today.month &&
-             meal.timestamp.day == today.day;
+            meal.timestamp.month == today.month &&
+            meal.timestamp.day == today.day;
     }).toList();
   }
 
@@ -78,8 +78,8 @@ class MealTrackingProvider extends ChangeNotifier {
   List<MealDto> getMealsForDate(DateTime date) {
     return _meals.where((meal) {
       return meal.timestamp.year == date.year &&
-             meal.timestamp.month == date.month &&
-             meal.timestamp.day == date.day;
+            meal.timestamp.month == date.month &&
+            meal.timestamp.day == date.day;
     }).toList();
   }
 
